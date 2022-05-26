@@ -1,9 +1,11 @@
 <template>
-  <Coba/>
+  <Kanban/>
 </template>
 
 <script>
+import Kanban from "../components/Kanban.vue";
 export default {
-  name: 'IndexPage'
+    name: "IndexPage",
+    components: { Kanban }
 }
 </script>

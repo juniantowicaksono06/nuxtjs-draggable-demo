@@ -1,4 +1,4 @@
-# belajar_nuxt
+# Kanban NuxtJS Draggable Library Demo
 
 ## Build Setup
 
