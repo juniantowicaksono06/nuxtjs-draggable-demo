@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="row pl-4 pr-4" id="kanban_section">
-                <draggable v-model="kanban" tag="div" id="kanban_container" draggable=".kanban-card, .card-body:not(.add-item)" animation=250>
+                <draggable v-model="kanban" tag="div" class="pb-5" id="kanban_container" draggable=".kanban-card, .card-body:not(.add-item)" animation=250>
                     <div class="kanban-card card" v-for="(k,index) in kanban" :key="k.kanban_id">
                         <div class="card-header kanban-header">
                             <p class="kanban-header-input mb-0" v-on:click="enableEditKanbanName($event,index)" style="display: block;" ref="kanban_name_ref">{{ k.kanban_name }}</p>
