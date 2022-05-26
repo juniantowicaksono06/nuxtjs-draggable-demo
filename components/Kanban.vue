@@ -23,13 +23,13 @@
                 </div>
             </div>
             <div class="row pl-4 pr-4" id="kanban_section">
-                <draggable v-model="kanban" tag="div" id="kanban_container" draggable=".kanban-card">
+                <draggable v-model="kanban" tag="div" id="kanban_container" draggable=".kanban-card" animation=250>
                     <div class="kanban-card card" v-for="k in kanban" :key="k.kanban_id">
                         <div class="card-header kanban-header">
                             <input class="kanban-header-input" :value="k.kanban_name" @focus="$event.target.select()" />
                         </div>
                         <div class="card-body kanban-body py-1 px-2">
-                            <draggable v-model="k.data" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class">
+                            <draggable v-model="k.data" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
                                 <div class="card kanban-item mb-1 mt-1" v-for="a in k.data" :key="a.task_id" draggable=".kanban-item">
                                     <div class="py-2 px-1">
                                         <span class="kanban-text">{{ a.task_name }}</span>
