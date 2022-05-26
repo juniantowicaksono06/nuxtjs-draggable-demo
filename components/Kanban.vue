@@ -23,10 +23,11 @@
                 </div>
             </div>
             <div class="row pl-4 pr-4" id="kanban_section">
-                <draggable v-model="kanban" tag="div" id="kanban_container" draggable=".kanban-card" animation=250>
-                    <div class="kanban-card card" v-for="k in kanban" :key="k.kanban_id">
+                <draggable v-model="kanban" tag="div" id="kanban_container" draggable=".kanban-card, .card-body:not(.add-item)" animation=250>
+                    <div class="kanban-card card" v-for="(k,index) in kanban" :key="k.kanban_id">
                         <div class="card-header kanban-header">
-                            <input class="kanban-header-input" :value="k.kanban_name" @focus="$event.target.select()" />
+                            <p class="kanban-header-input mb-0" v-on:click="enableEditKanbanName($event,index)" style="display: block;" ref="kanban_name_ref">{{ k.kanban_name }}</p>
+                            <input class="kanban-header-input" ref="kanban_name_edit" style="display:none;" :value="k.kanban_name" v-on:blur="disableEditKanbanName($event, index)" />
                         </div>
                         <div class="card-body kanban-body py-1 px-2">
                             <draggable v-model="k.data" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
@@ -36,10 +37,10 @@
                                     </div>
                                 </div>
                             </draggable>
-                            <div class="add-item kanban-text w-100 px-2 py-2" v-on:click="showAddItemInput($event, k.kanban_id)" v-if="((!add_item_enabled) || (add_item_enabled && k.kanban_id != add_item_id))">
+                            <div class="add-item kanban-item kanban-text w-100 px-2 py-2" v-on:click="showAddItemInput($event, k.kanban_id)" v-if="((!add_item_enabled) || (add_item_enabled && k.kanban_id != add_item_id))">
                                 <strong>+</strong> Add Item
                             </div>
-                            <div class="w-100 px-0 py-0 kanban-text" v-else-if="(add_item_enabled == true && k.kanban_id == add_item_id)">
+                            <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" v-else-if="(add_item_enabled == true && k.kanban_id == add_item_id)">
                                 <textarea autofocus v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text" style="resize: none;" placeholder="Enter a title for this card"></textarea>
                                 <div class="d-flex mt-2">
                                     <button class="btn btn-primary kanban-text" v-on:click="addItem">Add Item</button>
@@ -73,6 +74,18 @@
             this.resizeBoard()
         },
         methods: {
+            enableEditKanbanName(event, index) {
+                this.$refs.kanban_name_ref[index].style.display = 'none'
+                this.$refs.kanban_name_edit[index].style.display = 'block'
+                this.$refs.kanban_name_edit[index].focus()
+                this.$refs.kanban_name_edit[index].select()
+            },
+            disableEditKanbanName(event, index) {
+                this.$refs.kanban_name_ref[index].style.display = 'block'
+                this.$refs.kanban_name_edit[index].style.display = 'none'
+                // this.$refs.kanban_name_edit[index].focus()
+                // this.$refs.kanban_name_edit[index].select()
+            },
             disableAddItem() {
                 this.add_item_enabled = false
                 this.add_item_id = null
