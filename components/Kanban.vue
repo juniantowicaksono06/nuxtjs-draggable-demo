@@ -31,7 +31,7 @@
                         </div>
                         <div class="card-body kanban-body py-1 px-2">
                             <draggable v-model="k.data" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
-                                <div class="card kanban-item mb-1 mt-1" v-for="a in k.data" :key="a.task_id" draggable=".kanban-item">
+                                <div class="card kanban-item mb-1 mt-1" v-for="a in k.data" :key="a.task_id" draggable=".kanban-item" v-on:click="showModalItem($event, a.task_id, a.task_name, k.kanban_name)">
                                     <div class="py-2 px-1">
                                         <span class="kanban-text">{{ a.task_name }}</span>
                                     </div>
@@ -61,6 +61,50 @@
                     </div>
                 </draggable>
             </div>
+            <div>
+                <b-modal id="modal_item" hide-footer size="lg" hide-header>
+                    <div class="container-fluid">
+                        <div class="d-flex justify-content-between" id="modal_header">
+                            <div class="mb-1" style="width: 90%;">
+                                <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="open_item_modal_task_name" />
+                                <h6 class="pr-0 no-select" id="">in list <b>{{ open_item_modal_kanban_name }}</b></h6>
+                            </div>
+                            <div style="width: 10%; margin: 0 auto; text-align: right;">
+                                <button class="btn btn-transparent" v-on:click="hideModalItem($event)">
+                                    <font-awesome-icon :icon="['fa', 'xmark']" />        
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row ml-0 pl-0 pr-0" id="modal_content">
+                            <div class="col-12 pl-0">
+                                <h5 class="ml-0 pl-0 pr-0 no-select">Description</h5>
+                            </div>
+                            <div class="col-9 pl-0">
+                                <textarea class="form-control" placeholder="Add a more detailed description" style="resize: none;"></textarea>
+                            </div>
+                            <div class="col-3">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <p class="mb-1 text-bold kanban-text">Add to card</p>
+                                        <div class="modal-list-option">
+                                            <font-awesome-icon :icon="['fa', 'user']" class="kanban-text" />
+                                            <span class="kanban-text ml-2">Member</span>
+                                        </div>
+                                        <div class="modal-list-option">
+                                            <font-awesome-icon :icon="['fa', 'check']" class="kanban-text" />
+                                            <span class="kanban-text ml-2">Checklist</span>
+                                        </div>
+                                        <div class="modal-list-option">
+                                            <font-awesome-icon :icon="['fa', 'clock']" class="kanban-text" />
+                                            <span class="kanban-text ml-2">Dates</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </b-modal>
+            </div>
         </div>
     </div>
 </template>
@@ -74,6 +118,18 @@
             this.resizeBoard()
         },
         methods: {
+            showModalItem(event, id, name, card_name) {
+                this.open_item_modal_task_id = id
+                this.open_item_modal_task_name = name
+                this.open_item_modal_kanban_name = card_name
+                this.$bvModal.show("modal_item")
+            },
+            hideModalItem(event) {
+                this.$bvModal.hide("modal_item")
+                this.open_item_modal_task_id = null
+                this.open_item_modal_task_name = ''
+                this.open_item_modal_kanban_name = ''
+            },
             enableEditKanbanName(event, index) {
                 this.$refs.kanban_name_ref[index].style.display = 'none'
                 this.$refs.kanban_name_edit[index].style.display = 'block'
@@ -149,6 +205,11 @@
                 add_list_enabled: false,
                 add_list_id: null,
                 add_list_value: "",
+
+                open_item_modal_task_id: null,
+                open_item_modal_task_name: '',
+                open_item_modal_kanban_name: '',
+
 
                 kanban: [
                     {
