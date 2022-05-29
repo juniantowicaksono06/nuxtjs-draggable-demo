@@ -1,0 +1,53 @@
+.profile-info {
+    overflow: hidden;
+}
+.profile-fullname, .profile-email {
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: default;
+    text-overflow: ellipsis;
+    width: 100%;
+    font-size: 16px;
+}
+.profile-fullname {
+    font-weight: bold;
+}
+.profile-email {
+    font-size: 11px !important;
+}
+.member-active > .profile-pic-info > .card {
+    display: block;
+}
+.member-active > .profile-pic-info > .card > .card-header {
+    border: 1px solid rgb(0,123,255);
+}
+.profile-pic-container > div {
+    display: inline-block;
+}
+.profile-pic {
+    width: 88px;
+    height: 88px;
+    border: 1px solid rgb(0, 0, 0);
+}
+#profile_pop_up {
+    display: none;
+    position: fixed;
+    margin-left: 10px;
+    min-width: 310px;
+    max-width: 310px;
+    color: black;
+    top: 45px;
+    left: 0;
+    background-color: white;
+    z-index: 999;
+}
+.profile-list-option {
+    padding: 20px 10px;
+}
+.profile-list-option:hover {
+    cursor: pointer;
+    background-color: rgb(235,236,240);
+}
+.profile-head {
+    height: 80px;
+}

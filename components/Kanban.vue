@@ -2,7 +2,7 @@
     @import './assets/styles/kanban.css';
 </style>
 <template>
-    <div class="w-100 h-100" id="content-wrap">
+    <div class="w-100 h-100" id="content-wrap" v-on:click="closeElem">
         <Topbar/>
         <div class="container-fluid">
             <div class="row" id="toolbar_section">
@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="row pl-4 pr-4" id="kanban_section">
-                <draggable v-model="kanban" tag="div" class="pb-5" id="kanban_container" draggable=".kanban-card, .card-body:not(.add-item)" animation=250>
+                <draggable v-model="kanban" tag="div" class="pb-5" id="kanban_container" draggable=".kanban-card, .card-body:not(.add-item)" animation=250 ref="kanban_container">
                     <div class="kanban-card card" v-for="(k,index) in kanban" :key="k.kanban_id">
                         <div class="card-header kanban-header">
                             <p class="kanban-header-input mb-0" v-on:click="enableEditKanbanName($event,index)" style="display: block;" ref="kanban_name_ref">{{ k.kanban_name }}</p>
@@ -34,6 +34,15 @@
                                 <div class="card kanban-item mb-1 mt-1" v-for="a in k.data" :key="a.task_id" draggable=".kanban-item" v-on:click="showModalItem($event, a.task_id, a.task_name, k.kanban_name)">
                                     <div class="py-2 px-1">
                                         <span class="kanban-text">{{ a.task_name }}</span>
+                                    </div>
+                                    <div class="w-100" v-if="(a.members.length > 0)">
+                                        <div class="float-left">
+                                        </div>
+                                        <div class="float-right profile-pic-container justify-content-end">
+                                           <div v-for="(member, member_index) in a.members" class="px-1 py-1 position-relative  member" v-on:click="openCardInfo($event, member)" ref="card_info_ref" @click.stop="">
+                                                <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" />
+                                           </div> 
+                                        </div>
                                     </div>
                                 </div>
                             </draggable>
@@ -106,18 +115,46 @@
                 </b-modal>
             </div>
         </div>
+        <div id="profile_pop_up" ref="profile_pop_up" @click.stop="">
+            <CardProfileMember :data="profile_data" :close="closeCardInfo" />
+        </div>
     </div>
 </template>
 
 <script>
     import draggable from "vuedraggable"
+    import CardProfileMember from "./CardProfileMember.vue"
     import Topbar from "./Topbar.vue"
     export default {
         mounted() {
-            // console.log(this.$refs.board_input)
             this.resizeBoard()
         },
         methods: {
+            closeElem() {
+                this.closeCardInfo()
+            },
+            openCardInfo(event, data) {
+                let element = event.currentTarget.getBoundingClientRect()
+                this.$refs.profile_pop_up.style.display = 'block'
+                let profile_pop_up_height = this.$refs.profile_pop_up.clientHeight
+                let kanban_container_height = document.getElementById('kanban_container').clientHeight
+                this.$refs.profile_pop_up.style.left = element.x + 'px'
+                if(element.y + (profile_pop_up_height) < window.innerHeight) {
+                    if(element.y + (profile_pop_up_height) + 48 > window.innerHeight) {
+                        this.$refs.profile_pop_up.style.top = (element.y) + 'px'
+                    }
+                    else {
+                        this.$refs.profile_pop_up.style.top = (element.y + 48) + 'px'
+                    }
+                }
+                else {
+                    this.$refs.profile_pop_up.style.top = ((element.y + 48) - (profile_pop_up_height)) + 'px'
+                }
+                this.profile_data = data
+            },
+            closeCardInfo() {
+                this.$refs.profile_pop_up.style.display = 'none'
+            },
             showModalItem(event, id, name, card_name) {
                 this.open_item_modal_task_id = id
                 this.open_item_modal_task_name = name
@@ -139,8 +176,6 @@
             disableEditKanbanName(event, index) {
                 this.$refs.kanban_name_ref[index].style.display = 'block'
                 this.$refs.kanban_name_edit[index].style.display = 'none'
-                // this.$refs.kanban_name_edit[index].focus()
-                // this.$refs.kanban_name_edit[index].select()
             },
             disableAddItem() {
                 this.add_item_enabled = false
@@ -175,6 +210,7 @@
                         value.data.push({
                             task_id: id_random,
                             task_name: task_name,
+                            members: []
                         })
                     }
                     return value
@@ -210,6 +246,13 @@
                 open_item_modal_task_name: '',
                 open_item_modal_kanban_name: '',
 
+                profile_data: {
+                    'user_id': 1,
+                    'full_name': 'Junianto Ichwan Dwi Wicaksono',
+                    'email': 'juniantowicaksono06@gmail.com',
+                    'profile_pic': 'https://play-lh.googleusercontent.com/xlnwmXFvzc9Avfl1ppJVURc7f3WynHvlA749D1lPjT-_bxycZIj3mODkNV_GfIKOYJmG'
+                },
+
 
                 kanban: [
                     {
@@ -218,11 +261,39 @@
                         data: [
                            {
                                task_id: 1,
-                               task_name: 'Testing 1'
+                               task_name: 'Testing 1',
+                               members: [
+                                   {
+                                       'user_id': 1,
+                                       'full_name': 'Junianto Ichwan Dwi Wicaksono',
+                                       'email': 'juniantowicaksono06@gmail.com',
+                                       'profile_pic': 'https://play-lh.googleusercontent.com/xlnwmXFvzc9Avfl1ppJVURc7f3WynHvlA749D1lPjT-_bxycZIj3mODkNV_GfIKOYJmG'
+                                   },
+                                   {
+                                       'user_id': 2,
+                                       'full_name': 'Arif Romdoni',
+                                       'email': 'arif98@gmail.com',
+                                       'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg'
+                                   },
+                               ]
                            },
                            {
                                task_id: 2,
-                               task_name: 'Testing 2'
+                               task_name: 'Testing 2',
+                               members: [
+                                   {
+                                       'user_id': 2,
+                                       'full_name': 'Arif Romdoni',
+                                       'email': 'arif98@gmail.com',
+                                       'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg'
+                                   },
+                                   {
+                                       'user_id': 3,
+                                       'full_name': 'Ahmad Fadil',
+                                       'email': 'jackhammer@gmail.com',
+                                       'profile_pic': 'https://i.pinimg.com/originals/fd/f4/18/fdf41862cf42f0c0cf4ca627c74cbece.jpg'
+                                   },
+                               ]
                            } 
                         ]
                     },
@@ -232,7 +303,8 @@
                         data: [
                            {
                                task_id: 3,
-                               task_name: 'Testing 3'
+                               task_name: 'Testing 3',
+                               members: []
                            } 
                         ]
                     },
@@ -242,7 +314,8 @@
                         data: [
                             {
                                 task_id: 4,
-                                task_name: 'Testing 4'
+                                task_name: 'Testing 4',
+                                members: []
                             }
                         ]
                     },
@@ -252,7 +325,8 @@
                         data: [
                             {
                                 task_id: 5,
-                                task_name: 'Testing 5'
+                                task_name: 'Testing 5',
+                                members: []
                             }
                         ]
                     },
@@ -261,7 +335,8 @@
         },
         components: {
             draggable,
-            Topbar
+            Topbar,
+            CardProfileMember
         }
     }
 </script>
