@@ -39,7 +39,7 @@
                                         <div class="float-left">
                                         </div>
                                         <div class="float-right profile-pic-container justify-content-end">
-                                           <div v-for="(member, member_index) in a.members" class="px-1 py-1 position-relative  member" v-on:click="openCardInfo($event, member)" ref="card_info_ref" @click.stop="">
+                                           <div v-for="(member, member_index) in a.members" class="px-1 py-1 position-relative  member" v-on:click="openCardInfo($event, member)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
                                                 <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" />
                                            </div> 
                                         </div>
