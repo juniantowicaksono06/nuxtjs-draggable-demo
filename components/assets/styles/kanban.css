@@ -207,6 +207,9 @@ body, html {
     background-color: skyblue;
     z-index: 99;
 }
+.hover-pointer:hover {
+    cursor: pointer;
+}
 @media only screen and (max-height: 500px) {
     #kanban_container {
         max-height: 45vh;
