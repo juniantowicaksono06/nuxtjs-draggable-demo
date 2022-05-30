@@ -21,7 +21,7 @@
                     </div>
                     <div class="col-12 mt-2">
                         <h6>Board members</h6>
-                        <div id="member-list-container">
+                        <div id="member_list_container">
                             <div v-for="(member, member_index) in all_members" v-if="(member.full_name.toLowerCase().includes(search_member.toLowerCase()) || search_member.trim() == '' || member.email.toLowerCase().includes(search_member.toLowerCase()))" v-on:click="toggleMember($event, member)">
                                 <div class="d-flex member-list-item mb-2">
                                     <div>
@@ -41,14 +41,18 @@
                         <input class="form-control kanban-text" placeholder="Title" v-model="checklist_name" />
                     </div>
                     <div class="col-12 mt-2">
-                        <button class="btn btn-primary kanban-text">
+                        <button class="btn btn-primary kanban-text" v-on:click="addChecklist">
                             Add
                         </button>
                     </div>
                 </div>
             </div>
             <div id="dates_type" :class="(data.card_type == 'dates' ? 'type-active': 'type-inactive')">
-                <div>dates</div>
+                <b-row>
+                    <b-col md="auto" style="margin: 0 auto;">
+                        <b-calendar locale="en-US" hide-header></b-calendar>
+                    </b-col>
+                </b-row>
             </div>
         </div>
     </div>
@@ -85,7 +89,8 @@
                         'profile_pic': 'https://avatarfiles.alphacoders.com/302/302948.png'
                     },
                 ],
-                selected_members: this.data.data_item.members
+                selected_members: this.data.data_item.members,
+                checklist: this.data.data_item.checklist
             }
         },
         props: {
@@ -99,6 +104,14 @@
         mounted() {
         },
         methods: {
+            addChecklist() {
+                this.checklist.push({
+                    'checklist_id': Math.round(Math.random() * 10240),
+                    'checklist_name': this.checklist_name,
+                    'checklist_child': []
+                }) 
+                this.checklist_name = ''
+            },
             toggleMember(event, member) {
                 let member_exist = false
                 let index = null;

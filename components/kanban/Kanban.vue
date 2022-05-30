@@ -27,7 +27,7 @@
                     <div class="kanban-card card" v-for="(k,index) in kanban" :key="k.kanban_id">
                         <div class="card-header kanban-header">
                             <p class="kanban-header-input mb-0" v-on:click="enableEditKanbanName($event,index)" style="display: block;" ref="kanban_name_ref">{{ k.kanban_name }}</p>
-                            <input class="kanban-header-input" ref="kanban_name_edit" style="display:none;" :value="k.kanban_name" v-on:blur="disableEditKanbanName($event, index)" />
+                            <input class="kanban-header-input" ref="kanban_name_edit" style="display:none;" v-model="k.kanban_name" v-on:blur="disableEditKanbanName($event, index)" />
                         </div>
                         <div class="card-body kanban-body py-1 px-2">
                             <draggable v-model="k.data" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
@@ -36,7 +36,7 @@
                                         <span class="kanban-text">{{ a.task_name }}</span>
                                     </div>
                                     <div class="w-100" v-if="(a.members.length > 0 || a.checklist.length > 0)">
-                                        <div class="float-left px-2">
+                                        <div class="float-left px-2 mb-2">
                                             <div class="d-flex" v-if="(a.checklist.length > 0)">
                                                 <span :class="(countChildChecklist(a.checklist) == a.checklist_completed ? 'badge badge-success kanban-text': 'kanban-text')"><font-awesome-icon class="ml-1" :icon="['fa', 'list-check']"/><span class="pl-1 pr-1">{{ a.checklist_completed }}/{{ countChildChecklist(a.checklist) }}</span></span>
                                             </div>
@@ -80,7 +80,7 @@
                         <div class="d-flex justify-content-between" id="modal_header">
                             <div class="mb-1" style="width: 90%;">
                                 <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item_modal_data.task_name" />
-                                <h6 class="pr-0 no-select" id="">in list <b>{{ item_modal_data_card_name }}</b></h6>
+                                <h6 class="pr-0 no-select">in list <b>{{ item_modal_data_card_name }}</b></h6>
                             </div>
                             <div style="width: 10%; margin: 0 auto; text-align: right;">
                                 <button class="btn btn-transparent" v-on:click="hideModalItem($event)">
@@ -106,9 +106,11 @@
                         <div class="row ml-0 pl-0 pr-0" id="modal_content">
                             <div class="col-12 col-sm-9 col-md-9 pl-0 mt-2">
                                 <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Description</h5>
-                                <textarea class="form-control" placeholder="Add a more detailed description" style="resize: none;"></textarea>
-                                <div class="mt-2" v-for="checklist in item_modal_data.checklist" :key="checklist.checklist_id">
-                                    <h6>{{ checklist.checklist_name }}</h6>
+                                <textarea class="form-control" placeholder="Add a more detailed description" v-model="item_modal_data.task_description" style="resize: none;"></textarea>
+                                <div class="mt-2" v-for="(checklist, checklist_index) in item_modal_data.checklist" :key="checklist.checklist_id">
+                                    <div class="d-flex mb-2">
+                                        <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.checklist_name" />
+                                    </div>
                                     <div>
                                         <div class="progress">
                                             <div :class="(Math.round(100 / (checklist.checklist_child.length / countChildChecklistDoneTotal(checklist.checklist_child)) >= 100) ? 'progress-bar bg-success' : 'progress-bar')" role="progressbar" :style="{
@@ -116,13 +118,21 @@
                                             }" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
-                                    <div v-for="child in checklist.checklist_child" :key="child.checklist_child_id" class="row">
+                                    <div v-for="(child, child_index) in checklist.checklist_child" :key="child.checklist_child_id" class="row">
                                         <div class="col-1 py-1 pr-0 mr-0">
-                                            <input type="checkbox" class="form-control mr-0" :checked="child.checklist_child_done" style="width: 14px; height: 14px;" v-model="child.checklist_child_done" />
+                                            <input type="checkbox" class="form-control mr-0" :checked="child.checklist_child_done" style="width: 14px; height: 14px;" v-model="child.checklist_child_done" v-on:change="toggleChecklistDone(child.checklist_child_done)" />
                                         </div>
                                         <div class="col-10 mt-1 px-0">
                                             <h6 class="kanban-text">{{ child.checklist_child_name }}</h6>
                                         </div>
+                                    </div>
+                                    <div v-if="add_checklist_item.index == checklist_index && add_checklist_item.enable">
+                                        <input class="form-control kanban-text" placeholder="Add an item" v-model="add_checklist_item.item_name" />
+                                        <button class="btn btn-primary mt-2 kanban-text" v-on:click="addCheklistItem">Add</button>
+                                        <button class="btn btn-transparent mt-2 kanban-text" v-on:click="disableAddChecklistItem()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                                    </div>
+                                    <div v-else>
+                                        <button class="btn btn-secondary mt-2 kanban-text" v-on:click="enableAddChecklistItem(checklist_index)">Add an item</button>
                                     </div>
                                 </div>
                             </div>
@@ -153,10 +163,7 @@
             </div>
         </div>
         <div id="profile_pop_up" ref="profile_pop_up_ref" @click.stop="">
-            <CardProfileMember :data="{
-                profile_data: profile_data,
-                item_data: card_data
-            }" :close="closeCardInfo" />
+            <CardProfileMember :data="profile_data" :close="closeCardInfo" />
         </div>
     </div>
 </template>
@@ -225,7 +232,6 @@
                 let element = event.currentTarget.getBoundingClientRect()
                 this.$refs.profile_pop_up_ref.style.display = 'block'
                 let profile_pop_up_height = this.$refs.profile_pop_up_ref.clientHeight
-                // let kanban_container_height = document.getElementById('kanban_container').clientHeight
                 this.$refs.profile_pop_up_ref.style.left = element.x + 'px'
                 if(element.y + (profile_pop_up_height) < window.innerHeight) {
                     if(element.y + (profile_pop_up_height) + 48 > window.innerHeight) {
@@ -238,9 +244,10 @@
                 else {
                     this.$refs.profile_pop_up_ref.style.top = ((element.y + 48) - (profile_pop_up_height)) + 'px'
                 }
-                this.profile_data = data
-                this.card_data = item
-                console.log(this.card_data)
+                this.profile_data = {
+                    current_member: data,
+                    member_list: item
+                }
             },
             closeCardInfo() {
                 if('profile_pop_up_ref' in this.$refs) {
@@ -250,7 +257,6 @@
                 }
             },
             showModalItem(event, data, card_name) {
-                console.log(data)
                 this.item_modal_data = data
                 this.item_modal_data_card_name = card_name
                 this.$bvModal.show("modal_item")
@@ -329,6 +335,40 @@
                 this.add_list_enabled = true
                 this.add_list_id = Math.round(Math.random() * 10240)
                 this.add_list_value = ''
+            },
+            enableAddChecklistItem(index) {
+                this.disableAddChecklistItem()
+                this.add_checklist_item = {
+                    enable: true,
+                    index: index,
+                    item_name: ''
+                }
+            },
+            disableAddChecklistItem() {
+                console.log("tes")
+                this.add_checklist_item = {
+                    enable: false,
+                    index: null,
+                    item_name: ''
+                }
+            },
+            addCheklistItem() {
+                if(this.add_checklist_item.item_name.trim() != '') {
+                    this.item_modal_data.checklist[this.add_checklist_item.index].checklist_child.push({
+                        'checklist_child_id': Math.round(Math.random() * 10240),
+                        'checklist_child_name': this.add_checklist_item.item_name,
+                        'checklist_child_done': false
+                    })
+                }
+                this.add_checklist_item.item_name = ''
+            },
+            toggleChecklistDone(done) {
+                // console.log(done)
+                if(done) {
+                    this.item_modal_data.checklist_completed++
+                    return
+                }
+                this.item_modal_data.checklist_completed--
             }
         },
         data() {
@@ -346,19 +386,22 @@
                 item_modal_data: {
                     task_id: null,
                     task_name: '',
+                    task_description: '',
                     members: [],
                     checklist: []
                 },
                 item_modal_data_card_name: '',
-                card_data: {
-                    task_id: null,
-                    task_name: '',
-                    members: [],
-                    checklist: []
+                add_checklist_item: {
+                    enable: false,
+                    index: null,
+                    item_name: ''
                 },
 
                 // FOR PROFILE CARD
-                profile_data: {},
+                profile_data: {
+                    current_member: {},
+                    member_list: {}
+                },
 
                 add_to_card_type: '',
 
@@ -370,6 +413,7 @@
                            {
                                task_id: 1,
                                task_name: 'Testing 1',
+                               task_description: 'Ini uji coba saja',
                                members: [
                                    {
                                        'user_id': 1,
@@ -423,6 +467,7 @@
                            {
                                task_id: 2,
                                task_name: 'Testing 2',
+                               task_description: '',
                                members: [
                                    {
                                        'user_id': 2,
@@ -449,6 +494,7 @@
                            {
                                task_id: 3,
                                task_name: 'Testing 3',
+                               task_description: '',
                                members: [],
                                checklist: [],
                                checklist_completed: 0,
@@ -462,6 +508,7 @@
                             {
                                 task_id: 4,
                                 task_name: 'Testing 4',
+                                task_description: '',
                                 members: [],
                                 checklist: [],
                                 checklist_completed: 0,
@@ -475,6 +522,7 @@
                             {
                                 task_id: 5,
                                 task_name: 'Testing 5',
+                                task_description: '',
                                 members: [],
                                 checklist: [],
                                 checklist_completed: 0,
@@ -485,10 +533,10 @@
             }
         },
         components: {
-    draggable,
-    Topbar,
-    CardProfileMember,
-    AddToCard
-}
+            draggable,
+            Topbar,
+            CardProfileMember,
+            AddToCard
+        }
     }
 </script>

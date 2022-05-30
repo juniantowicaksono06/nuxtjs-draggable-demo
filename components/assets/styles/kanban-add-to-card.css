@@ -33,7 +33,12 @@
     background-color: rgb(218,219,226,0.5);       
     cursor: pointer;
 }
-#member-list-container {
+#member_list_container {
+    max-height: 150px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#dates_type {
     max-height: 150px;
     overflow-x: hidden;
     overflow-y: auto;
