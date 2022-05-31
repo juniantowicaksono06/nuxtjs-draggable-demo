@@ -35,10 +35,15 @@
                                     <div class="py-2 px-1">
                                         <span class="kanban-text">{{ a.task_name }}</span>
                                     </div>
-                                    <div class="w-100" v-if="(a.members.length > 0 || a.checklist.length > 0)">
+                                    <div class="w-100" v-if="(a.members.length > 0 || a.checklist.length > 0 || a.deadline.date != null)">
                                         <div class="float-left px-2 mb-2">
-                                            <div class="d-flex" v-if="(a.checklist.length > 0)">
-                                                <span :class="(countChildChecklist(a.checklist) == a.checklist_completed ? 'badge badge-success kanban-text': 'kanban-text')"><font-awesome-icon class="ml-1" :icon="['fa', 'list-check']"/><span class="pl-1 pr-1">{{ a.checklist_completed }}/{{ countChildChecklist(a.checklist) }}</span></span>
+                                            <div class="d-flex" v-if="(a.checklist.length > 0 || a.deadline.date != null)">
+                                                <span :class="(countChildChecklist(a.checklist) == a.checklist_completed ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="a.checklist.length > 0"><font-awesome-icon class="ml-1" :icon="['fa', 'list-check']"/><span class="pl-1 pr-1 kanban-text">{{ a.checklist_completed }}/{{ countChildChecklist(a.checklist) }}</span></span>
+                                                <span :class="(a.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(a.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="a.deadline.date != null">
+                                                 <font-awesome-icon class="mr-1 kanban-text" :icon="['fa', 'clock']"/>
+                                                 <input type="checkbox" class="d-inline-block" v-model="a.deadline.done" @click.stop="" />
+                                                    <span>{{ convertDate(a.deadline.date) }}</span>
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="float-right profile-pic-container justify-content-end">
@@ -89,36 +94,47 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-12 col-sm-6 d-flex">
-                                 <div v-for="member in item_modal_data.members" class="px-1 py-1 position-relative member hover-pointer" v-on:click="showProfileCard($event, member, item_modal_data)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
-                                    <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" />
-                                 </div>                               
-                                 <div class="px-1 py-1 position-relative member hover-pointer" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item_modal_data.members.length > 0" v-on:click="showAddToCard($event, 'members')">
-                                    <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
-                                        <span><font-awesome-icon :icon="['fa', 'plus']" /></span>
-                                    </p>
-                                 </div>                               
-                            </div>
-                            <div class="col-12 col-sm-6">
-
+                            <div class="col-12">
+                                <div id="member_and_deadline_container">
+                                    <div>
+                                        <h6 class="kanban-text">Members</h6>
+                                        <div v-for="member in item_modal_data.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="showProfileCard($event, member, item_modal_data)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
+                                            <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" />
+                                        </div>                               
+                                        <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item_modal_data.members.length > 0" v-on:click="showAddToCard($event, 'members')">
+                                            <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
+                                                <span><font-awesome-icon :icon="['fa', 'plus']" /></span>
+                                            </p>
+                                        </div>                               
+                                    </div>
+                                    <div v-if="item_modal_data.deadline.date != null">
+                                        <h6 class="kanban-text">Due date</h6>
+                                        <div style="margin: auto;">
+                                            <input type="checkbox" class="d-inline-block mt-2 mr-1" v-model="item_modal_data.deadline.done" />
+                                            <div class="d-inline-block btn bg-gray" v-on:click="showAddToCard($event, 'dates')" @click.stop="">
+                                                <h6 class="kanban-text mb-0">{{ convertDate(item_modal_data.deadline.date, true) }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="row ml-0 pl-0 pr-0" id="modal_content">
-                            <div class="col-12 col-sm-9 col-md-9 pl-0 mt-2">
+                            <div class="col-12 col-sm-12 col-md-9 pl-0 mt-2">
                                 <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Description</h5>
                                 <textarea class="form-control" placeholder="Add a more detailed description" v-model="item_modal_data.task_description" style="resize: none;"></textarea>
-                                <div class="mt-2" v-for="(checklist, checklist_index) in item_modal_data.checklist" :key="checklist.checklist_id">
+                                <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item_modal_data.checklist" :key="checklist.checklist_id">
                                     <div class="d-flex mb-2">
                                         <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.checklist_name" />
                                     </div>
-                                    <div>
+                                    <div class="mb-2">
                                         <div class="progress">
                                             <div :class="(Math.round(100 / (checklist.checklist_child.length / countChildChecklistDoneTotal(checklist.checklist_child)) >= 100) ? 'progress-bar bg-success' : 'progress-bar')" role="progressbar" :style="{
                                                 'width': Math.round(100 / (checklist.checklist_child.length / countChildChecklistDoneTotal(checklist.checklist_child)))+ '%'
                                             }" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
-                                    <div v-for="(child, child_index) in checklist.checklist_child" :key="child.checklist_child_id" class="row">
+                                    <div v-for="(child, child_index) in checklist.checklist_child" :key="child.checklist_child_id" class="row mt-2">
                                         <div class="col-1 py-1 pr-0 mr-0">
                                             <input type="checkbox" class="form-control mr-0" :checked="child.checklist_child_done" style="width: 14px; height: 14px;" v-model="child.checklist_child_done" v-on:change="toggleChecklistDone(child.checklist_child_done)" />
                                         </div>
@@ -132,11 +148,11 @@
                                         <button class="btn btn-transparent mt-2 kanban-text" v-on:click="disableAddChecklistItem()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
                                     </div>
                                     <div v-else>
-                                        <button class="btn btn-secondary mt-2 kanban-text" v-on:click="enableAddChecklistItem(checklist_index)">Add an item</button>
+                                        <button class="btn btn-light mt-2 kanban-text" v-on:click="enableAddChecklistItem(checklist_index)">Add an item</button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-sm-3 col-md-3 pl-0">
+                            <div class="col-12 col-sm-12 col-md-3 pl-0">
                                 <p class="mb-1 text-bold kanban-text">Add to card</p>
                                 <div class="modal-list-option" v-on:click="showAddToCard($event, 'members')" ref="members_item_ref" @click.stop=''>
                                     <font-awesome-icon :icon="['fa', 'user']" class="kanban-text" />
@@ -178,6 +194,22 @@
             this.resizeBoard()
         },
         methods: {
+            isDeadline(date) {
+                let d = new Date(date)
+                let currentDate = new Date()
+                if(d.getTime() < currentDate.getTime()) return true
+                return false
+            },
+            convertDate(date, fulldate = false) {
+                let bulan = [
+                    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                ];
+                if(date == null || date == '') return false
+                let d = new Date(date)
+                let month = bulan[d.getMonth()]
+                if(fulldate) return `${d.getDate()} ${month} ${d.getFullYear()}`
+                return `${month} ${d.getDate()}`
+            },
             countChildChecklistDoneTotal(checklist) {
                 let total_checklist_item = 0;
                 if(checklist.length > 0) {
@@ -211,7 +243,12 @@
                 }
             },
             showAddToCard(event, type) {
-                this.$refs.add_to_card_pop_up_ref.style.display = 'block'
+                if(this.$refs.add_to_card_pop_up_ref.style.display == 'none') {
+                    this.$refs.add_to_card_pop_up_ref.style.display = 'block'
+                }
+                else {
+                    this.$refs.add_to_card_pop_up_ref.style.display = 'none'
+                }
                 let element = event.currentTarget.getBoundingClientRect()
                 let {add_to_card_pop_up_ref} = this.$refs
                 this.$refs.add_to_card_pop_up_ref.style.left = (element.x - 10) + 'px'
@@ -267,7 +304,11 @@
                     task_id: null,
                     task_name: '',
                     members: [],
-                    checklist: []
+                    checklist: [],
+                    deadline: {
+                        date: null,
+                        done: false
+                    }
                 }
                 this.item_modal_data_card_name = ''
 
@@ -316,7 +357,12 @@
                             task_id: id_random,
                             task_name: task_name,
                             members: [],
-                            checklist: []
+                            checklist: [],
+                            checklist_completed: 0,
+                            deadline: {
+                                date: null,
+                                done: false
+                            }
                         })
                     }
                     return value
@@ -388,7 +434,11 @@
                     task_name: '',
                     task_description: '',
                     members: [],
-                    checklist: []
+                    checklist: [],
+                    deadline: {
+                        date: null,
+                        done: false
+                    }
                 },
                 item_modal_data_card_name: '',
                 add_checklist_item: {
@@ -463,6 +513,10 @@
                                    }
                                ],
                                checklist_completed: 3,
+                               deadline: {
+                                   date: '2022-06-30',
+                                   done: true
+                               }
                            },
                            {
                                task_id: 2,
@@ -484,6 +538,10 @@
                                ],
                                checklist: [],
                                checklist_completed: 0,
+                               deadline: {
+                                   date: null,
+                                   done: false
+                               }
                            } 
                         ]
                     },
@@ -498,6 +556,10 @@
                                members: [],
                                checklist: [],
                                checklist_completed: 0,
+                               deadline: {
+                                   date: null,
+                                   done: false
+                               }
                            } 
                         ]
                     },
@@ -512,6 +574,10 @@
                                 members: [],
                                 checklist: [],
                                 checklist_completed: 0,
+                                deadline: {
+                                   date: null,
+                                   done: false
+                                }
                             }
                         ],
                     },
@@ -525,7 +591,11 @@
                                 task_description: '',
                                 members: [],
                                 checklist: [],
-                                checklist_completed: 0,
+                                checklist_completed: 0, 
+                                deadline: {
+                                   date: null,
+                                   done: false
+                                }
                             }
                         ],
                     },

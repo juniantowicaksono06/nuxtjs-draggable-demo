@@ -39,7 +39,7 @@
     overflow-y: auto;
 }
 #dates_type {
-    max-height: 150px;
+    max-height: 250px;
     overflow-x: hidden;
     overflow-y: auto;
 }

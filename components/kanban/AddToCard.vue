@@ -50,9 +50,19 @@
             <div id="dates_type" :class="(data.card_type == 'dates' ? 'type-active': 'type-inactive')">
                 <b-row>
                     <b-col md="auto" style="margin: 0 auto;">
-                        <b-calendar locale="en-US" hide-header></b-calendar>
+                        <b-calendar v-model="selected_date" locale="en-US" hide-header></b-calendar>
                     </b-col>
                 </b-row>
+                <div class="mt-2 px-2">
+                    <div class="mt-2 mb-2">
+                        <button class="btn btn-block btn-primary" v-on:click="saveDeadline">
+                            Save
+                        </button>
+                        <button class="btn btn-block btn-light" v-on:click="removeDeadline">
+                            Remove
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -63,6 +73,8 @@
             return {
                 search_member: '',
                 checklist_name: '',
+                selected_date: this.data.data_item.deadline.date == null ? this.currentDate() : this.data.data_item.deadline.date,
+                date_context: null,
                 all_members: [
                     {
                         'user_id': 1,
@@ -102,8 +114,27 @@
             }
         },
         mounted() {
+            // console.log(this.data)
         },
         methods: {
+            removeDeadline() {
+                this.data.data_item.deadline = {
+                    date: null,
+                    done: false
+                }
+                this.closeAddToCard()
+            },
+            currentDate() {
+                let d = new Date()
+                return `${d.getFullYear()} ${d.getMonth()} ${d.getDate()}`
+            },
+            saveDeadline() {
+                this.data.data_item.deadline.date = this.selected_date
+                this.closeAddToCard()
+            },
+            onContext(ctx) {
+                this.date_context = ctx
+            },
             addChecklist() {
                 this.checklist.push({
                     'checklist_id': Math.round(Math.random() * 10240),
