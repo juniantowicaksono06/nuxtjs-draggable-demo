@@ -1,0 +1,109 @@
+<template>
+    <div class="kanban-card card">
+        <div class="card-header kanban-header">
+            <p class="kanban-header-input mb-0" style="display: block;" ref="kanban_name_ref" v-on:click="enableEditKanbanName($event)">{{ kanban.kanban_name }}</p> 
+            <input class="kanban-header-input" ref="kanban_name_edit" style="display:none;" v-model="kanban.kanban_name" v-on:blur="disableEditKanbanName($event)"/>
+        </div>
+        <div class="card-body kanban-body py-1 px-2">
+            <draggable v-model="kanban.data" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
+                <div v-for="a in kanban.data" :key="a.task_id" draggable=".kanban-item">
+                    <CardItem :data="{
+                        item: a,
+                        kanban_name: kanban.kanban_name
+                    }" />
+                </div>
+            </draggable>
+            <div class="add-item kanban-item kanban-text w-100 px-2 py-2" v-on:click="showAddItemInput($event, kanban.kanban_id)" v-if="((!add_item_enabled) || (add_item_enabled && kanban.kanban_id != add_item_id))">
+                <strong>+</strong> Add Item
+            </div>
+            <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" v-else-if="(add_item_enabled == true && kanban.kanban_id == add_item_id)">
+                <textarea autofocus v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text" style="resize: none;" placeholder="Enter a title for this card"></textarea>
+                <div class="d-flex mt-2">
+                    <button class="btn btn-primary kanban-text" v-on:click="addItem">Add Item</button>
+                    <button class="btn btn-transparent kanban-text" v-on:click="disableAddItem()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    import draggable from 'vuedraggable'
+    import CardItem from './CardItem.vue'
+    export default {
+        data() {
+            return {
+                add_item_enabled: false,
+                add_item_id: null,
+                add_item_value: "",
+                kanban: this.data.kanban
+            }
+        },
+        props: {
+            data: {
+                type: Object
+            }
+        },
+        mounted() {
+        },
+        methods: {
+            disableAddItem() {
+                this.add_item_enabled = false
+                this.add_item_id = null
+                this.add_item_value = ''
+            },
+            enableEditKanbanName(event) {
+                this.$refs.kanban_name_ref.style.display = 'none'
+                this.$refs.kanban_name_edit.style.display = 'block'
+                this.$refs.kanban_name_edit.focus()
+                this.$refs.kanban_name_edit.select()
+            },
+            disableEditKanbanName(event) {
+                this.$refs.kanban_name_ref.style.display = 'block'
+                this.$refs.kanban_name_edit.style.display = 'none'
+            },
+            showAddItemInput(event, kanban_id) {
+                this.add_item_enabled = true
+                this.add_item_id = kanban_id
+                this.add_item_value = ''
+            },
+            disableAddItem() {
+                this.add_item_enabled = false
+                this.add_item_id = null
+                this.add_item_value = ''
+            },
+            addItem() {
+                let id = this.add_item_id 
+                let id_random = Math.round(Math.random() * 10240)
+                let task_name = this.add_item_value
+                if(task_name.trim() == "" || task_name == null) {
+                    return false
+                }
+
+                // console.log(this.kanban)
+                
+                this.kanban.data.push({
+                    task_id: id_random,
+                    task_name: task_name,
+                    members: [],
+                    checklist: [],
+                    checklist_completed: 0,
+                    deadline: {
+                        date: null,
+                        done: false
+                    }
+                })
+                // this.kanban.map((value) => {
+                //     if(value.kanban_id == id) {
+                //     }
+                //     return value
+                // })
+                this.disableAddItem()
+            },
+        },
+        components: {
+            draggable,
+            CardItem
+        }
+    }
+</script>

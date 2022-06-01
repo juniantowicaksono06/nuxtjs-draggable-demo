@@ -31,7 +31,7 @@
     export default {
         data() {
             return {
-                member_list: this.data.member_list
+                member_list: this.data
             }
         },
         props: {
@@ -46,15 +46,15 @@
             removeMember(user_id) {
                 let member_exist = false
                 let index = null;
-                for(let i = 0; i < this.data.member_list.members.length; i++) {
-                    if(this.data.member_list.members[i].user_id == user_id) {
+                for(let i = 0; i < this.data.item.members.length; i++) {
+                    if(this.data.item.members[i].user_id == user_id) {
                         member_exist = true
                         index = i
                         break
                     }
                 }
                 if(member_exist) {
-                    this.data.member_list.members.splice(index, 1)
+                    this.data.item.members.splice(index, 1)
                     this.close()
                 }
             },
