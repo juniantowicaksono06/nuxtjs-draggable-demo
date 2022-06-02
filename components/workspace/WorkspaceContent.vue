@@ -12,17 +12,17 @@
             <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in board_data">
                 <a :href="`/project/${board.board_id}/kanban`" target="_blank">
                     <div class="card workspace-card hover-pointer">
-                        <div class="card-body px-2 py-2 bg-primary text-white">
+                        <div class="card-body px-2 py-2 bg-danger text-white">
                             <h6 class="mb-0 no-select">{{ board.board_name }}</h6>
                         </div>
                     </div>
                 </a>
             </div>
             <div class="col-12 col-sm-6 col-md-3 mb-2">
-                <div class="card workspace-card hover-pointer" v-on:click="openCreateBoard">
+                <div class="card workspace-card hover-pointer bg-secondary" v-on:click="openCreateBoard">
                     <div class="card-body">
-                        <h6 class="mb-0 mt-2 text-center text-muted"><font-awesome-icon :icon="['fa', 'plus']" /></h6>
-                        <h6 class="mb-0 text-center no-select text-muted" style="margin: auto;">Create new board</h6>
+                        <h6 class="mb-0 mt-2 text-center text-white"><font-awesome-icon :icon="['fa', 'plus']" /></h6>
+                        <h6 class="mb-0 text-center no-select text-white" style="margin: auto;">Create new board</h6>
                     </div>
                 </div>
             </div>

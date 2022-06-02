@@ -140,9 +140,11 @@
             <font-awesome-icon :icon="['fa', 'chevron-right']" class="ml-2" />
         </div>
         <div class="px-2" id="sidebar_content">
-            <div class="d-flex justify-content-between mt-3 mb-2 hover-pointer" id="workspace_label">
+            <div class="d-flex justify-content-between mt-3 mb-2" id="workspace_label">
                 <span class="">Workspace</span>
-                <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
+                <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
+                    <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
+                </button>
             </div>
             <div v-for="(work, index) in workspace" class="workspace" v-on:click="toggleWorkspaceItem($event, index)">
                 <div class="workspace-text hover-pointer workspace-name d-flex justify-content-between">
@@ -158,6 +160,28 @@
                 </div>
             </div>
         </div>
+        <div>
+            <b-modal id="create_new_workspace" size="md" title="Add new workspace" hide-footer>
+                <div class="form-group">
+                    <label class="kanban-text">
+                        Workspace name
+                    </label>
+                    <input type="text" class="form-control" placeholder="Workspace name" v-model="add_workspace.workspace_name" />
+                </div>
+                <div class="form-group">
+                    <label>Workspace visibility</label>
+                    <select class="form-control" v-model="add_workspace.workspace_visibility">
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary btn-block" v-on:click="saveWorkspace">
+                        Add workspace
+                    </button>
+                </div>
+            </b-modal>
+        </div>
     </div>
 </template>
 <script>
@@ -166,7 +190,11 @@
             return {
                 workspace: this.data.workspace,
                 sidebar_open: false,
-                workspace_id: this.$nuxt.$route.params.slug
+                workspace_id: this.$nuxt.$route.params.slug,
+                add_workspace: {
+                    workspace_name: '',
+                    workspace_visibility: 'public'
+                },
             }    
         },
         props: {
@@ -178,6 +206,16 @@
             this.calculateSidebar()
         },
         methods: {
+            saveWorkspace() {
+                this.$bvModal.hide('create_new_workspace')
+                if(this.add_workspace.workspace_name == '') return false
+                this.data.workspace.push({
+                    workspace_id: Math.round(Math.random() * 10240),
+                    workspace_name: this.add_workspace.workspace_name,
+                    workspace_visibility: this.add_workspace.workspace_visibility,
+                    workspace_data: []
+                })
+            },
             toggleWorkspaceItem(event, index) {
                 let chevron_ref = this.$refs.chevron_ref[index]
                 if(chevron_ref.style.transform.includes('rotate(180deg)')) {
@@ -214,6 +252,13 @@
                 }
                 this.sidebar_open = false
                 return 0
+            },
+            openAddWorkspace() {
+                this.add_workspace= {
+                    workspace_name: '',
+                    workspace_visibility: 'public'
+                }
+                this.$bvModal.show('create_new_workspace')
             }
         }
     }
