@@ -14,7 +14,7 @@ body, html {
     min-height: 100%;
     overflow-y: hidden;
 }
-#content-wrap {
+#content_wrap {
     background-image: url('../img/bg-kanban.jpg');
     background-position: 50%;
     background-size: cover;
