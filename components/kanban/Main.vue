@@ -10,9 +10,9 @@
                     <span class="text-white transparent-button font-sm btn">Board <span class="ml-1"><font-awesome-icon :icon="['fa', 'chevron-down']" /></span></span>
                     <span>
                         <div>
-                            <p ref="board_input_ref" id="board_input_ref">{{ board_name }}</p>
+                            <p ref="board_input_ref" id="board_input_ref">{{ kanban.board_name }}</p>
                         </div>
-                        <input ref="board_input" type="text" id="board_input" v-model="board_name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" />
+                        <input ref="board_input" type="text" id="board_input" v-model="kanban.board_name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" />
                     </span>
                     <span class="ml-1">
                         <span class="text-white transparent-button font-sm btn">Workspace <span class="ml-1"></span></span>
@@ -23,8 +23,8 @@
                 </div>
             </div>
             <div class="row pl-4 pr-4" id="kanban_section">
-                <draggable v-model="kanban" tag="div" class="pb-5" id="kanban_container" animation=250 ref="kanban_container">
-                    <div v-for="(k, index) in kanban" :key="k.kanban_id">
+                <draggable v-model="kanban.board_data" tag="div" class="pb-5" id="kanban_container" animation=250 ref="kanban_container">
+                    <div v-for="(k, index) in kanban.board_data" :key="k.kanban_id">
                         <KanbanCardVue :data="{
                             kanban: k,
                             index: index
@@ -55,7 +55,158 @@
     export default {
         mounted() {
             this.resizeBoard()
-            // console.log(this.data)
+        },
+        created() {
+            this.kanban = {
+                board_id: 1,
+                board_name: "Coba",
+                board_visibility: "workspace",
+                board_data: [
+                    {
+                        card_id: 1,
+                        card_name: 'Todo',
+                        data: [
+                        {
+                            task_id: 1,
+                            task_name: 'Testing 1',
+                            task_description: 'Ini uji coba saja',
+                            members: [
+                                {
+                                    'user_id': 1,
+                                    'full_name': 'Junianto Ichwan Dwi Wicaksono',
+                                    'email': 'juniantowicaksono06@gmail.com',
+                                    'profile_pic': 'https://play-lh.googleusercontent.com/xlnwmXFvzc9Avfl1ppJVURc7f3WynHvlA749D1lPjT-_bxycZIj3mODkNV_GfIKOYJmG'
+                                },
+                                {
+                                    'user_id': 2,
+                                    'full_name': 'Arif Romdoni',
+                                    'email': 'arif98@gmail.com',
+                                    'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg'
+                                },
+                            ],
+                            checklist: [
+                                {
+                                    'checklist_id': 1,
+                                    'checklist_name': 'Testing1',
+                                    'checklist_child': [
+                                        {
+                                            'checklist_child_id': 1,
+                                            'checklist_child_name': 'Testing Child 1',
+                                            'checklist_child_done': true
+                                        },
+                                        {
+                                            'checklist_child_id': 2,
+                                            'checklist_child_name': 'Testing Child 2',
+                                            'checklist_child_done': false
+                                        }
+                                    ]
+                                },
+                                {
+                                    'checklist_id': 2,
+                                    'checklist_name': 'Testing2',
+                                    'checklist_child': [
+                                        {
+                                            'checklist_child_id': 3,
+                                            'checklist_child_name': 'Testing Child 3',
+                                            'checklist_child_done': true
+                                        },
+                                        {
+                                            'checklist_child_id': 4,
+                                            'checklist_child_name': 'Testing Child 4',
+                                            'checklist_child_done': true
+                                        }
+                                    ]
+                                }
+                            ],
+                            checklist_completed: 3,
+                            deadline: {
+                                date: '2022-06-30',
+                                done: true
+                            }
+                        },
+                        {
+                            task_id: 2,
+                            task_name: 'Testing 2',
+                            task_description: '',
+                            members: [
+                                {
+                                    'user_id': 2,
+                                    'full_name': 'Arif Romdoni',
+                                    'email': 'arif98@gmail.com',
+                                    'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg'
+                                },
+                                {
+                                    'user_id': 3,
+                                    'full_name': 'Ahmad Fadil',
+                                    'email': 'jackhammer@gmail.com',
+                                    'profile_pic': 'https://i.pinimg.com/originals/fd/f4/18/fdf41862cf42f0c0cf4ca627c74cbece.jpg'
+                                },
+                            ],
+                            checklist: [],
+                            checklist_completed: 0,
+                            deadline: {
+                                date: null,
+                                done: false
+                            }
+                        } 
+                        ]
+                    },
+                    {
+                        card_id: 2,
+                        card_name: 'In Progress',
+                        data: [
+                        {
+                            task_id: 3,
+                            task_name: 'Testing 3',
+                            task_description: '',
+                            members: [],
+                            checklist: [],
+                            checklist_completed: 0,
+                            deadline: {
+                                date: null,
+                                done: false
+                            }
+                        } 
+                        ]
+                    },
+                    {
+                        card_id: 3,
+                        card_name: 'Testing',
+                        data: [
+                            {
+                                task_id: 4,
+                                task_name: 'Testing 4',
+                                task_description: '',
+                                members: [],
+                                checklist: [],
+                                checklist_completed: 0,
+                                deadline: {
+                                date: null,
+                                done: false
+                                }
+                            }
+                        ],
+                    },
+                    {
+                        card_id: 4,
+                        card_name: 'Deploy',
+                        data: [
+                            {
+                                task_id: 5,
+                                task_name: 'Testing 5',
+                                task_description: '',
+                                members: [],
+                                checklist: [],
+                                checklist_completed: 0, 
+                                deadline: {
+                                date: null,
+                                done: false
+                                }
+                            }
+                        ],
+                    },
+                ]
+            }
         },
         methods: {
             closePopUp() {
@@ -84,8 +235,8 @@
                     return false
                 }
                 this.kanban.push({
-                    kanban_id: this.add_list_id,
-                    kanban_name: this.add_list_value,
+                    card_id: this.add_list_id,
+                    card_name: this.add_list_value,
                     data: []
                 })  
                 this.disableAddList()
@@ -96,8 +247,6 @@
         },
         data() {
             return {
-                board_name: 'Project 1',
-
                 add_list_enabled: false,
                 add_list_id: null,
                 add_list_value: "",
@@ -124,151 +273,9 @@
 
                 add_to_card_type: '',
 
-                kanban: [
-                    {
-                        kanban_id: 1,
-                        kanban_name: 'Todo',
-                        data: [
-                           {
-                               task_id: 1,
-                               task_name: 'Testing 1',
-                               task_description: 'Ini uji coba saja',
-                               members: [
-                                   {
-                                       'user_id': 1,
-                                       'full_name': 'Junianto Ichwan Dwi Wicaksono',
-                                       'email': 'juniantowicaksono06@gmail.com',
-                                       'profile_pic': 'https://play-lh.googleusercontent.com/xlnwmXFvzc9Avfl1ppJVURc7f3WynHvlA749D1lPjT-_bxycZIj3mODkNV_GfIKOYJmG'
-                                   },
-                                   {
-                                       'user_id': 2,
-                                       'full_name': 'Arif Romdoni',
-                                       'email': 'arif98@gmail.com',
-                                       'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg'
-                                   },
-                               ],
-                               checklist: [
-                                   {
-                                       'checklist_id': 1,
-                                       'checklist_name': 'Testing1',
-                                       'checklist_child': [
-                                           {
-                                               'checklist_child_id': 1,
-                                               'checklist_child_name': 'Testing Child 1',
-                                               'checklist_child_done': true
-                                           },
-                                           {
-                                               'checklist_child_id': 2,
-                                               'checklist_child_name': 'Testing Child 2',
-                                               'checklist_child_done': false
-                                           }
-                                       ]
-                                   },
-                                   {
-                                       'checklist_id': 2,
-                                       'checklist_name': 'Testing2',
-                                       'checklist_child': [
-                                           {
-                                               'checklist_child_id': 3,
-                                               'checklist_child_name': 'Testing Child 3',
-                                               'checklist_child_done': true
-                                           },
-                                           {
-                                               'checklist_child_id': 4,
-                                               'checklist_child_name': 'Testing Child 4',
-                                               'checklist_child_done': true
-                                           }
-                                       ]
-                                   }
-                               ],
-                               checklist_completed: 3,
-                               deadline: {
-                                   date: '2022-06-30',
-                                   done: true
-                               }
-                           },
-                           {
-                               task_id: 2,
-                               task_name: 'Testing 2',
-                               task_description: '',
-                               members: [
-                                   {
-                                       'user_id': 2,
-                                       'full_name': 'Arif Romdoni',
-                                       'email': 'arif98@gmail.com',
-                                       'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg'
-                                   },
-                                   {
-                                       'user_id': 3,
-                                       'full_name': 'Ahmad Fadil',
-                                       'email': 'jackhammer@gmail.com',
-                                       'profile_pic': 'https://i.pinimg.com/originals/fd/f4/18/fdf41862cf42f0c0cf4ca627c74cbece.jpg'
-                                   },
-                               ],
-                               checklist: [],
-                               checklist_completed: 0,
-                               deadline: {
-                                   date: null,
-                                   done: false
-                               }
-                           } 
-                        ]
-                    },
-                    {
-                        kanban_id: 2,
-                        kanban_name: 'In Progress',
-                        data: [
-                           {
-                               task_id: 3,
-                               task_name: 'Testing 3',
-                               task_description: '',
-                               members: [],
-                               checklist: [],
-                               checklist_completed: 0,
-                               deadline: {
-                                   date: null,
-                                   done: false
-                               }
-                           } 
-                        ]
-                    },
-                    {
-                        kanban_id: 3,
-                        kanban_name: 'Testing',
-                        data: [
-                            {
-                                task_id: 4,
-                                task_name: 'Testing 4',
-                                task_description: '',
-                                members: [],
-                                checklist: [],
-                                checklist_completed: 0,
-                                deadline: {
-                                   date: null,
-                                   done: false
-                                }
-                            }
-                        ],
-                    },
-                    {
-                        kanban_id: 4,
-                        kanban_name: 'Deploy',
-                        data: [
-                            {
-                                task_id: 5,
-                                task_name: 'Testing 5',
-                                task_description: '',
-                                members: [],
-                                checklist: [],
-                                checklist_completed: 0, 
-                                deadline: {
-                                   date: null,
-                                   done: false
-                                }
-                            }
-                        ],
-                    },
-                ]
+                kanban: {
+
+                }
             }
         },
         components: {
