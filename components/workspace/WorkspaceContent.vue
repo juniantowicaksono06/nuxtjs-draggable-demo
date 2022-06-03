@@ -12,7 +12,7 @@
             <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in board_data">
                 <a :href="`/project/${board.board_id}/kanban`" target="_blank">
                     <div class="card workspace-card hover-pointer">
-                        <div class="card-body px-2 py-2 bg-danger text-white">
+                        <div class="card-body px-2 py-2 bg-primary text-white">
                             <h6 class="mb-0 no-select">{{ board.board_name }}</h6>
                         </div>
                     </div>
@@ -28,7 +28,7 @@
             </div>
         </div>
         <div>
-            <b-modal id="create_new_board" size="md" title="Add new board" hide-footer>
+            <b-modal id="create_new_board2" size="md" title="Add new board" hide-footer>
                 <div class="w-100">
                     <div class="form-group">
                         <label class="kanban-text">
@@ -78,7 +78,7 @@
                 }
             },
             openCreateBoard() {
-                this.$bvModal.show('create_new_board')
+                this.$bvModal.show('create_new_board2')
             },
         },
         props: {

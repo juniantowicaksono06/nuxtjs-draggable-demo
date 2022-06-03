@@ -6,7 +6,9 @@
 </style>
 <template>
     <div class="w-100 h-100" id="content_wrap">
-        <TopBar/>
+        <TopBar :data="{
+                workspace: workspace
+            }"/>
         <div class="d-flex w-100 position-relative h-100">
             <Sidebar :data="{
                 workspace: workspace
@@ -32,11 +34,13 @@
                         workspace_data: [
                             {
                                 board_id: 1,
-                                board_name: 'Mojopait'
+                                board_name: 'Mojopait',
+                                board_visibility: 'public'
                             },
                             {
                                 board_id: 2,
-                                board_name: 'Prasasti'
+                                board_name: 'Prasasti',
+                                board_visibility: 'public'
                             }
                         ]
                     },
@@ -47,7 +51,8 @@
                         workspace_data: [
                             {
                                 board_id: 3,
-                                board_name: 'DitaAja'
+                                board_name: 'DitaAja',
+                                board_visibility: 'public'
                             }
                         ]
                     }

@@ -3,7 +3,9 @@
 </style>
 <template>
     <div class="w-100 h-100" id="content_wrap" v-on:click="closePopUp">
-        <Topbar/>
+        <Topbar :data="{
+            workspace: workspace
+        }"/>
         <div class="h-100 d-flex">
             <div>
                 <WorkspaceSidebar :data="{
@@ -21,10 +23,10 @@
                                 <input ref="board_input" type="text" id="board_input" v-model="kanban.board_name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" />
                             </span>
                             <span class="ml-1">
-                                <span class="text-white transparent-button font-sm btn">Workspace <span class="ml-1"></span></span>
+                                <span class="text-white transparent-button font-sm btn">Jatim <span class="ml-1"></span></span>
                             </span>
                             <span class="ml-1">
-                                <span class="text-white transparent-button font-sm btn">Workspace visible <span class="ml-1"></span></span>
+                                <span class="text-white transparent-button font-sm btn">Public <span class="ml-1"></span></span>
                             </span>
                         </div>
                     </div>
@@ -300,11 +302,13 @@
                         workspace_data: [
                             {
                                 board_id: 1,
-                                board_name: 'Mojopait'
+                                board_name: 'Mojopait',
+                                board_visibility: 'public'
                             },
                             {
                                 board_id: 2,
-                                board_name: 'Prasasti'
+                                board_name: 'Prasasti',
+                                board_visibility: 'public'
                             }
                         ]
                     },
@@ -315,7 +319,8 @@
                         workspace_data: [
                             {
                                 board_id: 3,
-                                board_name: 'DitaAja'
+                                board_name: 'DitaAja',
+                                board_visibility: 'public'
                             }
                         ]
                     }
