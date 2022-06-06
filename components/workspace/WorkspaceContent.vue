@@ -37,7 +37,7 @@
                         <input type="text" class="form-control" placeholder="Board title" />
                     </div>
                 </div>
-                <div class="w-100 mt-2">
+                <!-- <div class="w-100 mt-2">
                     <div class="form-group">
                         <label class="kanban-text">
                             Visibility
@@ -47,7 +47,7 @@
                             <option value="public">Public</option>
                         </select>
                     </div>
-                </div>
+                </div> -->
                 <div class="w-100 mt-3">
                     <button class="btn btn-block btn-primary">
                         Create board

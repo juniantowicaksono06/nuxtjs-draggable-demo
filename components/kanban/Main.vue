@@ -20,17 +20,17 @@
                                 <div>
                                     <p ref="board_input_ref" id="board_input_ref">{{ kanban.board_name }}</p>
                                 </div>
-                                <input ref="board_input" type="text" id="board_input" v-model="kanban.board_name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" />
+                                <input ref="board_input" type="text" id="board_input" v-model="kanban.board_name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, kanban.board_id)" />
                             </span>
-                            <span class="ml-1">
-                                <span class="text-white transparent-button font-sm btn">Jatim <span class="ml-1"></span></span>
+                            <span class="ml-1" v-on:click="showModalMoveWorkspace" v-for="work in workspace" v-if="work.workspace_id == kanban.workspace_id">
+                                <span class="text-white transparent-button font-sm btn">{{ work.workspace_name }} <span class="ml-1"></span></span>
                             </span>
-                            <span class="ml-1">
+                            <!-- <span class="ml-1">
                                 <span class="text-white transparent-button font-sm btn">Public <span class="ml-1"></span></span>
-                            </span>
+                            </span> -->
                         </div>
                     </div>
-                    <div class="row pl-5 pr-4" id="kanban_section" style="width: 100%;">
+                    <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
                         <draggable v-model="kanban.board_data" tag="div" class="pb-5" id="kanban_container" animation=250 ref="kanban_container">
                             <div v-for="(k, index) in kanban.board_data" :key="k.kanban_id">
                                 <KanbanCardVue :data="{
@@ -53,6 +53,28 @@
                 </div>
             </div>
         </div>
+        <!-- Modal Select And Move Board to Workspace -->
+        <b-modal id="modal_move_workspace" hide-footer size="md" title="Edit Workspace">
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group w-100">
+                        <label class="kanban-text">
+                            This board is in workspace
+                        </label>
+                        <select class="form-control" v-model="workspace_id_selected">
+                            <option v-for="work in workspace" :value="work.workspace_id">
+                                {{ work.workspace_name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-block btn-primary" v-on:click="changeWorkspace">
+                            Change
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </b-modal>
     </div>
 </template>
 
@@ -80,6 +102,46 @@
             this.loadData()
         },
         methods: {
+            changeBoardName(event, board_id) {
+                for(let a = 0; a < this.workspace.length; a++) {
+                    this.workspace[a].workspace_data.forEach((value, index) => {
+                        if(value.board_id == board_id) {
+                            value.board_name = this.kanban.board_name
+                        }
+                    })
+                }
+            },
+            changeWorkspace(event, target) {
+                let old_workspace_id = this.kanban.workspace_id
+                this.kanban.workspace_id = this.workspace_id_selected
+                let board_move = {}
+                for(let i = 0; i < this.workspace.length; i++) {
+                    if(this.workspace[i].workspace_id == old_workspace_id)   {
+                        for(let a = 0; a < this.workspace[i].workspace_data.length; a++) {
+                            if(this.workspace[i].workspace_data[a].board_id == this.kanban.board_id) {
+                                board_move = this.workspace[i].workspace_data[a]
+                                this.workspace[i].workspace_data.splice(a, 1)
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                for(let i = 0; i < this.workspace.length; i++) {
+                    if(this.workspace[i].workspace_id == this.workspace_id_selected)   {
+                        console.log(this.workspace[i])
+                        this.workspace[i].workspace_data.push(board_move)
+                        break;
+                    }
+                }
+                // console.log(this.workspace)
+                this.workspace_id_selected = null
+                this.$bvModal.hide("modal_move_workspace")
+            },
+            showModalMoveWorkspace() {
+                this.workspace_id_selected = this.kanban.workspace_id
+                this.$bvModal.show("modal_move_workspace")
+            },
             resizeKanbanContainer() {
                 let sidebar = document.getElementById("sidebar")
                 let width = window.innerWidth - sidebar.offsetWidth
@@ -89,9 +151,10 @@
                 let id = this.$nuxt.$route.params.slug
                 if(id == 1) {
                     this.kanban = {
+                        workspace_id: 1,
                         board_id: 1,
                         board_name: "Mojopait",
-                        board_visibility: "public",
+                        // board_visibility: "public",
                         board_data: [
                             {
                                 card_id: 1,
@@ -241,17 +304,19 @@
                 }
                 else if(id == 2) {
                     this.kanban = {
+                        workspace_id: 1,
                         board_id: 2,
                         board_name: "Prasasti",
-                        board_visibility: "public",
+                        // board_visibility: "public",
                         board_data: []
                     }
                 }
                 else if(id == 3) {
                     this.kanban = {
+                        workspace_id: 2,
                         board_id: 3,
                         board_name: "DitaAja",
-                        board_visibility: "public",
+                        // board_visibility: "public",
                         board_data: []
                     }
                 }
@@ -294,6 +359,7 @@
         },
         data() {
             return {
+                workspace_id_selected: null,
                 workspace: [
                     {
                         workspace_id: 1,
@@ -303,12 +369,12 @@
                             {
                                 board_id: 1,
                                 board_name: 'Mojopait',
-                                board_visibility: 'public'
+                                // board_visibility: 'public'
                             },
                             {
                                 board_id: 2,
                                 board_name: 'Prasasti',
-                                board_visibility: 'public'
+                                // board_visibility: 'public'
                             }
                         ]
                     },
@@ -320,7 +386,7 @@
                             {
                                 board_id: 3,
                                 board_name: 'DitaAja',
-                                board_visibility: 'public'
+                                // board_visibility: 'public'
                             }
                         ]
                     }

@@ -35,12 +35,12 @@
                             {
                                 board_id: 1,
                                 board_name: 'Mojopait',
-                                board_visibility: 'public'
+                                // board_visibility: 'public'
                             },
                             {
                                 board_id: 2,
                                 board_name: 'Prasasti',
-                                board_visibility: 'public'
+                                // board_visibility: 'public'
                             }
                         ]
                     },
@@ -52,7 +52,7 @@
                             {
                                 board_id: 3,
                                 board_name: 'DitaAja',
-                                board_visibility: 'public'
+                                // board_visibility: 'public'
                             }
                         ]
                     }

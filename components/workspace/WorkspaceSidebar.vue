@@ -3,8 +3,12 @@
         font-size: .95em;
         padding-right: 8px;
     }
-    .workspace-text, .workspace-item-text {
+    .workspace-text, .workspace-item-list {
         font-size: .75em;
+    }
+    .workspace-icon-square {
+        font-size: 1.2em;
+        margin-left: -5px;
     }
     #sidebar {
         width: 300px;
@@ -50,14 +54,20 @@
     .sidebar-anim-open #workspace_container {
         overflow-y: auto;
     }
-    #sidebar_close:hover, .workspace > div.workspace-name:hover, .workspace-item div.workspace-item-list:hover {
+    #sidebar_close:hover, .sidebar-anim-open #workspace_container .workspace > div.workspace-name:hover, .workspace-item div.workspace-item-list:hover {
         background-color: rgb(127,145,155,0.5);
         cursor: pointer;
         user-select: none;
         -webkit-user-select: none;
         -moz-user-select: none;
     }
-    div.workspace-item-list > a {
+    .sidebar-anim-open div.workspace-item-list-active {
+        background-color: rgb(127,145,155,0.8);
+    }
+    .sidebar-anim-close .workspace > div.workspace-name:hover,.sidebar-close .workspace > div.workspace-name:hover {
+        cursor: default;
+    }
+    div.workspace-item-list > a, div.workspace-item-list > span {
         display: block;
         width: 100%;
         padding: 10px;
@@ -92,6 +102,9 @@
         animation-name: sidebar-anim-open;
         animation-duration: 1s;
         animation-fill-mode: forwards;
+    }
+    .sidebar-anim-close .workspace-item {
+        display: block;
     }
     .sidebar-anim-open .board-name, .sidebar-anim-open .workspace-title, .sidebar-anim-open .workspace-title, .sidebar-anim-open #workspace_label, .sidebar-anim-open .workspace-item-list .board-name-add  {
         animation-name: fade-in;
@@ -218,14 +231,14 @@
                 </button>
             </div>
             <div id="workspace_container" ref="workspace_container_ref">
-                <div v-for="(work, index) in workspace" class="workspace" v-on:click="toggleWorkspaceItem($event, index)">
+                <div v-for="(work, index) in workspace" class="workspace">
                     <div class="workspace-text hover-pointer workspace-name d-flex justify-content-between">
                         <div class="workspace-icon">
                             <span class="workspace-icon-square">
-                                <font-awesome-icon :icon="['fa', 'square']" />
+                                <font-awesome-icon :icon="['fa', 'users']" />
                             </span>
                         </div>
-                        <div class="workspace-title d-flex justify-content-between w-100">
+                        <div class="workspace-title d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
                             <span class="">{{ work.workspace_name }}</span>
                             <font-awesome-icon :icon="['fa', 'chevron-up']" class="mt-1" ref="chevron_ref" />
                         </div>
@@ -238,15 +251,20 @@
                                         <font-awesome-icon :icon="['fa', 'circle']" />
                                     </span>
                                 </div>
-                                <div class="workspace-item-list workspace-item-text mb-0 w-100" >
-                                    <a :href="`/project/${board.board_id}/kanban`" target="_blank">
+                                <div :class="(board.board_id == slug ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
+                                    <a :href="`/project/${board.board_id}/kanban`" target="_blank" v-if="(board.board_id != slug)">
                                         <div class="d-flex justify-content-between">
                                             <span class="board-name">{{ board.board_name }}</span>
                                         </div>
                                     </a>
+                                    <span v-else>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="board-name">{{ board.board_name }}</span>
+                                        </div>
+                                    </span>
                                 </div>
                             </div>
-                            <div class="workspace-item-list workspace-item-text mb-0 board-name-add" v-if="(board_index == (work.workspace_data.length - 1))" v-on:click="openCreateBoard($event, index)" >
+                            <div class="workspace-item-list mb-0 board-name-add" v-if="(board_index == (work.workspace_data.length - 1))" v-on:click="openCreateBoard($event, index)" >
                                 <button class="btn btn-transparent text-white kanban-text px-2">
                                     <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
                                 </button>
@@ -320,7 +338,7 @@
             return {
                 workspace: this.data.workspace,
                 sidebar_open: false,
-                workspace_id: this.$nuxt.$route.params.slug,
+                slug: this.$nuxt.$route.params.slug,
                 add_workspace: {
                     workspace_name: '',
                     workspace_visibility: 'public'
