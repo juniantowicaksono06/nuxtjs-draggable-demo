@@ -6,7 +6,7 @@
         <div class="w-100 h-100" v-if="!loading">
             <Topbar :data="{
                 workspace: workspace
-            }"/>
+            }" :key="sidebarKey" />
             <div class="h-100 d-flex">
                 <div>
                     <WorkspaceSidebar :data="{
@@ -43,7 +43,7 @@
                                     <span class="mb-0" style="font-size: 14px;"><strong>+</strong> Add another list</span>
                                 </div>
                                 <div class="add-list2 card" v-else>
-                                    <input v-model="add_list_value" autofocus class="form-control kanban-text" placeholder="Enter list title" />
+                                    <input v-model="add_list_value" class="form-control kanban-text" placeholder="Enter list title" />
                                     <div class="d-flex mt-2">
                                         <button class="btn btn-primary kanban-text" v-on:click="addList">Add List</button>
                                         <button class="btn btn-transparent kanban-text" v-on:click="disableAddList()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
@@ -212,34 +212,7 @@
                 sidebarKey: 0,
                 loading: true,
                 workspace_id_selected: null,
-                // workspace: [],
                 workspace: [
-                    // {
-                    //     workspace_id: 1,
-                    //     workspace_name: 'Jatim',
-                    //     workspace_visibility: 'public',
-                    //     workspace_data: [
-                    //         {
-                    //             board_id: 1,
-                    //             board_name: 'Mojopait',
-                    //         },
-                    //         {
-                    //             board_id: 2,
-                    //             board_name: 'Prasasti',
-                    //         }
-                    //     ]
-                    // },
-                    // {
-                    //     workspace_id: 2,
-                    //     workspace_name: 'Balnus',
-                    //     workspace_visibility: 'public',
-                    //     workspace_data: [
-                    //         {
-                    //             board_id: 3,
-                    //             board_name: 'DitaAja',
-                    //         }
-                    //     ]
-                    // }
                 ],
 
                 add_list_enabled: false,

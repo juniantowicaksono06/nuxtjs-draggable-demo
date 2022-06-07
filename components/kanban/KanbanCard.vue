@@ -17,7 +17,7 @@
                 <strong>+</strong> Add Item
             </div>
             <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" v-else-if="(add_item_enabled == true && kanban.card_id == add_item_id)">
-                <textarea autofocus v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text" style="resize: none;" placeholder="Enter a title for this card"></textarea>
+                <textarea v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text" style="resize: none;" placeholder="Enter a title for this card"></textarea>
                 <div class="d-flex mt-2">
                     <button class="btn btn-primary kanban-text" v-on:click="addItem">Add Item</button>
                     <button class="btn btn-transparent kanban-text" v-on:click="disableAddItem()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>

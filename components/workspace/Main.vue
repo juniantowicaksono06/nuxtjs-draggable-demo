@@ -1,3 +1,6 @@
+<style>
+    @import '../assets/styles/kanban.css';
+</style>
 <style scoped>
     #content_wrap {
         background-color: #fff;

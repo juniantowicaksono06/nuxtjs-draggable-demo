@@ -21,6 +21,32 @@
         cursor: pointer;
     }
 
+    #workspace_topbar_list {
+        max-height: 200px;
+    }
+
+    #workspace_topbar_list > div.workspace-item:hover {
+        background-color: rgb(71,98,112);
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        cursor: pointer;
+    }
+
+    #workspace_topbar_list > div.workspace-item:hover a {
+        color: rgb(255, 255, 255);
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+    }
+
+    #workspace_topbar_list > div {
+        padding: 5px;
+    }
+
+    #workspace_topbar_list a {
+        color: black;
+    }
 
     .topbar-workspace-card {
         position: absolute;
@@ -36,34 +62,50 @@
 <template>
     <div class="w-100 text-white px-3 topbar">
         <ul class="topbar-list">
-            <li class="topbar-list-item"><span>Workspace <span class="ml-1"><font-awesome-icon :icon="['fa', 'chevron-down']" /></span></span></li>
+            <li class="topbar-list-item" v-on:click="toggleWorkspace">
+                <span>Workspace 
+                    <span class="ml-1"><font-awesome-icon :icon="['fa', 'chevron-down']" /></span>
+                </span>
+            </li>
         </ul>
-        <!-- <div class="topbar-workspace-container">
+        <div class="topbar-workspace-container" v-if="show">
             <div class="topbar-workspace-card card text-dark">
                 <div class="card-header">
                     <h6 class="text-center mb-0">
                         <span>Workspace</span>
-                        <span class="float-right hover-pointer">
+                        <span class="float-right hover-pointer" v-on:click="hideWorkspace">
                             <font-awesome-icon :icon="['fa', 'xmark']"/>
                         </span>
                     </h6>
                 </div>
-                <div class="card-body px-1">
-                    <div v-for="(work) in workspace" :key="work.workspace_id">
+                <div class="card-body px-1 py-1" id="workspace_topbar_list">
+                    <div>
+                        <span class="text-muted kanban-text">Your Workspaces</span>
+                    </div>
+                    <div v-for="(work) in workspace" :key="work.workspace_id" class="workspace-item px-3">
                         <div class="hover-pointer">
                             <h6><a :href="`/project/workspace`">{{ work.workspace_name }}</a></h6>
                         </div>
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
     </div>
 </template>
 <script>
     export default {
         data() {
             return {
-                workspace: this.data.workspace
+                workspace: this.data.workspace,
+                show: false
+            }
+        },
+        methods: {
+            toggleWorkspace() {
+                this.show = !this.show
+            },
+            hideWorkspace() {
+                this.show = false
             }
         },
         props: {

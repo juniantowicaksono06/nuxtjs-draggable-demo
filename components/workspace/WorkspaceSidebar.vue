@@ -15,7 +15,6 @@
         position: relative;
         background-color: rgb(71,98,112);
         color: white;
-        overflow: hidden;
     }
     .no-select {
         white-space: nowrap;
@@ -312,7 +311,7 @@
                         <input type="text" class="form-control" placeholder="Board title" v-model="add_board.board_name" />
                     </div>
                 </div>
-                <div class="w-100 mt-2">
+                <!-- <div class="w-100 mt-2">
                     <div class="form-group">
                         <label class="kanban-text">
                             Visibility
@@ -322,7 +321,7 @@
                             <option value="private">Private</option>
                         </select>
                     </div>
-                </div>
+                </div> -->
                 <div class="w-100 mt-3">
                     <button class="btn btn-block btn-primary" v-on:click="saveBoard">
                         Create board
@@ -346,7 +345,7 @@
                 add_board: {
                     workspace_index: null,
                     board_name: '',
-                    board_visibility: 'public'
+                    // board_visibility: 'public'
                 }
             }    
         },
@@ -358,24 +357,23 @@
         mounted() {
             this.calculateSidebar()
             this.calculateSidebarContainerHeight()
-            window.addEventListener('resize', () => {
-                this.calculateSidebarContainerHeight()
-            })
+            window.addEventListener('resize', this.calculateSidebarContainerHeight)
         },
         methods: {
             calculateSidebarContainerHeight() {
                 let window_height = window.innerHeight
-                let workspace_label_height = this.$refs.workspace_label_ref.offsetHeight
-                let sidebar_header_height = this.$refs.sidebar_header_ref.offsetHeight
-                console.log(this.$refs.workspace_label_ref.offsetHeight)
-                document.getElementById("workspace_container").style.height = ( window_height - (workspace_label_height + sidebar_header_height + 85) ) + 'px'
+                if(typeof this.$refs.workspace_label_ref != 'undefined') {
+                    let workspace_label_height = this.$refs.workspace_label_ref.offsetHeight
+                    let sidebar_header_height = this.$refs.sidebar_header_ref.offsetHeight
+                    document.getElementById("workspace_container").style.height = ( window_height - (workspace_label_height + sidebar_header_height + 85) ) + 'px'
+                }
             },
             openCreateBoard(event, index) {
                 this.$bvModal.show('create_new_board')
                 this.add_board= {
                     workspace_index: index,
                     board_name: '',
-                    board_visibility: 'public'
+                    // board_visibility: 'public'
                 }
             },
             saveBoard() {
@@ -387,7 +385,7 @@
                 this.add_board= {
                     workspace_index: null,
                     board_name: '',
-                    board_visibility: 'public'
+                    // board_visibility: 'public'
                 }
                 this.$bvModal.hide('create_new_board')
             },
