@@ -67,6 +67,9 @@
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklist" :key="checklist.checklist_id">
                                 <div class="d-flex mb-2">
                                     <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.checklist_name" />
+                                    <span class="btn btn-transparent" v-on:click="deleteChecklist($event, checklist_index, checklist, item.checklist)">
+                                        <font-awesome-icon :icon="['fa', 'trash']"/>
+                                    </span>
                                 </div>
                                 <div class="mb-2">
                                     <div class="progress">
@@ -79,8 +82,21 @@
                                     <div class="col-1 py-1 pr-0 mr-0">
                                         <input type="checkbox" class="form-control mr-0" :checked="child.checklist_child_done" style="width: 14px; height: 14px;" v-model="child.checklist_child_done" v-on:change="toggleChecklistDone(child.checklist_child_done)" />
                                     </div>
-                                    <div class="col-10 mt-1 px-0">
-                                        <h6 class="kanban-text">{{ child.checklist_child_name }}</h6>
+                                    <div class="col-10 mt-0 px-0">
+                                        <!-- <h6 class="kanban-text">{{ child.checklist_child_name }}</h6> -->
+                                        <input class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent" :style="child.checklist_child_done ? {
+                                            fontSize: '12px',
+                                            fontWeight: 'normal',
+                                            textDecoration: 'line-through'
+                                        } : {
+                                            fontSize: '12px',
+                                            fontWeight: 'normal'
+                                        }" :readonly="(child.checklist_child_done)" v-model="child.checklist_child_name" />
+                                    </div>
+                                    <div class="float-right" style="margin-top: -5px;">
+                                        <span class="kanban-text btn btn-transparent" v-on:click="deleteChecklistChild($event, child_index, child, checklist.checklist_child)">
+                                            <font-awesome-icon :icon="['fa', 'trash']"/>
+                                        </span>
                                     </div>
                                 </div>
                                 <div v-if="add_checklist_item.index == checklist_index && add_checklist_item.enable">
@@ -146,6 +162,22 @@
             }
         },
         methods: {
+            deleteChecklist(event, index, selected_checklist, checklist) {
+                let checklist_child_completed = 0;
+                let checklist_child_total = selected_checklist.checklist_child.length
+                for(let i = 0; i < checklist_child_total; i++) {
+                    if(selected_checklist.checklist_child[i].checklist_child_done) {
+                        checklist_child_completed += 1
+                    }
+                }
+                checklist.splice(index, 1)
+                this.item.checklist_completed -= checklist_child_completed
+            },
+            deleteChecklistChild(event, child_index, selected_checklist, checklist) {
+                checklist.splice(child_index, 1) 
+                if(!selected_checklist.checklist_child_done) return
+                this.item.checklist_completed--
+            },
             showModalItem(event, data, card_name) {
                 // this.$bvModal.show("modal_item")
                 this.closePopUp()
