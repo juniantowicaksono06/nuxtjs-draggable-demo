@@ -1,0 +1,15 @@
+#login_panel {
+    position: absolute;
+    top: 50%;
+    left: 1%;
+    transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+    width: 100%;
+}
+.login-text {
+    font-size: 0.85em;
+}
+.login-normal-cursor:hover {
+    cursor: default !important;
+}
