@@ -166,6 +166,7 @@
                             this.resizeKanbanContainer()
                         }).observe(document.getElementById('sidebar'))
                         this.sidebarKey += 1
+                        document.title = `${this.kanban.workspace_data.board_name} Board`
                     }, 200)
                 })
             },
