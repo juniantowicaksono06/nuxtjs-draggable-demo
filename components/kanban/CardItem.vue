@@ -1,12 +1,14 @@
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
         <div class="py-2 px-1">
-            <span class="kanban-text">{{ item.task_name }}</span>
+            <span class="kanban-text">{{ item.name }}</span>
         </div>
         <div class="w-100" v-if="(item.members.length > 0 || item.checklist.length > 0 || item.deadline.date != null)">
             <div class="float-left px-2 mb-2">
-                <div class="d-flex" v-if="(item.checklist.length > 0 || item.deadline.date != null)">
-                    <span :class="(countChildChecklist(item.checklist) == item.checklist_completed ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="item.checklist.length > 0"><font-awesome-icon class="ml-1" :icon="['fa', 'list-check']"/><span class="pl-1 pr-1 kanban-text">{{ item.checklist_completed }}/{{ countChildChecklist(item.checklist) }}</span></span>
+                <div class="d-flex" v-if="(item.checklists.length > 0 || item.deadline.date != null)">
+                    <span :class="(countChecklistChild.done ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="item.checklists.length > 0">
+                        <font-awesome-icon class="ml-1" :icon="['fa', 'list-check']"/><span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
+                    </span>
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
                         <font-awesome-icon class="mr-1 kanban-text" :icon="['fa', 'clock']"/>
                         <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" />
@@ -15,8 +17,11 @@
                 </div>
             </div>
             <div class="float-right profile-pic-container justify-content-end">
-                <div v-for="(member, member_index) in item.members" class="px-1 py-1 position-relative  member" v-on:click="showProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
-                    <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" />
+                <div v-for="(member, member_index) in item.members" class="px-1 py-1 position-relative  member" v-on:click="showProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name">
+                    <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
+                    <div class="profile-pic-thumbs bg-primary text-white text-center rounded-circle" v-else>
+                        {{ generateProfileName(member.name) }}
+                    </div>
                 </div> 
             </div>
         </div>
@@ -161,7 +166,37 @@
                 }
             }
         },
+        computed: {
+            countChecklistChild() {
+                let checklist_done = 0;
+                let total_checklist = 0;
+                for(let i = 0; i < this.item.checklists.length; i++) {
+                    for(let x = 0; x < this.item.checklists[i].childs.length; x++) {
+                        if(this.item.checklists[i].childs[x].done) {
+                            checklist_done++;
+                        }
+                    }
+                    total_checklist += this.item.checklists[i].childs.length
+                }
+                return {
+                    done: checklist_done >= total_checklist,
+                    total_checklist: total_checklist,
+                    checklist_done: checklist_done   
+                }
+            },
+        },
         methods: {
+            generateProfileName(fullname) {
+                let split_name = fullname.split(' ')
+                let initial = '';
+                if(split_name.length > 1) {
+                    initial = `${split_name[0].charAt(0)}${split_name[split_name.length - 1].charAt(0)}`
+                }
+                else if(split_name.length == 1) {
+                    initial = `${split_name[0].charAt(0)}`
+                }
+                return initial
+            },
             deleteChecklist(event, index, selected_checklist, checklist) {
                 let checklist_child_completed = 0;
                 let checklist_child_total = selected_checklist.checklist_child.length
@@ -278,6 +313,9 @@
                 }
                 return total_checklist_item
             },
+            // countChildChecklistItem(checklist) {
+
+            // },
             countChildChecklist(checklist) {
                 let total_checklist_item = 0;
                 if(checklist.length > 0) {
