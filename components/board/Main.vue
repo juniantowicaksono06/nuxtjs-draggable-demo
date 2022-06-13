@@ -10,7 +10,8 @@
             <div class="h-100 d-flex">
                 <div>
                     <WorkspaceSidebar :data="{
-                        workspace: workspace
+                        workspace: workspace,
+                        boards: all_board
                     }" :key="sidebarKey" />
                 </div>
                 <div class="d-flex position-relative w-100 h-100">
@@ -23,8 +24,8 @@
                                     </div>
                                     <input ref="board_input" type="text" id="board_input" v-model="kanban.name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, kanban._id)" />
                                 </span>
-                                <span class="ml-1" v-on:click="showModalMoveWorkspace" v-for="work in workspace" v-if="work.workspace_id == kanban.workspace_id._id">
-                                    <span class="text-white transparent-button font-sm btn">{{ work.workspace_name }} <span class="ml-1"></span></span>
+                                <span class="ml-1" v-on:click="showModalMoveWorkspace" v-for="work in workspace" v-if="work._id == kanban.workspace_id._id">
+                                    <span class="text-white transparent-button font-sm btn">{{ work.name }} <span class="ml-1"></span></span>
                                 </span>
                             </div>
                         </div>
@@ -60,8 +61,8 @@
                                 This board is in workspace
                             </label>
                             <select class="form-control" v-model="workspace_id_selected">
-                                <option v-for="work in workspace" :value="work.workspace_id">
-                                    {{ work.workspace_name }}
+                                <option v-for="work in workspace" :value="work._id">
+                                    {{ work.name }}
                                 </option>
                             </select>
                         </div>
@@ -100,33 +101,21 @@
                 }
             },
             changeWorkspace(event, target) {
-                let old_workspace_id = this.kanban.workspace_id
-                this.kanban.workspace_id = this.workspace_id_selected
-                let board_move = {}
-                console.log(this.workspace)
-                for(let i = 0; i < this.workspace.length; i++) {
-                    if(this.workspace[i].workspace_id == old_workspace_id)   {
-                        for(let a = 0; a < this.workspace[i].workspace_data.length; a++) {
-                            if(this.workspace[i].workspace_data[a].board_id == this.kanban.workspace_data.board_id) {
-                                board_move = this.workspace[i].workspace_data[a]
-                                this.workspace[i].workspace_data.splice(a, 1)
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-                for(let i = 0; i < this.workspace.length; i++) {
-                    if(this.workspace[i].workspace_id == this.workspace_id_selected)   {
-                        this.workspace[i].workspace_data.push(board_move)
-                        break;
+                this.kanban.workspace_id._id = this.workspace_id_selected
+                for(let i = 0; i < this.all_board.length; i++) {
+                    if(this.workspace_id_selected == this.all_board[i].workspace_id) {
+                        this.all_board[i].workspace_id = this.workspace_id_selected
+                        break
                     }
                 }
                 this.workspace_id_selected = null
+                this.$nextTick()
+                this.$forceUpdate()
+                this.sidebarKey += 1
                 this.$bvModal.hide("modal_move_workspace")
             },
             showModalMoveWorkspace() {
-                this.workspace_id_selected = this.kanban.workspace_id
+                this.workspace_id_selected = this.kanban.workspace_id._id
                 this.$bvModal.show("modal_move_workspace")
             },
             resizeKanbanContainer() {
@@ -137,13 +126,26 @@
                 }
             },
             loadDataWorkspace() {
-                this.$axios.$get(`https://965f4f9f-449c-4d77-8560-7ccffe3f561c.mock.pstmn.io/workspace`)
-                .then((response) => {
-                    this.workspace = response.workspace
-                    this.$nextTick()
-                    this.$forceUpdate()
-                    this.sidebarKey += 1
+                this.$axios.$get(`${process.env.BACKEND_URL}/api/workspace`)
+                .then((response_workspace) => {
+                    if(response_workspace.status != 'OK') {
+                        return
+                    }
+                    this.$axios.$get(`${process.env.BACKEND_URL}/api/board`)
+                    .then((response_board) => {
+                        if(response_board.status != 'OK') {
+                            return
+                        }
+                        this.workspace = response_workspace.data
+                        this.all_board = response_board.data
+                        this.$nextTick()
+                        this.$forceUpdate()
+                        this.sidebarKey += 1
+                    }) 
+                    
                 })
+                // .then((response) => {
+                // })
             },
             loadDataBoard() {
                 let id = this.$nuxt.$route.params.slug
@@ -160,36 +162,15 @@
                             window.addEventListener('resize', () => {
                                 this.resizeKanbanContainer()
                             })
-                            // UNCOMMENT ME IF FINISHED
                             // Listen to sidebar resize
-                            // new ResizeObserver(() => {
-                            //     this.resizeKanbanContainer()
-                            // }).observe(document.getElementById('sidebar'))
+                            new ResizeObserver(() => {
+                                this.resizeKanbanContainer()
+                            }).observe(document.getElementById('sidebar'))
                             this.sidebarKey += 1
                             document.title = `${this.kanban.name} Board`
                         }, 200)
                     }
                 })
-                // this.$axios.$get(`https://965f4f9f-449c-4d77-8560-7ccffe3f561c.mock.pstmn.io/kanban/${id}`)
-                // .then((response) => {
-                //     this.kanban = response
-                //     this.loading = false
-                //     this.$nextTick()
-                //     setTimeout(() => {
-                //         this.resizeBoard()
-                //         this.resizeKanbanContainer()
-                //         // Listen to window resize
-                //         window.addEventListener('resize', () => {
-                //             this.resizeKanbanContainer()
-                //         })
-                //         // Listen to sidebar resize
-                //         new ResizeObserver(() => {
-                //             this.resizeKanbanContainer()
-                //         }).observe(document.getElementById('sidebar'))
-                //         this.sidebarKey += 1
-                //         document.title = `${this.kanban.workspace_data.board_name} Board`
-                //     }, 200)
-                // })
             },
             closePopUp() {
                 let a = document.getElementsByClassName("profile_pop_up")
@@ -216,11 +197,29 @@
                 if(this.add_list_value.trim() == "") {
                     return false
                 }
-                this.kanban.lists.push({
-                    "name": this.add_list_value,
-                    "cards": []
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$post(`${process.env.BACKEND_URL}/api/list`, new URLSearchParams({
+                    name: this.add_list_value,
+                    board_id: this.kanban._id
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        this.kanban.lists.push({
+                            "name": this.add_list_value,
+                            "cards": []
+                        })
+                        this.disableAddList()
+                        return 
+                    }
+                    alert("Telah terjadi kesalahan")
                 })
-                this.disableAddList()
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
             },
             resizeBoard() {
                 if("board_input" in this.$refs) {
@@ -230,6 +229,7 @@
         },
         data() {
             return {
+                all_board: [],
                 sidebarKey: 0,
                 loading: true,
                 workspace_id_selected: null,

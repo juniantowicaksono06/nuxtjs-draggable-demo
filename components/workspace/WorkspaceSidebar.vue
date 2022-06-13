@@ -238,39 +238,34 @@
                             </span>
                         </div>
                         <div class="workspace-title d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
-                            <span class="">{{ work.workspace_name }}</span>
+                            <span class="">{{ work.name }}</span>
                             <font-awesome-icon :icon="['fa', 'chevron-up']" class="mt-1" ref="chevron_ref" />
                         </div>
                     </div>
                     <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
-                        <div v-for="(board, board_index) in work.workspace_data" :key="board.board_id">
+                        <div v-for="(board, board_index) in boards" :key="board._id" v-if="board.workspace_id == work._id">
                             <div class="d-flex justify-content-between">
                                 <div class="board-icon">
                                     <span class="board-icon-circle kanban-text">
                                         <font-awesome-icon :icon="['fa', 'circle']" />
                                     </span>
                                 </div>
-                                <div :class="(board.board_id == slug ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
-                                    <a :href="`/project/${board.board_id}/kanban`" target="_blank" v-if="(board.board_id != slug)">
+                                <div :class="(board._id == slug ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
+                                    <a :href="`/project/${board.board_id}/kanban`" target="_blank" v-if="(board._id != slug)">
                                         <div class="d-flex justify-content-between">
-                                            <span class="board-name">{{ board.board_name }}</span>
+                                            <span class="board-name">{{ board.name }}</span>
                                         </div>
                                     </a>
                                     <span v-else>
                                         <div class="d-flex justify-content-between">
-                                            <span class="board-name">{{ board.board_name }}</span>
+                                            <span class="board-name">{{ board.name }}</span>
                                         </div>
                                     </span>
                                 </div>
                             </div>
-                            <div class="workspace-item-list mb-0 board-name-add" v-if="(board_index == (work.workspace_data.length - 1))" v-on:click="openCreateBoard($event, index)" >
-                                <button class="btn btn-transparent text-white kanban-text px-2">
-                                    <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
-                                </button>
-                            </div>
                         </div>
-                        <div v-if="work.workspace_data.length == 0">
-                            <div class="workspace-item-list workspace-item-text mb-0" v-on:click="openCreateBoard($event, index)" >
+                        <div>
+                            <div class="workspace-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index)" >
                                 <button class="btn btn-transparent text-white kanban-text px-2">
                                     <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
                                 </button>
@@ -311,17 +306,6 @@
                         <input type="text" class="form-control" placeholder="Board title" v-model="add_board.board_name" />
                     </div>
                 </div>
-                <!-- <div class="w-100 mt-2">
-                    <div class="form-group">
-                        <label class="kanban-text">
-                            Visibility
-                        </label>
-                        <select class="form-control" v-model="add_board.board_visibility">
-                            <option value="public">Public</option>
-                            <option value="private">Private</option>
-                        </select>
-                    </div>
-                </div> -->
                 <div class="w-100 mt-3">
                     <button class="btn btn-block btn-primary" v-on:click="saveBoard">
                         Create board
@@ -336,6 +320,7 @@
         data() {
             return {
                 workspace: this.data.workspace,
+                boards: this.data.boards,
                 sidebar_open: false,
                 slug: this.$nuxt.$route.params.slug,
                 add_workspace: {
@@ -358,7 +343,6 @@
             this.calculateSidebar()
             this.calculateSidebarContainerHeight()
             window.addEventListener('resize', this.calculateSidebarContainerHeight)
-            console.log(this.workspace)
         },
         methods: {
             calculateSidebarContainerHeight() {

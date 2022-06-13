@@ -140,12 +140,30 @@
                 this.date_context = ctx
             },
             addChecklist() {
-                this.checklist.push({
-                    '_id': Math.round(Math.random() * 10240),
-                    'name': this.checklist_name,
-                    'childs': []
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$post(`${process.env.BACKEND_URL}/api/card/checklist`, new URLSearchParams({
+                    name: this.checklist_name,
+                    card_id: this.data.data_item._id
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        this.checklist.push({
+                            '_id': Math.round(Math.random() * 10240),
+                            'name': this.checklist_name,
+                            'childs': []
+                        }) 
+                        this.checklist_name = ''
+                        return
+                    }
+                    alert('Telah terjadi kesalahan')
                 }) 
-                this.checklist_name = ''
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
             },
             toggleMember(event, member) {
                 let member_exist = false
