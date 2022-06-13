@@ -67,30 +67,42 @@
                 this.add_item_id = card_id
                 this.add_item_value = ''
             },
-            disableAddItem() {
-                this.add_item_enabled = false
-                this.add_item_id = null
-                this.add_item_value = ''
-            },
             addItem() {
-                // let id = this.add_item_id 
                 let id_random = Math.round(Math.random() * 10240)
                 let task_name = this.add_item_value
                 if(task_name.trim() == "" || task_name == null) {
                     return false
                 }
-                this.kanban.cards.push({
-                    "deadline": {
-                        "date": null,
-                        "done": false
-                    },
-                    "_id": id_random,
-                    "name": task_name,
-                    "description": "",
-                    "members": [],
-                    "checklists": []
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$post(`${process.env.BACKEND_URL}/api/card`, new URLSearchParams({
+                    name: task_name,
+                    list_id: this.kanban._id
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        this.kanban.cards.push({
+                            "deadline": {
+                                "date": null,
+                                "done": false
+                            },
+                            "_id": id_random,
+                            "name": task_name,
+                            "description": "",
+                            "members": [],
+                            "checklists": []
+                        })
+                        this.disableAddItem()
+                        return
+                    }
+                    alert('Telah terjadi kesalahan')
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
                 })
-                this.disableAddItem()
             },
         },
         components: {

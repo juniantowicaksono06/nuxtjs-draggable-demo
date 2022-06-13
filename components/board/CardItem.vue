@@ -86,7 +86,7 @@
                                         }" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
-                                <div v-for="(child, child_index) in checklist.childs" :key="child.checklist_child_id" class="row mt-2">
+                                <div v-for="(child, child_index) in checklist.childs" :key="child._id" class="row mt-2">
                                     <div class="col-1 py-1 pr-0 mr-0">
                                         <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="toggleChecklistDone(child.done)" />
                                     </div>
@@ -107,13 +107,13 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div v-if="add_checklist_item.index == checklist_index && add_checklist_item.enable">
-                                    <input class="form-control kanban-text" placeholder="Add an item" v-model="add_checklist_item.item_name" />
+                                <div v-if="add_checklist_child.index == checklist_index && add_checklist_child.enable">
+                                    <input class="form-control kanban-text" placeholder="Add an item" v-model="add_checklist_child.item_name" />
                                     <button class="btn btn-primary mt-2 kanban-text" v-on:click="addChecklistChild">Add</button>
                                     <button class="btn btn-transparent mt-2 kanban-text" v-on:click="disableAddChecklistChild()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
                                 </div>
                                 <div v-else>
-                                    <button class="btn btn-light mt-2 kanban-text" v-on:click="enableAddChecklistChild(checklist_index)">Add an item</button>
+                                    <button class="btn btn-light mt-2 kanban-text" v-on:click="enableAddChecklistChild(checklist_index, checklist._id)">Add an item</button>
                                 </div>
                             </div>
                         </div>
@@ -157,7 +157,7 @@
                 item: this.data.item,
                 show_modal: false,
                 kanban_name: this.data.card_name,
-                add_checklist_item: {
+                add_checklist_child: {
                     enable: false,
                     index: null,
                     item_name: ''
@@ -320,31 +320,51 @@
                 if(fulldate) return `${d.getDate()} ${month} ${d.getFullYear()}`
                 return `${month} ${d.getDate()}`
             },
-            enableAddChecklistChild(index) {
+            enableAddChecklistChild(index, id) {
                 this.disableAddChecklistChild()
-                this.add_checklist_item = {
+                this.add_checklist_child = {
                     enable: true,
                     index: index,
-                    item_name: ''
+                    item_name: '',
+                    item_id: id,
                 }
             },
             disableAddChecklistChild() {
-                this.add_checklist_item = {
+                this.add_checklist_child = {
                     enable: false,
                     index: null,
-                    item_name: ''
+                    item_name: '',
+                    item_id: null,
                 }
             },
             addChecklistChild() {
-                if(this.add_checklist_item.item_name.trim() != '') {
-                    this.item.checklists[this.add_checklist_item.index].childs.push({
-                        '_id': Math.round(Math.random() * 10240),
-                        'name': this.add_checklist_item.item_name,
-                        'done': false
+                if(this.add_checklist_child.item_name.trim() != '') {
+                    let config = {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }
+                    this.$axios.$post(`${process.env.BACKEND_URL}/api/card/checklist/child`, new URLSearchParams({
+                        name: this.add_checklist_child.item_name,
+                        checklist_id: this.add_checklist_child.item_id
+                    }), config)
+                    .then((response) => {
+                        if(response.status == 'OK') {
+                            this.item.checklists[this.add_checklist_child.index].childs.push({
+                                '_id': Math.round(Math.random() * 10240),
+                                'name': this.add_checklist_child.item_name,
+                                'done': false
+                            })
+                            this.add_checklist_child.item_name = ''
+                            this.add_checklist_child.enable = false
+                            return
+                        }
+                        alert('Telah terjadi kesalahan')
+                    }) 
+                    .catch((error) => {
+                        alert('Error: Telah terjadi kesalahan')
                     })
                 }
-                this.add_checklist_item.item_name = ''
-                this.add_checklist_item.enable = false
             },
             toggleChecklistDone(done) {
                 // if(done) {
