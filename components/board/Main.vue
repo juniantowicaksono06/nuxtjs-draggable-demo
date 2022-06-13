@@ -24,17 +24,14 @@
                                     <input ref="board_input" type="text" id="board_input" v-model="kanban.name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, kanban._id)" />
                                 </span>
                                 <span class="ml-1" v-on:click="showModalMoveWorkspace" v-for="work in workspace" v-if="work.workspace_id == kanban.workspace_id._id">
-                                    <span class="text-white transparent-button font-sm btn">{{ work.workspace_id.name }} <span class="ml-1"></span></span>
+                                    <span class="text-white transparent-button font-sm btn">{{ work.workspace_name }} <span class="ml-1"></span></span>
                                 </span>
-                                <!-- <span class="ml-1">
-                                    <span class="text-white transparent-button font-sm btn">Public <span class="ml-1"></span></span>
-                                </span> -->
                             </div>
                         </div>
                         <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
                             <draggable v-model="kanban.lists" tag="div" class="pb-5" id="kanban_container" animation=250 ref="kanban_container">
                                 <div v-for="(k, index) in kanban.lists" :key="index">
-                                    <KanbanCardVue :data="{
+                                    <Card :data="{
                                         kanban: k,
                                         index: index
                                     }" />
@@ -82,7 +79,7 @@
 
 <script>
     import draggable from "vuedraggable"
-    import KanbanCardVue from "./KanbanCard.vue"
+    import Card from "./Card.vue"
     import CardProfileMember from "./CardProfileMember.vue"
     import Topbar from "../Topbar.vue"
     import AddToCard from "./AddToCard.vue"
@@ -97,7 +94,7 @@
                 for(let a = 0; a < this.workspace.length; a++) {
                     this.workspace[a].workspace_data.forEach((value, index) => {
                         if(value.board_id == board_id) {
-                            value.board_name = this.kanban.workspace_data.board_name
+                            value.board_name = this.kanban.name
                         }
                     })
                 }
@@ -140,12 +137,12 @@
                 }
             },
             loadDataWorkspace() {
-                // console.log(process.env.BACKEND_URL)
                 this.$axios.$get(`https://965f4f9f-449c-4d77-8560-7ccffe3f561c.mock.pstmn.io/workspace`)
                 .then((response) => {
                     this.workspace = response.workspace
                     this.$nextTick()
                     this.$forceUpdate()
+                    this.sidebarKey += 1
                 })
             },
             loadDataBoard() {
@@ -219,11 +216,10 @@
                 if(this.add_list_value.trim() == "") {
                     return false
                 }
-                this.kanban.workspace_data.board_data.push({
-                    card_id: this.add_list_id,
-                    card_name: this.add_list_value,
-                    data: []
-                })  
+                this.kanban.lists.push({
+                    "name": this.add_list_value,
+                    "cards": []
+                })
                 this.disableAddList()
             },
             resizeBoard() {
@@ -244,20 +240,6 @@
                 add_list_id: null,
                 add_list_value: "",
 
-                // DATA FOR OPEN MODAL
-                item_modal_data: {
-                    task_id: null,
-                    task_name: '',
-                    task_description: '',
-                    members: [],
-                    checklist: [],
-                    deadline: {
-                        date: null,
-                        done: false
-                    }
-                },
-                item_modal_data_card_name: '',
-
                 // FOR PROFILE CARD
                 profile_data: {
                     current_member: {},
@@ -271,7 +253,7 @@
             }
         },
         components: {
-            KanbanCardVue,
+            Card,
             draggable,
             Topbar,
             CardProfileMember,

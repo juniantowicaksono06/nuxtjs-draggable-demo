@@ -10,18 +10,21 @@
                 </div>
             </div>
             <div class="d-flex mt-2">
-                <div>
+                <div v-if="this.data.current_member.profile_pic">
                     <img :src="this.data.current_member.profile_pic" class="profile-pic rounded-circle"/>
+                </div>
+                <div class="profile-pic bg-primary text-white py-4 text-center rounded-circle" v-else>
+                    <h2 class="d-inline-block">{{ generateProfileName(this.data.current_member.name) }}</h2>
                 </div>
 
                 <div class="profile-info">
-                    <h5 class="mb-0 ml-2 mt-2 profile-fullname">{{ this.data.current_member.full_name }}</h5>
+                    <h5 class="mb-0 ml-2 mt-2 profile-fullname">{{ this.data.current_member.name }}</h5>
                     <h6 class="ml-2 kanban-text profile-email">{{ this.data.current_member.email }}</h6>
                 </div>
             </div>
         </div>
         <div class="card-body px-0 py-1 mt-4 profile-body">
-            <div class="profile-list-option" v-on:click="removeMember(data.current_member.user_id)">
+            <div class="profile-list-option" v-on:click="removeMember(data.current_member._id)">
                 <h6 class="mb-0">Remove from card</h6>
             </div>
         </div>
@@ -40,6 +43,9 @@
             },
             close: {
                 type: Function
+            },
+            generateProfileName: {
+                type: Function
             }
         },
         methods: {
@@ -47,7 +53,7 @@
                 let member_exist = false
                 let index = null;
                 for(let i = 0; i < this.data.item.members.length; i++) {
-                    if(this.data.item.members[i].user_id == user_id) {
+                    if(this.data.item.members[i]._id == user_id) {
                         member_exist = true
                         index = i
                         break
