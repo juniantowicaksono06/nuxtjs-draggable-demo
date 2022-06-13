@@ -1,22 +1,22 @@
 <template>
     <div class="kanban-card card">
         <div class="card-header kanban-header">
-            <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ kanban.card_name }}</p> 
-            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban.card_name" v-on:blur="disableEditKanbanName($event)"/>
+            <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ kanban.name }}</p> 
+            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban.name" v-on:blur="disableEditKanbanName($event)"/>
         </div>
         <div class="card-body kanban-body py-1 px-2">
-            <draggable v-model="kanban.data" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
-                <div v-for="a in kanban.data" :key="a.task_id" draggable=".kanban-item">
+            <draggable v-model="kanban.cards" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
+                <div v-for="(a, index_item) in kanban.cards" :key="index_item" draggable=".kanban-item">
                     <CardItem :data="{
                         item: a,
-                        card_name: kanban.card_name
+                        card_name: kanban.name
                     }" />
                 </div>
             </draggable>
-            <div class="add-item kanban-item kanban-text w-100 px-2 py-2" v-on:click="showAddItemInput($event, kanban.card_id)" v-if="((!add_item_enabled) || (add_item_enabled && kanban.card_id != add_item_id))">
+            <div class="add-item kanban-item kanban-text w-100 px-2 py-2" v-on:click="showAddItemInput($event, kanban._id)" v-if="((!add_item_enabled) || (add_item_enabled && kanban._id != add_item_id))">
                 <strong>+</strong> Add Item
             </div>
-            <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" v-else-if="(add_item_enabled == true && kanban.card_id == add_item_id)">
+            <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" v-else-if="(add_item_enabled == true && kanban._id == add_item_id)">
                 <textarea v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text" style="resize: none;" placeholder="Enter a title for this card"></textarea>
                 <div class="d-flex mt-2">
                     <button class="btn btn-primary kanban-text" v-on:click="addItem">Add Item</button>
@@ -73,31 +73,23 @@
                 this.add_item_value = ''
             },
             addItem() {
-                let id = this.add_item_id 
+                // let id = this.add_item_id 
                 let id_random = Math.round(Math.random() * 10240)
                 let task_name = this.add_item_value
                 if(task_name.trim() == "" || task_name == null) {
                     return false
                 }
-
-                // console.log(this.kanban)
-                
-                this.kanban.data.push({
-                    task_id: id_random,
-                    task_name: task_name,
-                    members: [],
-                    checklist: [],
-                    checklist_completed: 0,
-                    deadline: {
-                        date: null,
-                        done: false
-                    }
+                this.kanban.cards.push({
+                    "deadline": {
+                        "date": null,
+                        "done": false
+                    },
+                    "_id": id_random,
+                    "name": task_name,
+                    "description": "",
+                    "members": [],
+                    "checklists": []
                 })
-                // this.kanban.map((value) => {
-                //     if(value.card_id == id) {
-                //     }
-                //     return value
-                // })
                 this.disableAddItem()
             },
         },

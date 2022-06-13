@@ -358,6 +358,7 @@
             this.calculateSidebar()
             this.calculateSidebarContainerHeight()
             window.addEventListener('resize', this.calculateSidebarContainerHeight)
+            console.log(this.workspace)
         },
         methods: {
             calculateSidebarContainerHeight() {

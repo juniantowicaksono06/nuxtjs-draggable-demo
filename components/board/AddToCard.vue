@@ -22,13 +22,16 @@
                     <div class="col-12 mt-2">
                         <h6>Board members</h6>
                         <div id="member_list_container">
-                            <div v-for="(member, member_index) in all_members" v-if="(member.full_name.toLowerCase().includes(search_member.toLowerCase()) || search_member.trim() == '' || member.email.toLowerCase().includes(search_member.toLowerCase()))" v-on:click="toggleMember($event, member)">
+                            <div v-for="(member, member_index) in all_members" v-if="(member.name.toLowerCase().includes(search_member.toLowerCase()) || search_member.trim() == '' || member.email.toLowerCase().includes(search_member.toLowerCase()))" v-on:click="toggleMember($event, member)">
                                 <div class="d-flex member-list-item mb-2">
-                                    <div>
+                                    <div v-if="member.profile_pic">
                                         <img :src="member.profile_pic" style="width: 32px;"  class="rounded-circle" />
                                     </div>
-                                    <p class="mb-0 mt-1 ml-2 profile-fullname member-fullname">{{ member.full_name }}</p>
-                                    <p class="mb-0 mt-1" v-for="selected in selected_members" v-if="(member.user_id == selected.user_id)"><font-awesome-icon :icon="['fa', 'check']" /></p>
+                                    <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else style="width: 42px;">
+                                        {{ generateProfileName(member.name) }}
+                                    </div>
+                                    <p class="mb-0 mt-1 ml-2 profile-fullname member-fullname">{{ member.name }}</p>
+                                    <p class="mb-0 mt-1" v-for="selected in selected_members" v-if="(member._id == selected._id)"><font-awesome-icon :icon="['fa', 'check']" /></p>
                                 </div>
                             </div>
                         </div>
@@ -77,32 +80,30 @@
                 date_context: null,
                 all_members: [
                     {
-                        'user_id': 1,
-                        'full_name': 'Junianto Ichwan Dwi Wicaksono',
-                        'email': 'juniantowicaksono06@gmail.com',
-                        'profile_pic': 'https://play-lh.googleusercontent.com/xlnwmXFvzc9Avfl1ppJVURc7f3WynHvlA749D1lPjT-_bxycZIj3mODkNV_GfIKOYJmG'
+                        '_id': 1,
+                        'name': 'Junianto Ichwan Dwi Wicaksono',
+                        'nik': 22190825,
+                        'email': 'junianto_id_wicaksono_x@telkomsel.co.id',
+                        'profile_pic': 'https://play-lh.googleusercontent.com/xlnwmXFvzc9Avfl1ppJVURc7f3WynHvlA749D1lPjT-_bxycZIj3mODkNV_GfIKOYJmG',
+                        "workspace_id": "62a19b4ff243480499051207"
                     },
                     {
-                        'user_id': 2,
-                        'full_name': 'Arif Romdoni',
-                        'email': 'arif98@gmail.com',
-                        'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg'
+                        '_id': 2,
+                        'name': 'Ahmad Munir',
+                        'nik': 221685322,
+                        'email': '',
+                        'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg',                        "workspace_id": "62a19b4ff243480499051207"
                     },
                     {
-                        'user_id': 3,
-                        'full_name': 'Ahmad Fadil',
-                        'email': 'jackhammer@gmail.com',
-                        'profile_pic': 'https://i.pinimg.com/originals/fd/f4/18/fdf41862cf42f0c0cf4ca627c74cbece.jpg'
-                    },
-                    {
-                        'user_id': 4,
-                        'full_name': 'Septian',
-                        'email': 'septianz98@gmail.com',
-                        'profile_pic': 'https://avatarfiles.alphacoders.com/302/302948.png'
+                        '_id': '62a19c32f24348049905120b',
+                        'name': 'Fahmi Syaifudin',
+                        'nik': 21188554,
+                        'email': 'moh_f_syaifudin_x@telkomsel.co.id',
+                        "workspace_id": "62a19b4ff243480499051207"
                     },
                 ],
                 selected_members: this.data.data_item.members,
-                checklist: this.data.data_item.checklist
+                checklist: this.data.data_item.checklists
             }
         },
         props: {
@@ -110,6 +111,9 @@
                 type: Object
             },
             closeAddToCard: {
+                type: Function
+            },
+            generateProfileName: {
                 type: Function
             }
         },
@@ -137,9 +141,9 @@
             },
             addChecklist() {
                 this.checklist.push({
-                    'checklist_id': Math.round(Math.random() * 10240),
-                    'checklist_name': this.checklist_name,
-                    'checklist_child': []
+                    '_id': Math.round(Math.random() * 10240),
+                    'name': this.checklist_name,
+                    'childs': []
                 }) 
                 this.checklist_name = ''
             },
@@ -147,7 +151,7 @@
                 let member_exist = false
                 let index = null;
                 for(let a = 0; a < this.selected_members.length; a++) {
-                   if(this.selected_members[a].user_id == member.user_id) {
+                   if(this.selected_members[a]._id == member._id) {
                        member_exist = true
                        index = a
                        break;
