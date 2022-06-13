@@ -82,9 +82,9 @@
                     <div>
                         <span class="text-muted kanban-text">Your Workspaces</span>
                     </div>
-                    <div v-for="(work) in workspace" :key="work.workspace_id" class="workspace-item px-3">
+                    <div v-for="(work) in workspace" :key="work._id" class="workspace-item px-3">
                         <div class="hover-pointer">
-                            <h6><a :href="`/project/workspace`">{{ work.workspace_name }}</a></h6>
+                            <h6><a :href="`/project/workspace`">{{ work.name }}</a></h6>
                         </div>
                     </div>
                 </div>

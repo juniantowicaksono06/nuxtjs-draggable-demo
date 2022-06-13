@@ -13,11 +13,11 @@
                     }" />
                 </div>
             </draggable>
-            <div class="add-item kanban-item kanban-text w-100 px-2 py-2" v-on:click="showAddItemInput($event, kanban._id)" v-if="((!add_item_enabled) || (add_item_enabled && kanban._id != add_item_id))">
+            <div class="add-item kanban-item kanban-text w-100 px-2 py-2" v-on:click="showAddItemInput($event, kanban._id)" :class="((!add_item_enabled) || (add_item_enabled && kanban._id != add_item_id) ? 'd-block' : 'd-none')">
                 <strong>+</strong> Add Item
             </div>
-            <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" v-else-if="(add_item_enabled == true && kanban._id == add_item_id)">
-                <textarea v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text" style="resize: none;" placeholder="Enter a title for this card"></textarea>
+            <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" :class="((add_item_enabled == true && kanban._id == add_item_id) ? 'd-block' : 'd-none')">
+                <textarea ref="add_item_ref" v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text add-item" style="resize: none;" placeholder="Enter a title for this card"></textarea>
                 <div class="d-flex mt-2">
                     <button class="btn btn-primary kanban-text" v-on:click="addItem">Add Item</button>
                     <button class="btn btn-transparent kanban-text" v-on:click="disableAddItem()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
@@ -63,9 +63,14 @@
                 this.$refs.card_name_edit.style.display = 'none'
             },
             showAddItemInput(event, card_id) {
+                // setTimeout(() => {
+                //     }, 200)
                 this.add_item_enabled = true
                 this.add_item_id = card_id
                 this.add_item_value = ''
+                this.$nextTick(() => {
+                    this.$refs.add_item_ref.focus()
+                })
             },
             addItem() {
                 let id_random = Math.round(Math.random() * 10240)
@@ -84,12 +89,13 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        let {data} = response
                         this.kanban.cards.push({
                             "deadline": {
                                 "date": null,
                                 "done": false
                             },
-                            "_id": id_random,
+                            "_id": data._id,
                             "name": task_name,
                             "description": "",
                             "members": [],

@@ -1,6 +1,6 @@
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
-        <div class="py-2 px-1">
+        <div class="py-2 px-2">
             <span class="kanban-text">{{ item.name }}</span>
         </div>
         <div class="w-100" v-if="(item.members.length > 0 || item.checklists.length > 0 || item.deadline.date != null)">
@@ -107,12 +107,12 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div v-if="add_checklist_child.index == checklist_index && add_checklist_child.enable">
+                                <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-block' : 'd-none')">
                                     <input class="form-control kanban-text" placeholder="Add an item" v-model="add_checklist_child.item_name" />
                                     <button class="btn btn-primary mt-2 kanban-text" v-on:click="addChecklistChild">Add</button>
                                     <button class="btn btn-transparent mt-2 kanban-text" v-on:click="disableAddChecklistChild()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
                                 </div>
-                                <div v-else>
+                                <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-none' : 'd-block')">
                                     <button class="btn btn-light mt-2 kanban-text" v-on:click="enableAddChecklistChild(checklist_index, checklist._id)">Add an item</button>
                                 </div>
                             </div>
@@ -303,7 +303,7 @@
                 let total_checklist_item = 0;
                 if(checklist.length > 0) {
                     for(let i = 0; i < checklist.length; i++) {
-                        if(checklist[i].checklist_child_done) {
+                        if(checklist[i].done) {
                             total_checklist_item++
                         }
                     }
@@ -350,8 +350,9 @@
                     }), config)
                     .then((response) => {
                         if(response.status == 'OK') {
+                            let {data} = response
                             this.item.checklists[this.add_checklist_child.index].childs.push({
-                                '_id': Math.round(Math.random() * 10240),
+                                '_id': data._id,
                                 'name': this.add_checklist_child.item_name,
                                 'done': false
                             })

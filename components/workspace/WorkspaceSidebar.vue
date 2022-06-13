@@ -251,7 +251,7 @@
                                     </span>
                                 </div>
                                 <div :class="(board._id == slug ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
-                                    <a :href="`/project/${board.board_id}/kanban`" target="_blank" v-if="(board._id != slug)">
+                                    <a :href="`/project/${board._id}/board`" target="_blank" v-if="(board._id != slug)">
                                         <div class="d-flex justify-content-between">
                                             <span class="board-name">{{ board.name }}</span>
                                         </div>

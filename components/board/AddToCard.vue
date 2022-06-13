@@ -151,8 +151,9 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        let {data} = response
                         this.checklist.push({
-                            '_id': Math.round(Math.random() * 10240),
+                            '_id': data._id,
                             'name': this.checklist_name,
                             'childs': []
                         }) 

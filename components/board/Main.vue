@@ -30,24 +30,28 @@
                             </div>
                         </div>
                         <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
-                            <draggable v-model="kanban.lists" tag="div" class="pb-5" id="kanban_container" animation=250 ref="kanban_container">
-                                <div v-for="(k, index) in kanban.lists" :key="index">
-                                    <Card :data="{
-                                        kanban: k,
-                                        index: index
-                                    }" />
-                                </div>
-                                <div class="add-list transparent-button" v-if="(!add_list_enabled && add_list_id == null)" v-on:click="showAddListInput">
-                                    <span class="mb-0" style="font-size: 14px;"><strong>+</strong> Add another list</span>
-                                </div>
-                                <div class="add-list2 card" v-else>
-                                    <input v-model="add_list_value" class="form-control kanban-text" placeholder="Enter list title" />
-                                    <div class="d-flex mt-2">
-                                        <button class="btn btn-primary kanban-text" v-on:click="addList">Add List</button>
-                                        <button class="btn btn-transparent kanban-text" v-on:click="disableAddList()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                            <div id="kanban_container">
+                                <draggable v-model="kanban.lists" tag="div" class="pb-5 d-flex" animation=250>
+                                    <div v-for="(k, index) in kanban.lists" :key="index">
+                                        <Card :data="{
+                                            kanban: k,
+                                            index: index
+                                        }" />
+                                    </div>
+                                </draggable>
+                                <div>
+                                    <div :class="((!add_list_enabled && add_list_id == null) ? 'add-list transparent-button d-block' : 'add-list transparent-button d-none')" v-on:click="showAddListInput">
+                                        <span class="mb-0" style="font-size: 14px;"><strong>+</strong> Add another list</span>
+                                    </div>
+                                    <div :class="((!add_list_enabled && add_list_id == null) ? 'add-list2 card d-none' : 'add-list2 card d-block')">
+                                        <input ref="add_list_ref" v-model="add_list_value" class="form-control kanban-text" placeholder="Enter list title" />
+                                        <div class="d-flex mt-2">
+                                            <button class="btn btn-primary kanban-text" v-on:click="addList">Add List</button>
+                                            <button class="btn btn-transparent kanban-text" v-on:click="disableAddList()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                                        </div>
                                     </div>
                                 </div>
-                            </draggable>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -92,26 +96,21 @@
         },
         methods: {
             changeBoardName(event, board_id) {
-                for(let a = 0; a < this.workspace.length; a++) {
-                    this.workspace[a].workspace_data.forEach((value, index) => {
-                        if(value.board_id == board_id) {
-                            value.board_name = this.kanban.name
-                        }
-                    })
+                for(let a = 0; a < this.all_board.length; a++) {
+                    if(this.all_board[a]._id == board_id) {
+                        this.all_board[a].name = this.kanban.name
+                    }
                 }
             },
             changeWorkspace(event, target) {
                 this.kanban.workspace_id._id = this.workspace_id_selected
                 for(let i = 0; i < this.all_board.length; i++) {
-                    if(this.workspace_id_selected == this.all_board[i].workspace_id) {
+                    if(this.kanban._id == this.all_board[i]._id) {
                         this.all_board[i].workspace_id = this.workspace_id_selected
                         break
                     }
                 }
                 this.workspace_id_selected = null
-                this.$nextTick()
-                this.$forceUpdate()
-                this.sidebarKey += 1
                 this.$bvModal.hide("modal_move_workspace")
             },
             showModalMoveWorkspace() {
@@ -144,12 +143,10 @@
                     }) 
                     
                 })
-                // .then((response) => {
-                // })
             },
             loadDataBoard() {
                 let id = this.$nuxt.$route.params.slug
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/board?id=62a19d9ef243480499051229`)
+                this.$axios.$get(`${process.env.BACKEND_URL}/api/board?id=${id}`)
                 .then((response) => {
                     if(response.status == 'OK') {
                         this.loading = false
@@ -182,6 +179,9 @@
                 this.add_list_enabled = true
                 this.add_list_id = Math.round(Math.random() * 10240)
                 this.add_list_value = ''
+                this.$nextTick(() => {
+                    this.$refs.add_list_ref.focus()
+                })
             },
             disableAddItem() {
                 this.add_item_enabled = false
