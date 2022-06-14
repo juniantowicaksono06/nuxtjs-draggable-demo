@@ -78,30 +78,7 @@
                 checklist_name: '',
                 selected_date: this.data.data_item.deadline.date == null ? this.currentDate() : this.data.data_item.deadline.date,
                 date_context: null,
-                all_members: [
-                    {
-                        '_id': 1,
-                        'name': 'Junianto Ichwan Dwi Wicaksono',
-                        'nik': 22190825,
-                        'email': 'junianto_id_wicaksono_x@telkomsel.co.id',
-                        'profile_pic': 'https://play-lh.googleusercontent.com/xlnwmXFvzc9Avfl1ppJVURc7f3WynHvlA749D1lPjT-_bxycZIj3mODkNV_GfIKOYJmG',
-                        "workspace_id": "62a19b4ff243480499051207"
-                    },
-                    {
-                        '_id': 2,
-                        'name': 'Ahmad Munir',
-                        'nik': 221685322,
-                        'email': '',
-                        'profile_pic': 'https://i.pinimg.com/550x/c4/e6/d5/c4e6d51d4910f37051a67c48a1b5498b.jpg',                        "workspace_id": "62a19b4ff243480499051207"
-                    },
-                    {
-                        '_id': '62a19c32f24348049905120b',
-                        'name': 'Fahmi Syaifudin',
-                        'nik': 21188554,
-                        'email': 'moh_f_syaifudin_x@telkomsel.co.id',
-                        "workspace_id": "62a19b4ff243480499051207"
-                    },
-                ],
+                all_members: [],
                 selected_members: this.data.data_item.members,
                 checklist: this.data.data_item.checklists
             }
@@ -118,9 +95,23 @@
             }
         },
         mounted() {
-            // console.log(this.data)
+            this.loadMembers()
         },
         methods: {
+            loadMembers() {
+                    this.$axios.$get(`${process.env.BACKEND_URL}/api/member`)
+                    .then((response) => {
+                        if(response.status == 'OK') {
+                            let {data} = response
+                            this.all_members = data
+                            return
+                        }
+                        alert('Telah terjadi kesalahan')
+                    }) 
+                    .catch((error) => {
+                        alert('Error: Telah terjadi kesalahan')
+                    })
+            },
             removeDeadline() {
                 this.data.data_item.deadline = {
                     date: null,
