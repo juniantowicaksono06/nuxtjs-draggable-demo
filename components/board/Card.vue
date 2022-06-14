@@ -5,7 +5,7 @@
             <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban.name" v-on:blur="disableEditKanbanName($event)"/>
         </div>
         <div class="card-body kanban-body py-1 px-2">
-            <draggable v-model="kanban.cards" group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
+            <draggable group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
                 <div v-for="(a, index_item) in kanban.cards" :key="index_item" draggable=".kanban-item">
                     <CardItem :data="{
                         item: a,

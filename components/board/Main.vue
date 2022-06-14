@@ -31,7 +31,7 @@
                         </div>
                         <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
                             <div id="kanban_container">
-                                <draggable v-model="kanban.lists" tag="div" class="pb-5 d-flex" animation=250>
+                                <draggable tag="div" class="pb-5 d-flex" animation=250>
                                     <div v-for="(k, index) in kanban.lists" :key="index">
                                         <Card :data="{
                                             kanban: k,
