@@ -1,6 +1,6 @@
-<style>
+<!-- <style>
     @import '../assets/styles/kanban.css';
-</style>
+</style> -->
 <style scoped>
     #content_wrap {
         background-color: #fff;
@@ -14,11 +14,12 @@
             }"/>
         <div class="d-flex w-100 position-relative h-100">
             <Sidebar :data="{
-                workspace: workspace
-            }" />
+                workspace: workspace,
+                boards: all_board
+            }" :key="sidebarKey" />
             <Content :data="{
-                workspace: workspace
-            }" />
+                board: all_board
+            }" :key="contentKey" />
         </div>
     </div>
 </template>
@@ -29,38 +30,37 @@
     export default {
         data() {
             return {
-                workspace: [
-                    {
-                        workspace_id: 1,
-                        workspace_name: 'Jatim',
-                        workspace_visibility: 'public',
-                        workspace_data: [
-                            {
-                                board_id: 1,
-                                board_name: 'Mojopait',
-                                // board_visibility: 'public'
-                            },
-                            {
-                                board_id: 2,
-                                board_name: 'Prasasti',
-                                // board_visibility: 'public'
-                            }
-                        ]
-                    },
-                    {
-                        workspace_id: 2,
-                        workspace_name: 'Balnus',
-                        workspace_visibility: 'public',
-                        workspace_data: [
-                            {
-                                board_id: 3,
-                                board_name: 'DitaAja',
-                                // board_visibility: 'public'
-                            }
-                        ]
-                    }
-                ],
+                workspace: [],
+                all_board: [],
+                sidebarKey: 0,
+                contentKey: 0
             }
+        },
+        mounted() {
+            this.loadDataWorkspace()
+        },
+        methods: {
+            loadDataWorkspace() {
+                this.$axios.$get(`${process.env.BACKEND_URL}/api/workspace`)
+                .then((response_workspace) => {
+                    if(response_workspace.status != 'OK') {
+                        return
+                    }
+                    this.$axios.$get(`${process.env.BACKEND_URL}/api/board`)
+                    .then((response_board) => {
+                        if(response_board.status != 'OK') {
+                            return
+                        }
+                        this.workspace = response_workspace.data
+                        this.all_board = response_board.data
+                        this.$nextTick()
+                        this.$forceUpdate()
+                        this.sidebarKey += 1
+                        this.contentKey += 2
+                    }) 
+                    
+                })
+            },
         },
         components: {
             TopBar,

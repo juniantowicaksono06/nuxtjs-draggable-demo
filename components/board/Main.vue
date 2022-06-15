@@ -1,6 +1,6 @@
-<style>
+<!-- <style>
     @import '../assets/styles/kanban.css';
-</style>
+</style> -->
 <template>
     <div class="w-100 h-100" id="content_wrap" v-on:click="closePopUp">
         <div class="w-100 h-100" v-if="!loading">
@@ -87,7 +87,7 @@
     import Card from "./Card.vue"
     import CardProfileMember from "./CardProfileMember.vue"
     import Topbar from "../Topbar.vue"
-    import AddToCard from "./AddToCard.vue"
+    import CardPopup from "./CardPopup.vue"
     import WorkspaceSidebar from "../workspace/WorkspaceSidebar.vue"
     export default {
         async mounted() {
@@ -95,6 +95,44 @@
             this.loadDataBoard()
         },
         methods: {
+            loadDataWorkspace() {
+                this.$axios.$get(`${process.env.BACKEND_URL}/api/workspace`)
+                .then((response_workspace) => {
+                    if(response_workspace.status != 'OK') {
+                        return
+                    }
+                    this.$axios.$get(`${process.env.BACKEND_URL}/api/board`)
+                    .then((response_board) => {
+                        if(response_board.status != 'OK') {
+                            return
+                        }
+                        this.workspace = response_workspace.data
+                        this.all_board = response_board.data
+                        this.$nextTick()
+                        this.$forceUpdate()
+                        this.sidebarKey += 1
+                    }) 
+                    
+                })
+            },
+            loadDataBoard() {
+                let urlParams = new URLSearchParams(window.location.search)
+                let id = urlParams.get('board_id')
+
+                this.$axios.$get(`${process.env.BACKEND_URL}/api/board?id=${id}`)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        this.loading = false
+                        this.kanban = response.data
+                        this.sidebarKey += 1
+                        this.$nextTick(() => {
+                            // console.log(this.kanban)
+                            this.resizeBoard()
+                            document.title = `${this.kanban.name} Board`
+                        })
+                    }
+                })
+            },
             changeBoardName(event, board_id) {
                 for(let a = 0; a < this.all_board.length; a++) {
                     if(this.all_board[a]._id == board_id) {
@@ -117,58 +155,11 @@
                 this.workspace_id_selected = this.kanban.workspace_id._id
                 this.$bvModal.show("modal_move_workspace")
             },
-            resizeKanbanContainer() {
-                if(!this.loading) {
-                    let sidebar = document.getElementById("sidebar")
-                    let width = window.innerWidth - sidebar.offsetWidth
-                    document.getElementById('kanban_container').style.width = (width - 60) + 'px'
-                }
-            },
-            loadDataWorkspace() {
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/workspace`)
-                .then((response_workspace) => {
-                    if(response_workspace.status != 'OK') {
-                        return
-                    }
-                    this.$axios.$get(`${process.env.BACKEND_URL}/api/board`)
-                    .then((response_board) => {
-                        if(response_board.status != 'OK') {
-                            return
-                        }
-                        this.workspace = response_workspace.data
-                        this.all_board = response_board.data
-                        this.$nextTick()
-                        this.$forceUpdate()
-                        this.sidebarKey += 1
-                    }) 
-                    
-                })
-            },
-            loadDataBoard() {
-                let id = this.$nuxt.$route.params.slug
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/board?id=${id}`)
-                .then((response) => {
-                    if(response.status == 'OK') {
-                        this.loading = false
-                        this.kanban = response.data
-                        setTimeout(() => {
-                            console.log(this.kanban)
-                            this.resizeBoard()
-                            this.resizeKanbanContainer()
-                            // Listen to window resize
-                            window.addEventListener('resize', () => {
-                                this.resizeKanbanContainer()
-                            })
-                            // Listen to sidebar resize
-                            new ResizeObserver(() => {
-                                this.resizeKanbanContainer()
-                            }).observe(document.getElementById('sidebar'))
-                            this.sidebarKey += 1
-                            document.title = `${this.kanban.name} Board`
-                        }, 200)
-                    }
-                })
-            },
+            // resizeKanbanContainer() {
+            //     let sidebar = document.getElementById("sidebar")
+            //     let width = window.innerWidth - sidebar.offsetWidth
+            //     document.getElementById('kanban_container').style.width = (width - 60) + 'px'
+            // },
             closePopUp() {
                 let a = document.getElementsByClassName("profile_pop_up")
                 for(let i = 0; i < a.length; i++) {
@@ -229,6 +220,7 @@
         },
         data() {
             return {
+                sidebar_observer: null,
                 all_board: [],
                 sidebarKey: 0,
                 loading: true,
@@ -257,7 +249,7 @@
             draggable,
             Topbar,
             CardProfileMember,
-            AddToCard,
+            CardPopup,
             WorkspaceSidebar
         }
     }

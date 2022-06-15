@@ -10,10 +10,10 @@
         </div>
         <div class="row">
             <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in board_data">
-                <a :href="`/project/${board.board_id}/kanban`" target="_blank">
+                <a :href="`/project_management/board?board_id=${board._id}`">
                     <div class="card workspace-card hover-pointer">
                         <div class="card-body px-2 py-2 bg-primary text-white">
-                            <h6 class="mb-0 no-select">{{ board.board_name }}</h6>
+                            <h6 class="mb-0 no-select">{{ board.name }}</h6>
                         </div>
                     </div>
                 </a>
@@ -60,12 +60,11 @@
 <script>
     export default {
         mounted() {
-            this.loadAllDataBoard()
+            // this.loadAllDataBoard()
         },
         data() {
             return {
-                workspace: this.data.workspace,
-                board_data: []
+                board_data: this.data.board
             }
         },
         methods: {

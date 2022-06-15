@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="float-right profile-pic-container justify-content-end">
-                <div v-for="(member, member_index) in item.members" class="px-1 py-1 position-relative  member" v-on:click="showProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name">
+                <div v-for="(member, member_index) in item.members" class="px-1 py-1 position-relative  member" v-on:click="openProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name">
                     <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
                     <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
                         {{ generateProfileName(member.name) }}
@@ -44,13 +44,13 @@
                             <div id="member_and_deadline_container">
                                 <div>
                                     <h6 class="kanban-text" v-if="item.members.length > 0">Members</h6>
-                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="showProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
+                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="openProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
                                         <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
                                         <div class="profile-pic-thumbs bg-primary text-white text-center py-1 rounded-circle" v-else>
                                             {{ generateProfileName(member.name) }}
                                         </div>
                                     </div>                               
-                                    <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item.members.length > 0" v-on:click="showAddToCard($event, 'members')">
+                                    <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item.members.length > 0" v-on:click="showCardPopUp($event, 'members')">
                                         <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
                                             <span><font-awesome-icon :icon="['fa', 'plus']" /></span>
                                         </p>
@@ -60,7 +60,7 @@
                                     <h6 class="kanban-text">Due date</h6>
                                     <div style="margin: auto;">
                                         <input type="checkbox" class="d-inline-block mt-2 mr-1" v-model="item.deadline.done" />
-                                        <div class="d-inline-block btn bg-gray" v-on:click="showAddToCard($event, 'dates')" @click.stop="">
+                                        <div :class="(item.deadline.done ? 'd-inline-block btn bg-success text-white' : isDeadline(item.deadline.date) ? 'd-inline-block btn bg-danger text-white' : 'd-inline-block btn bg-gray')" v-on:click="showCardPopUp($event, 'dates')" @click.stop="">
                                             <h6 class="kanban-text mb-0">{{ convertDate(item.deadline.date, true) }}</h6>
                                         </div>
                                     </div>
@@ -119,55 +119,68 @@
                         </div>
                         <div class="col-12 col-sm-12 col-md-3 pl-0">
                             <p class="mb-1 text-bold kanban-text">Add to card</p>
-                            <div class="modal-list-option" v-on:click="showAddToCard($event, 'members')" ref="members_item_ref" @click.stop=''>
+                            <div class="modal-list-option" v-on:click="showCardPopUp($event, 'members')" ref="members_item_ref" @click.stop=''>
                                 <font-awesome-icon :icon="['fa', 'user']" class="kanban-text" />
                                 <span class="kanban-text ml-2">Member</span>
                             </div>
-                            <div class="modal-list-option" v-on:click="showAddToCard($event, 'checklist')" ref="checklist_item_ref" @click.stop=''>
+                            <div class="modal-list-option" v-on:click="showCardPopUp($event, 'checklist')" ref="checklist_item_ref" @click.stop=''>
                                 <font-awesome-icon :icon="['fa', 'check']" class="kanban-text" />
                                 <span class="kanban-text ml-2">Checklist</span>
                             </div>
-                            <div class="modal-list-option" v-on:click="showAddToCard($event, 'dates')" ref="dates_item_ref" @click.stop=''>
+                            <div class="modal-list-option" v-on:click="showCardPopUp($event, 'dates')" ref="dates_item_ref" @click.stop=''>
                                 <font-awesome-icon :icon="['fa', 'clock']" class="kanban-text" />
                                 <span class="kanban-text ml-2">Dates</span>
                             </div>
                         </div>
                     </div>
-                    <div id="add_to_card_pop_up" ref="add_to_card_pop_up_ref" @click.stop="">
-                        <AddToCard :data="{
-                            card_type: add_to_card_type,
+                    <div id="card_pop_up" ref="card_pop_up_ref" :class="(show_popup ? 'd-block' : 'd-none')" @click.stop="">
+                        <CardPopup :data="{
+                            card_type: card_type,
                             data_item: item
-                        }" :closeAddToCard="closeAddToCard" :generateProfileName="generateProfileName" />
+                        }" 
+                        :closeCardPopUp="closeCardPopUp" 
+                        :generateProfileName="generateProfileName"
+                       />
                     </div>
                 </div>
             </b-modal>
         </div>
-        <div class="profile_pop_up" ref="profile_pop_up_ref" @click.stop="">
-            <CardProfileMember :data="profile_data" :close="closeCardInfo" :generateProfileName="generateProfileName" />
-        </div>
+        <CardProfileMember :data="profile_data" :close="closeProfileCard" :key="profile_key" :generateProfileName="generateProfileName" :show="show_profile" :target_element="{data: target_element_profile}" />
     </div>
 </template>
 <script>
     import draggable from 'vuedraggable'
     import CardProfileMember from './CardProfileMember.vue'
-    import AddToCard from './AddToCard.vue'
+    import CardPopup from './CardPopup.vue'
     export default {
         data() {
             return {
+                profile_key: 0,
                 item: this.data.item,
                 show_modal: false,
                 kanban_name: this.data.card_name,
+                show_popup: false,
+                show_profile: false,
                 add_checklist_child: {
                     enable: false,
                     index: null,
                     item_name: ''
                 },
-                add_to_card_type: '',
+                card_type: '',
                 profile_data: {
                     current_member: {},
                     item: {}
-                }
+                },
+                target_element: null,
+                target_element_profile: {}
             }
+        },
+        mounted() {
+            this.$nextTick(() => {
+                window.addEventListener('resize', () => {
+                    this.setPopupOffset()
+                })
+            })
         },
         computed: {
             countChecklistChild() {
@@ -203,8 +216,6 @@
                 }
             },
             deleteChecklist(event, index, selected_checklist, checklist) {
-                let checklist_child_completed = 0;
-                let checklist_child_total = selected_checklist.childs.length
                 checklist.splice(index, 1)
             },
             deleteChecklistChild(event, child_index, selected_checklist, checklist) {
@@ -220,78 +231,66 @@
                 // this.$bvModal.hide("modal_item")
             },
             closePopUp() {
-                this.closeCardInfo()
-                this.closeAddToCard()
+                this.closeProfileCard()
+                this.closeCardPopUp()
             },
-            closeAddToCard() {
-                if("add_to_card_pop_up_ref" in this.$refs) {
-                    if(typeof this.$refs.add_to_card_pop_up_ref != 'undefined') {
-                        this.$refs.add_to_card_pop_up_ref.style.display = 'none'
-                        this.add_to_card_type = ''
-                    }
-                }
+            closeCardPopUp() {
+                this.show_popup = false
+                this.card_type = ''
             },
-            showAddToCard(event, type) {
-                if(this.$refs.add_to_card_pop_up_ref.style.display == 'none' || this.$refs.add_to_card_pop_up_ref.style.display == '') {
-                    this.$refs.add_to_card_pop_up_ref.style.display = 'block'
-                }
-                else {
-                    this.$refs.add_to_card_pop_up_ref.style.display = 'none'
-                }
-                let element = event.currentTarget.getBoundingClientRect()
-                let {add_to_card_pop_up_ref} = this.$refs
-                this.$refs.add_to_card_pop_up_ref.style.left = (element.x - 10) + 'px'
-                if(element.y + (add_to_card_pop_up_ref.clientHeight) < window.innerHeight) {
-                    if(element.y + (add_to_card_pop_up_ref.clientHeight) + 38 > window.innerHeight) {
-                        this.$refs.add_to_card_pop_up_ref.style.top = (element.y) + 'px'
+            setPopupOffset() {
+                setTimeout(() => {
+                    if(!this.show_popup) return
+                    let getClient = document.getElementById('card_pop_up').getBoundingClientRect()
+                    // Calculate Offset Y
+                    if((getClient.y + getClient.height) > window.innerHeight) {
+                        document.getElementById('card_pop_up').style.top = (getClient.top - ((getClient.y + getClient.height) - window.innerHeight) - 20) + 'px'
                     }
                     else {
-                        this.$refs.add_to_card_pop_up_ref.style.top = (element.y + 38) + 'px'
+                        if(this.target_element == null) return
+                        let element = this.target_element.getBoundingClientRect()
+                        document.getElementById('card_pop_up').style.top = (element.y + element.height) + 'px'
                     }
-                }
-                else {
-                    this.$refs.add_to_card_pop_up_ref.style.top = ((element.y + 38) - (add_to_card_pop_up_ref.clientHeight)) + 'px'
-                }
-                this.add_to_card_type = type
-            },
-            showProfileCard(event, member, item) {
-                this.hideProfileCard()
-                let element = event.currentTarget.getBoundingClientRect()
-                this.$refs.profile_pop_up_ref.style.display = 'block'
-                let profile_pop_up_height = this.$refs.profile_pop_up_ref.clientHeight
-                this.$refs.profile_pop_up_ref.style.left = element.x + 'px'
-                if(element.y + (profile_pop_up_height) < window.innerHeight) {
-                    if(element.y + (profile_pop_up_height) + 48 > window.innerHeight) {
-                        this.$refs.profile_pop_up_ref.style.top = (element.y) + 'px'
+                    // Calculate Offset X
+                    if((getClient.x + getClient.width) > window.innerWidth) {
+                        document.getElementById('card_pop_up').style.left = (getClient.left - ((getClient.x + getClient.width) - window.innerWidth) - 20) + 'px'
                     }
                     else {
-                        this.$refs.profile_pop_up_ref.style.top = (element.y + 48) + 'px'
+                        if(this.target_element == null) return
+                        let element = this.target_element.getBoundingClientRect()
+                        document.getElementById('card_pop_up').style.left = (element.x - 10) + 'px'
                     }
-                }
-                else {
-                    this.$refs.profile_pop_up_ref.style.top = ((element.y + 48) - (profile_pop_up_height)) + 'px'
-                }
+                })
+            },
+            showCardPopUp(event, type) {
+                this.show_popup = !this.show_popup
+                if(!this.show_popup) return
+                this.$nextTick(() => {
+                    let element = event.currentTarget.getBoundingClientRect()
+                    this.target_element = event.currentTarget
+                    this.$refs.card_pop_up_ref.style.left = (element.x - 10) + 'px'
+                    this.$refs.card_pop_up_ref.style.top = (element.y + element.height) + 'px'
+                    this.setPopupOffset()
+                })
+                this.card_type = type
+            },
+            openProfileCard(event, member, item) {
+                this.show_popup = false
+                this.show_profile = !this.show_profile
                 this.profile_data = {
                     current_member: member,
                     item: item,
                 }
+                this.target_element_profile = event.currentTarget
             },
-            hideProfileCard() {
-                let i = document.getElementsByClassName('profile_pop_up')
-                for(let a = 0; a < i.length; a++) {
-                    i[a].style.display = 'none'
-                }
+            closeProfileCard() {
+                this.show_profile = false
+                this.show_popup = false
                 this.profile_data = {
                     current_member: {},
                     item: {}
                 }
-            },
-            closeCardInfo() {
-                if('profile_pop_up_ref' in this.$refs) {
-                    if(typeof this.$refs.profile_pop_up_ref != 'undefined') {
-                        this.$refs.profile_pop_up_ref.style.display = 'none'
-                    }
-                }
+                this.target_element_profile = {}
             },
             isDeadline(date) {
                 let d = new Date(date)
@@ -375,7 +374,7 @@
         components: {
             draggable,
             CardProfileMember,
-            AddToCard
+            CardPopup
         },
         props: {
             data: {

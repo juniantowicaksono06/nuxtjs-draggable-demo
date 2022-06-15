@@ -1,4 +1,4 @@
-#add_to_card_pop_up {
+#card_pop_up {
     display: none;
     position: fixed;
     margin-left: 10px;
@@ -39,7 +39,7 @@
     overflow-y: auto;
 }
 #dates_type {
-    max-height: 250px;
+    max-height: 550px;
     overflow-x: hidden;
     overflow-y: auto;
 }

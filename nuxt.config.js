@@ -4,6 +4,9 @@ export default {
   env: {
     BACKEND_URL: process.env.BACKEND_URL,
   },
+  router: {
+    base: '/project_management/'
+  },
   head: {
     title: 'Kanban Test',
     htmlAttrs: {
@@ -21,9 +24,15 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [
-  ],
+  // css: [
+  // ],
 
+  css: [
+    '@/static/css/login.css',
+    '@/static/css/kanban.css',
+    '@/static/css/popup-card.css',
+    '@/static/css/kanban-profile-card.css',
+  ],
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
   ],

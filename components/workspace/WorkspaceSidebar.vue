@@ -250,8 +250,8 @@
                                         <font-awesome-icon :icon="['fa', 'circle']" />
                                     </span>
                                 </div>
-                                <div :class="(board._id == slug ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
-                                    <a :href="`/project/${board._id}/board`" target="_blank" v-if="(board._id != slug)">
+                                <div :class="(board._id == board_id ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
+                                    <a :href="`/project_management/board?board_id=${board._id}`" target="_blank" v-if="(board._id != board_id)">
                                         <div class="d-flex justify-content-between">
                                             <span class="board-name">{{ board.name }}</span>
                                         </div>
@@ -319,10 +319,10 @@
     export default {
         data() {
             return {
+                board_id: null,
                 workspace: this.data.workspace,
                 boards: this.data.boards,
                 sidebar_open: false,
-                slug: this.$nuxt.$route.params.slug,
                 add_workspace: {
                     workspace_name: '',
                     workspace_visibility: 'public'
@@ -330,7 +330,6 @@
                 add_board: {
                     workspace_index: null,
                     board_name: '',
-                    // board_visibility: 'public'
                 }
             }    
         },
@@ -340,11 +339,30 @@
             }
         },
         mounted() {
+            let urlParams = new URLSearchParams(window.location.search)
+            this.board_id = urlParams.get('board_id')
             this.calculateSidebar()
             this.calculateSidebarContainerHeight()
-            window.addEventListener('resize', this.calculateSidebarContainerHeight)
+
+            // Listen to sidebar resize
+            window.addEventListener('resize', () => {
+                this.calculateSidebarContainerHeight()
+                this.resizeKanbanContainer()
+            })
+            this.resizeKanbanContainer()
+            new ResizeObserver(() => {
+                this.resizeKanbanContainer()
+            }).observe(document.getElementById("sidebar"))
         },
         methods: {
+            resizeKanbanContainer() {
+                let sidebar = document.getElementById("sidebar")
+                let width = window.innerWidth - sidebar.offsetWidth
+                let kanban_container = document.getElementById('kanban_container')
+                if(kanban_container) {
+                    kanban_container.style.width = (width - 60) + 'px'
+                }
+            },
             calculateSidebarContainerHeight() {
                 let window_height = window.innerHeight
                 if(typeof this.$refs.workspace_label_ref != 'undefined') {

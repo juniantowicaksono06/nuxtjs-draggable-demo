@@ -1,6 +1,6 @@
-<style>
+<!-- <style>
     @import '../assets/styles/login.css';
-</style>
+</style> -->
 <template>
     <div class="container-fluid h-100 w-100" id="content_wrap">
         <div class="position-relative h-100 w-100">

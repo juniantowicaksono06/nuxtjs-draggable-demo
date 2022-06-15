@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Kanban from "../../../components/board/Main.vue";
+import Kanban from "../../components/board/Main.vue";
 export default {
     name: "KanbanPage",
     components: { Kanban },

@@ -1,6 +1,6 @@
-<style>
+<!-- <style>
     @import '../assets/styles/kanban-add-to-card.css';
-</style>
+</style> -->
 <template>
     <div class="card">
         <div class="card-header">
@@ -8,7 +8,8 @@
                 <span v-if="(data.card_type == 'members')">Members</span>
                 <span v-if="(data.card_type == 'checklist')">Checklist</span>
                 <span v-if="(data.card_type == 'dates')">Dates</span>
-                <span class="float-right hover-pointer" v-on:click="closeAddToCard">
+                <span v-if="(data.card_type == 'confirmation')">Confirmation</span>
+                <span class="float-right hover-pointer" v-on:click="closeCardPopUp">
                     <font-awesome-icon :icon="['fa', 'xmark']"/>
                 </span>
             </h6>
@@ -61,11 +62,14 @@
                         <button class="btn btn-block btn-primary" v-on:click="saveDeadline">
                             Save
                         </button>
-                        <button class="btn btn-block btn-light" v-on:click="removeDeadline">
+                        <button class="btn btn-block btn-light" v-on:click="removeDeadline" v-if="(deadline.date)">
                             Remove
                         </button>
                     </div>
                 </div>
+            </div>
+            <div id="confirmation">
+                
             </div>
         </div>
     </div>
@@ -77,6 +81,7 @@
                 search_member: '',
                 checklist_name: '',
                 selected_date: this.data.data_item.deadline.date == null ? this.currentDate() : this.data.data_item.deadline.date,
+                deadline: this.data.data_item.deadline,
                 date_context: null,
                 all_members: [],
                 selected_members: this.data.data_item.members,
@@ -87,10 +92,16 @@
             data: {
                 type: Object
             },
-            closeAddToCard: {
+            closeCardPopUp: {
                 type: Function
             },
             generateProfileName: {
+                type: Function
+            },
+            removeChecklist: {
+                type: Function
+            },
+            confirmed: {
                 type: Function
             }
         },
@@ -125,7 +136,7 @@
             },
             saveDeadline() {
                 this.data.data_item.deadline.date = this.selected_date
-                this.closeAddToCard()
+                this.closeCardPopUp()
             },
             onContext(ctx) {
                 this.date_context = ctx
