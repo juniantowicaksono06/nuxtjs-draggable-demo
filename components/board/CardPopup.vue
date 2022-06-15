@@ -123,20 +123,57 @@
                         alert('Error: Telah terjadi kesalahan')
                     })
             },
-            removeDeadline() {
-                this.data.data_item.deadline = {
-                    date: null,
-                    done: false
+            saveDeadline() {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 }
-                this.closeAddToCard()
+                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                    id: this.data.data_item._id,
+                    deadline: {
+                        done: false,
+                        date: this.selected_date
+                    }
+                }, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                        this.data.data_item.deadline.date = this.selected_date
+                        this.closeCardPopUp()
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            removeDeadline() {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                    id: this.data.data_item._id,
+                    deadline: {
+                        done: false,
+                    }
+                }, config)
+                .then((response) => {
+                    if(response.status != 'OK') return
+                    this.data.data_item.deadline = {
+                        date: null,
+                        done: false
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+                this.closeCardPopUp()
             },
             currentDate() {
                 let d = new Date()
                 return `${d.getFullYear()} ${d.getMonth()} ${d.getDate()}`
-            },
-            saveDeadline() {
-                this.data.data_item.deadline.date = this.selected_date
-                this.closeCardPopUp()
             },
             onContext(ctx) {
                 this.date_context = ctx
@@ -171,21 +208,41 @@
             toggleMember(event, member) {
                 let member_exist = false
                 let index = null;
+                let members_id = []
                 for(let a = 0; a < this.selected_members.length; a++) {
-                   if(this.selected_members[a]._id == member._id) {
+                   if(this.selected_members[a]._id == member._id && index === null) {
                        member_exist = true
                        index = a
-                       break;
                    }
+                   members_id.push(this.selected_members[a]._id)
                 }
                 // ADD MEMBER
                 if(!member_exist) {
                     this.selected_members.push(member)
+                    members_id.push(member._id)
                 }
                 // DELETE MEMBER
                 else {
                     this.selected_members.splice(index, 1)
+                    members_id.splice(index, 1)
                 }
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                    id: this.data.data_item._id,
+                    members: members_id
+                }, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
             }
         }
     }

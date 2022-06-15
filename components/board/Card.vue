@@ -2,7 +2,7 @@
     <div class="kanban-card card">
         <div class="card-header kanban-header">
             <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ kanban.name }}</p> 
-            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban.name" v-on:blur="disableEditKanbanName($event)"/>
+            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban.name" v-on:blur="disableEditKanbanName($event)" />
         </div>
         <div class="card-body kanban-body py-1 px-2">
             <draggable group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
@@ -47,6 +47,8 @@
         mounted() {
         },
         methods: {
+            // changeCardName() {
+            // },
             disableAddItem() {
                 this.add_item_enabled = false
                 this.add_item_id = null
@@ -73,7 +75,6 @@
                 })
             },
             addItem() {
-                let id_random = Math.round(Math.random() * 10240)
                 let task_name = this.add_item_value
                 if(task_name.trim() == "" || task_name == null) {
                     return false

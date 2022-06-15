@@ -11,7 +11,7 @@
                     </span>
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
                         <font-awesome-icon class="mr-1 kanban-text" :icon="['fa', 'clock']"/>
-                        <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" />
+                        <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" />
                         <span>{{ convertDate(item.deadline.date) }}</span>
                     </span>
                 </div>
@@ -30,7 +30,7 @@
                 <div class="container-fluid" v-on:click="closePopUp">
                     <div class="d-flex justify-content-between" id="modal_header">
                         <div class="mb-1" style="width: 90%;">
-                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" />
+                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="changeItemName()" />
                             <h6 class="pr-0 no-select">in list <b>{{ kanban_name }}</b></h6>
                         </div>
                         <div style="width: 10%; margin: 0 auto; text-align: right;">
@@ -59,7 +59,7 @@
                                 <div v-if="item.deadline.date != null">
                                     <h6 class="kanban-text">Due date</h6>
                                     <div style="margin: auto;">
-                                        <input type="checkbox" class="d-inline-block mt-2 mr-1" v-model="item.deadline.done" />
+                                        <input type="checkbox" class="d-inline-block mt-2 mr-1" v-model="item.deadline.done" v-on:click="toggleDeadline" />
                                         <div :class="(item.deadline.done ? 'd-inline-block btn bg-success text-white' : isDeadline(item.deadline.date) ? 'd-inline-block btn bg-danger text-white' : 'd-inline-block btn bg-gray')" v-on:click="showCardPopUp($event, 'dates')" @click.stop="">
                                             <h6 class="kanban-text mb-0">{{ convertDate(item.deadline.date, true) }}</h6>
                                         </div>
@@ -72,9 +72,10 @@
                         <div class="col-12 col-sm-12 col-md-9 pl-0 mt-2">
                             <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Description</h5>
                             <textarea class="form-control" placeholder="Add description" v-model="item.task_description" style="resize: none;"></textarea>
+                            <!-- CHECKLISTS -->
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id">
                                 <div class="d-flex mb-2">
-                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" />
+                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist.name)" />
                                     <span class="btn btn-transparent" v-on:click="deleteChecklist($event, checklist_index, checklist, item.checklists)">
                                         <font-awesome-icon :icon="['fa', 'trash']"/>
                                     </span>
@@ -86,9 +87,10 @@
                                         }" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
+                                <!-- CHECKLIST CHILD -->
                                 <div v-for="(child, child_index) in checklist.childs" :key="child._id" class="row mt-2">
                                     <div class="col-1 py-1 pr-0 mr-0">
-                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="toggleChecklistDone(child.done)" />
+                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="checklistHandle(child.done, child._id, checklist._id)" />
                                     </div>
                                     <div class="col-10 mt-0 px-0">
                                         <!-- <h6 class="kanban-text">{{ child.checklist_child_name }}</h6> -->
@@ -99,7 +101,7 @@
                                         } : {
                                             fontSize: '12px',
                                             fontWeight: 'normal'
-                                        }" :readonly="(child.done)" v-model="child.name" />
+                                        }" :readonly="(child.done)" v-model="child.name"  v-on:change="checklistHandle(child.name, child._id, checklist._id, 'name')" />
                                     </div>
                                     <div class="float-right" style="margin-top: -5px;">
                                         <span class="kanban-text btn btn-transparent" v-on:click="deleteChecklistChild($event, child_index, child, checklist.childs)">
@@ -171,7 +173,9 @@
                     current_member: {},
                     item: {}
                 },
+                // Target Element for Pop Up
                 target_element: null,
+                // Target Element for Profile Pop Up
                 target_element_profile: {}
             }
         },
@@ -202,6 +206,66 @@
             },
         },
         methods: {
+            changeChecklistName(name) {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, new URLSearchParams({
+                    id: this.item._id,
+                    name: name
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            toggleDeadline() {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                    id: this.item._id,
+                    deadline: {
+                        date: this.item.deadline.date,
+                        done: !this.item.deadline.done
+                    }
+                }, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            changeItemName() {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, new URLSearchParams({
+                    id: this.item._id,
+                    name: this.item.name
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
             generateProfileName(fullname) {
                 if(fullname) {
                     let split_name = fullname.split(' ')
@@ -366,9 +430,37 @@
                     })
                 }
             },
-            toggleChecklistDone(done) {
-                // if(done) {
-                // }
+            checklistHandle(value, child_id, parent_id, type='status') {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                let data = {}
+                if(type == 'status') {
+                    data = {
+                        done: value,
+                        checklist_id: parent_id,
+                        id: child_id,
+                        card_id: this.item._id
+                    }
+                }
+                else if(type == 'name') {
+                    data = {
+                        name: value,
+                        checklist_id: parent_id,
+                        id: child_id,
+                        card_id: this.item._id
+                    }
+                }
+                this.$axios.$put(`${process.env.BACKEND_URL}/api/card/checklist/child`, new URLSearchParams(data), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                    }
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
             }
         },
         components: {

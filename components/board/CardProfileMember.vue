@@ -88,16 +88,35 @@
             removeMember(user_id) {
                 let member_exist = false
                 let index = null;
+                let members_id = []
                 for(let i = 0; i < this.data.item.members.length; i++) {
-                    if(this.data.item.members[i]._id == user_id) {
+                    if(this.data.item.members[i]._id == user_id && index == null) {
                         member_exist = true
                         index = i
-                        break
                     }
+                   members_id.push(this.data.item.members[i]._id)
                 }
                 if(member_exist) {
-                    this.data.item.members.splice(index, 1)
-                    this.close()
+                    members_id.splice(index, 1)
+                    let config = {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                    this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                        id: this.data.item._id,
+                        members: members_id
+                    }, config)
+                    .then((response) => {
+                        if(response.status == 'OK') {
+                            // Do Something
+                            this.data.item.members.splice(index, 1)
+                            this.close()
+                        }
+                    })
+                    .catch((error) => {
+                        alert("Error: Telah terjadi kesalahan")
+                    })
                 }
             },
         }
