@@ -265,7 +265,7 @@
                             </div>
                         </div>
                         <div>
-                            <div class="workspace-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index)" >
+                            <div class="workspace-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
                                 <button class="btn btn-transparent text-white kanban-text px-2">
                                     <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
                                 </button>
@@ -276,7 +276,7 @@
             </div>
         </div>
         <div>
-            <b-modal id="create_new_workspace" size="md" title="Add new workspace" hide-footer>
+            <b-modal id="create_new_workspace" size="md" title="Add New Workspace" hide-footer>
                 <div class="form-group">
                     <label class="kanban-text">
                         Workspace name
@@ -284,7 +284,7 @@
                     <input type="text" class="form-control" placeholder="Workspace name" v-model="add_workspace.workspace_name" />
                 </div>
                 <div class="form-group">
-                    <label>Workspace visibility</label>
+                    <label class="kanban-text">Workspace visibility</label>
                     <select class="form-control" v-model="add_workspace.workspace_visibility">
                         <option value="public">Public</option>
                         <option value="private">Private</option>
@@ -297,7 +297,7 @@
                 </div>
             </b-modal>
             
-            <b-modal id="create_new_board" size="md" title="Add new board" hide-footer>
+            <b-modal id="create_new_board" size="md" title="Add New Board" hide-footer>
                 <div class="w-100">
                     <div class="form-group">
                         <label class="kanban-text">
@@ -307,7 +307,7 @@
                     </div>
                 </div>
                 <div class="w-100 mt-3">
-                    <button class="btn btn-block btn-primary" v-on:click="saveBoard">
+                    <button class="btn btn-block btn-primary" v-on:click="saveBoard()">
                         Create board
                     </button>
                 </div>
@@ -328,6 +328,7 @@
                     workspace_visibility: 'public'
                 },
                 add_board: {
+                    workspace_id: null,
                     workspace_index: null,
                     board_name: '',
                 }
@@ -371,21 +372,41 @@
                     document.getElementById("workspace_container").style.height = ( window_height - (workspace_label_height + sidebar_header_height + 85) ) + 'px'
                 }
             },
-            openCreateBoard(event, index) {
+            openCreateBoard(event, index, workspace_id) {
                 this.$bvModal.show('create_new_board')
                 this.add_board= {
+                    workspace_id: workspace_id,
                     workspace_index: index,
                     board_name: '',
                     // board_visibility: 'public'
                 }
             },
             saveBoard() {
-                this.data.workspace[this.add_board.workspace_index].workspace_data.push({
-                    board_id: Math.round(Math.random() * 10240),
-                    board_name: this.add_board.board_name,
-                    board_visibility: this.add_board.board_visibility
+                // for(let i = 0; i < this.boards.length; i++) {
+                //     if(workspace_id == this.boards[i]._id) {
+                //         // element_index = i;
+                //         this.boards[i].lists.push({
+                            
+                //         })
+                //         break
+                //     }
+                // }
+                // this.boards
+                // console.log(this.boards)
+                this.boards.push({
+                    _id: Math.round(Math.random() * 10240),
+                    name: this.add_board.board_name,
+                    workspace_id: this.add_board.workspace_id,
+                    lists: [],
+                    members: [],
                 })
-                this.add_board= {
+                // this.data.workspace[this.add_board.workspace_index].workspace_data.push({
+                //     board_id: Math.round(Math.random() * 10240),
+                //     board_name: this.add_board.board_name,
+                //     board_visibility: this.add_board.board_visibility
+                // })
+                this.add_board = {
+                    workspace_id: null,
                     workspace_index: null,
                     board_name: '',
                     // board_visibility: 'public'

@@ -5,10 +5,10 @@
             <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban.name" v-on:blur="disableEditKanbanName($event)" />
         </div>
         <div class="card-body kanban-body py-1 px-2">
-            <draggable group="task" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250>
-                <div v-for="(a, index_item) in kanban.cards" :key="index_item" draggable=".kanban-item">
+            <draggable group="task" v-model="kanban.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="kanban._id">
+                <div v-for="(item, index_item) in kanban.cards" :key="item._id" draggable=".kanban-item" v-on:mousedown="dragCard(item, kanban._id)">
                     <CardItem :data="{
-                        item: a,
+                        item: item,
                         card_name: kanban.name
                     }" />
                 </div>
@@ -36,7 +36,13 @@
                 add_item_enabled: false,
                 add_item_id: null,
                 add_item_value: "",
-                kanban: this.data.kanban
+                kanban: this.data.kanban,
+                drag_end_data: {
+                    id: '',
+                    board_id: '',
+                    origin_list_id: '',
+                    dest_list_id: ''
+                }
             }
         },
         props: {
@@ -47,8 +53,29 @@
         mounted() {
         },
         methods: {
-            // changeCardName() {
-            // },
+            dragCard(item, card_id){
+                this.drag_end_data['id'] = item._id
+                this.drag_end_data['board_id'] = this.data.board_id
+                this.drag_end_data['origin_list_id'] = card_id
+            },
+            endDrag(event) {
+                this.drag_end_data['dest_list_id'] = event.to.dataset.id
+                if(this.drag_end_data['dest_list_id'] == this.drag_end_data['origin_list_id']) return
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$post(`${process.env.BACKEND_URL}/api/card/slide`, this.drag_end_data, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                    }
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
+            },
             disableAddItem() {
                 this.add_item_enabled = false
                 this.add_item_id = null
@@ -63,10 +90,25 @@
             disableEditKanbanName(event) {
                 this.$refs.card_name_ref.style.display = 'block'
                 this.$refs.card_name_edit.style.display = 'none'
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$post(`${process.env.BACKEND_URL}/api/board`, new URLSearchParams({
+                    name: this.kanban.name,
+                    id: this.kanban._id
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        return 
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
             },
             showAddItemInput(event, card_id) {
-                // setTimeout(() => {
-                //     }, 200)
                 this.add_item_enabled = true
                 this.add_item_id = card_id
                 this.add_item_value = ''

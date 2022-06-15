@@ -35,7 +35,8 @@
                                     <div v-for="(k, index) in kanban.lists" :key="index">
                                         <Card :data="{
                                             kanban: k,
-                                            index: index
+                                            index: index,
+                                            board_id: kanban._id
                                         }" />
                                     </div>
                                 </draggable>
@@ -112,7 +113,6 @@
                         this.$forceUpdate()
                         this.sidebarKey += 1
                     }) 
-                    
                 })
             },
             loadDataBoard() {
@@ -126,7 +126,6 @@
                         this.kanban = response.data
                         this.sidebarKey += 1
                         this.$nextTick(() => {
-                            // console.log(this.kanban)
                             this.resizeBoard()
                             document.title = `${this.kanban.name} Board`
                         })

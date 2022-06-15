@@ -104,7 +104,7 @@
                                         }" :readonly="(child.done)" v-model="child.name"  v-on:change="checklistHandle(child.name, child._id, checklist._id, 'name')" />
                                     </div>
                                     <div class="float-right" style="margin-top: -5px;">
-                                        <span class="kanban-text btn btn-transparent" v-on:click="deleteChecklistChild($event, child_index, child, checklist.childs)">
+                                        <span class="kanban-text btn btn-transparent" v-on:click="deleteChecklistChild($event, child_index, child, checklist.childs, checklist._id)">
                                             <font-awesome-icon :icon="['fa', 'trash']"/>
                                         </span>
                                     </div>
@@ -280,10 +280,50 @@
                 }
             },
             deleteChecklist(event, index, selected_checklist, checklist) {
-                checklist.splice(index, 1)
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        card_id: this.item._id,
+                        id: checklist[index]._id
+                    }
+                }
+                this.$axios.$delete(`${process.env.BACKEND_URL}/api/card/checklist`, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        checklist.splice(index, 1)
+                        return
+                    }
+                    alert('Telah terjadi kesalahan')
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
             },
-            deleteChecklistChild(event, child_index, selected_checklist, checklist) {
-                checklist.splice(child_index, 1) 
+            deleteChecklistChild(event, child_index, selected_checklist, checklist, parent_id) {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: {
+                        card_id: this.item._id,
+                        id: checklist[child_index]._id,
+                        checklist_id: parent_id
+                    }
+                }
+                this.$axios.$delete(`${process.env.BACKEND_URL}/api/card/checklist/child`, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        checklist.splice(child_index, 1)
+                        return
+                    }
+                    alert('Telah terjadi kesalahan')
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
+                // checklist.splice(child_index, 1) 
             },
             showModalItem(event, data, card_name) {
                 // this.$bvModal.show("modal_item")

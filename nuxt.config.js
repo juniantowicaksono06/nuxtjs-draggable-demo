@@ -1,6 +1,11 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   target: 'static',
+  axios: {
+    // BACKEND_URL: process.env.BACKEND_URL,
+    // proxyHeaders: false,
+    // credentials: false
+  },
   env: {
     BACKEND_URL: process.env.BACKEND_URL,
   },
@@ -34,8 +39,9 @@ export default {
     '@/static/css/kanban-profile-card.css',
   ],
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-  ],
+  // plugins: [
+  //   '~/plugins/axios',
+  // ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -60,6 +66,9 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    babel: {
+      compact: true
+    }
   },
   // server: {
   //   host: '0'

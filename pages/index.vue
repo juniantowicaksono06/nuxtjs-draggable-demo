@@ -3,7 +3,7 @@
 </template>
 
 <script>
-    import Workspace from '../../components/workspace/Main.vue'
+    import Workspace from '../components/workspace/Main.vue'
     export default {
         name: "WorkspacePage",
         components: {
