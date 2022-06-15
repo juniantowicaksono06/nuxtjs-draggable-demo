@@ -93,7 +93,6 @@
                                         <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="checklistHandle(child.done, child._id, checklist._id)" />
                                     </div>
                                     <div class="col-10 mt-0 px-0">
-                                        <!-- <h6 class="kanban-text">{{ child.checklist_child_name }}</h6> -->
                                         <input class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent" :style="child.done ? {
                                             fontSize: '12px',
                                             fontWeight: 'normal',
@@ -161,7 +160,9 @@
                 item: this.data.item,
                 show_modal: false,
                 kanban_name: this.data.card_name,
+                // To Show Pop Up
                 show_popup: false,
+                // To Show Profile
                 show_profile: false,
                 add_checklist_child: {
                     enable: false,
@@ -212,7 +213,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, new URLSearchParams({
+                this.$axios.$put(`/api/card`, new URLSearchParams({
                     id: this.item._id,
                     name: name
                 }), config)
@@ -231,7 +232,7 @@
                         'Content-Type': 'application/json'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                this.$axios.$put(`/api/card`, {
                     id: this.item._id,
                     deadline: {
                         date: this.item.deadline.date,
@@ -253,7 +254,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, new URLSearchParams({
+                this.$axios.$put(`/api/card`, new URLSearchParams({
                     id: this.item._id,
                     name: this.item.name
                 }), config)
@@ -289,7 +290,7 @@
                         id: checklist[index]._id
                     }
                 }
-                this.$axios.$delete(`${process.env.BACKEND_URL}/api/card/checklist`, config)
+                this.$axios.$delete(`/api/card/checklist`, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         checklist.splice(index, 1)
@@ -312,7 +313,7 @@
                         checklist_id: parent_id
                     }
                 }
-                this.$axios.$delete(`${process.env.BACKEND_URL}/api/card/checklist/child`, config)
+                this.$axios.$delete(`/api/card/checklist/child`, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         checklist.splice(child_index, 1)
@@ -447,7 +448,7 @@
                             'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     }
-                    this.$axios.$post(`${process.env.BACKEND_URL}/api/card/checklist/child`, new URLSearchParams({
+                    this.$axios.$post(`/api/card/checklist/child`, new URLSearchParams({
                         name: this.add_checklist_child.item_name,
                         checklist_id: this.add_checklist_child.item_id
                     }), config)
@@ -493,7 +494,7 @@
                         card_id: this.item._id
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card/checklist/child`, new URLSearchParams(data), config)
+                this.$axios.$put(`/api/card/checklist/child`, new URLSearchParams(data), config)
                 .then((response) => {
                     if(response.status == 'OK') {
                     }

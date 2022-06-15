@@ -1,6 +1,3 @@
-<!-- <style>
-    @import '../assets/styles/kanban-add-to-card.css';
-</style> -->
 <template>
     <div class="card">
         <div class="card-header">
@@ -110,7 +107,7 @@
         },
         methods: {
             loadMembers() {
-                    this.$axios.$get(`${process.env.BACKEND_URL}/api/member`)
+                    this.$axios.$get(`/api/member`)
                     .then((response) => {
                         if(response.status == 'OK') {
                             let {data} = response
@@ -129,7 +126,7 @@
                         'Content-Type': 'application/json'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                this.$axios.$put(`/api/card`, {
                     id: this.data.data_item._id,
                     deadline: {
                         done: false,
@@ -153,7 +150,7 @@
                         'Content-Type': 'application/json'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                this.$axios.$put(`/api/card`, {
                     id: this.data.data_item._id,
                     deadline: {
                         done: false,
@@ -184,7 +181,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$post(`${process.env.BACKEND_URL}/api/card/checklist`, new URLSearchParams({
+                this.$axios.$post(`/api/card/checklist`, new URLSearchParams({
                     name: this.checklist_name,
                     card_id: this.data.data_item._id
                 }), config)
@@ -231,7 +228,7 @@
                         'Content-Type': 'application/json'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                this.$axios.$put(`/api/card`, {
                     id: this.data.data_item._id,
                     members: members_id
                 }, config)

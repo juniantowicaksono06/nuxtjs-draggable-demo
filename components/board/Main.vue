@@ -1,5 +1,5 @@
 <!-- <style>
-    @import '../assets/styles/kanban.css';
+    @import '../assets/styles/boards.css';
 </style> -->
 <template>
     <div class="w-100 h-100" id="content_wrap" v-on:click="closePopUp">
@@ -20,23 +20,24 @@
                             <div class="d-flex">
                                 <span>
                                     <div>
-                                        <p ref="board_input_ref" id="board_input_ref">{{ kanban.name }}</p>
+                                        <p ref="board_input_ref" id="board_input_ref">{{ boards.name }}</p>
                                     </div>
-                                    <input ref="board_input" type="text" id="board_input" v-model="kanban.name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, kanban._id)" />
+                                    <input ref="board_input" type="text" id="board_input" v-model="boards.name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, boards._id)" />
                                 </span>
-                                <span class="ml-1" v-on:click="showModalMoveWorkspace" v-for="work in workspace" v-if="work._id == kanban.workspace_id._id">
+                                <span class="ml-1" v-for="work in workspace" v-if="work._id == boards.workspace_id._id">
                                     <span class="text-white transparent-button font-sm btn">{{ work.name }} <span class="ml-1"></span></span>
                                 </span>
                             </div>
                         </div>
                         <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
-                            <div id="kanban_container">
+                            <div id="kanban_container" ref="kanban_container_ref">
                                 <draggable tag="div" class="pb-5 d-flex" animation=250>
-                                    <div v-for="(k, index) in kanban.lists" :key="index">
+                                    <div v-for="(k, index) in boards.lists" :key="index">
                                         <Card :data="{
                                             kanban: k,
                                             index: index,
-                                            board_id: kanban._id
+                                            board_id: boards._id,
+                                            workspace_id: boards.workspace_id._id
                                         }" />
                                     </div>
                                 </draggable>
@@ -97,12 +98,12 @@
         },
         methods: {
             loadDataWorkspace() {
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/workspace`)
+                this.$axios.$get(`/api/workspace`)
                 .then((response_workspace) => {
                     if(response_workspace.status != 'OK') {
                         return
                     }
-                    this.$axios.$get(`${process.env.BACKEND_URL}/api/board`)
+                    this.$axios.$get(`/api/board`)
                     .then((response_board) => {
                         if(response_board.status != 'OK') {
                             return
@@ -119,15 +120,15 @@
                 let urlParams = new URLSearchParams(window.location.search)
                 let id = urlParams.get('board_id')
 
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/board?id=${id}`)
+                this.$axios.$get(`/api/board?id=${id}`)
                 .then((response) => {
                     if(response.status == 'OK') {
                         this.loading = false
-                        this.kanban = response.data
+                        this.boards = response.data
                         this.sidebarKey += 1
                         this.$nextTick(() => {
                             this.resizeBoard()
-                            document.title = `${this.kanban.name} Board`
+                            document.title = `${this.boards.name} Board`
                         })
                     }
                 })
@@ -135,14 +136,31 @@
             changeBoardName(event, board_id) {
                 for(let a = 0; a < this.all_board.length; a++) {
                     if(this.all_board[a]._id == board_id) {
-                        this.all_board[a].name = this.kanban.name
+                        this.all_board[a].name = this.boards.name
                     }
                 }
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$put(`/api/board`, new URLSearchParams({
+                    name: this.boards.name,
+                    id: this.boards._id
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
             },
             changeWorkspace(event, target) {
-                this.kanban.workspace_id._id = this.workspace_id_selected
+                this.boards.workspace_id._id = this.workspace_id_selected
                 for(let i = 0; i < this.all_board.length; i++) {
-                    if(this.kanban._id == this.all_board[i]._id) {
+                    if(this.boards._id == this.all_board[i]._id) {
                         this.all_board[i].workspace_id = this.workspace_id_selected
                         break
                     }
@@ -151,14 +169,9 @@
                 this.$bvModal.hide("modal_move_workspace")
             },
             showModalMoveWorkspace() {
-                this.workspace_id_selected = this.kanban.workspace_id._id
+                this.workspace_id_selected = this.boards.workspace_id._id
                 this.$bvModal.show("modal_move_workspace")
             },
-            // resizeKanbanContainer() {
-            //     let sidebar = document.getElementById("sidebar")
-            //     let width = window.innerWidth - sidebar.offsetWidth
-            //     document.getElementById('kanban_container').style.width = (width - 60) + 'px'
-            // },
             closePopUp() {
                 let a = document.getElementsByClassName("profile_pop_up")
                 for(let i = 0; i < a.length; i++) {
@@ -171,6 +184,10 @@
                 this.add_list_value = ''
                 this.$nextTick(() => {
                     this.$refs.add_list_ref.focus()
+                    let kanban_container_ref = this.$refs.kanban_container_ref
+                    if(kanban_container_ref.scrollWidth > kanban_container_ref.clientWidth) {
+                        kanban_container_ref.scrollTo(kanban_container_ref.scrollWidth, kanban_container_ref.scrollHeight)
+                    }
                 })
             },
             disableAddItem() {
@@ -192,13 +209,13 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$post(`${process.env.BACKEND_URL}/api/list`, new URLSearchParams({
+                this.$axios.$post(`/api/list`, new URLSearchParams({
                     name: this.add_list_value,
-                    board_id: this.kanban._id
+                    board_id: this.boards._id
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        this.kanban.lists.push({
+                        this.boards.lists.push({
                             "name": this.add_list_value,
                             "cards": []
                         })
@@ -231,7 +248,7 @@
                 add_list_id: null,
                 add_list_value: "",
 
-                // FOR PROFILE CARD
+                // DATA FOR PROFILE CARD
                 profile_data: {
                     current_member: {},
                     member_list: {}
@@ -239,8 +256,8 @@
 
                 add_to_card_type: '',
 
-                // MAIN DATA FOR CARD
-                kanban: {}
+                // MAIN DATA FOR BOARD AND CARDS
+                boards: {}
             }
         },
         components: {

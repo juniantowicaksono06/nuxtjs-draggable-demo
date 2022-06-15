@@ -41,12 +41,12 @@
         },
         methods: {
             loadDataWorkspace() {
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/workspace`)
+                this.$axios.$get(`/api/workspace`)
                 .then((response_workspace) => {
                     if(response_workspace.status != 'OK') {
                         return
                     }
-                    this.$axios.$get(`${process.env.BACKEND_URL}/api/board`)
+                    this.$axios.$get(`/api/board`)
                     .then((response_board) => {
                         if(response_board.status != 'OK') {
                             return

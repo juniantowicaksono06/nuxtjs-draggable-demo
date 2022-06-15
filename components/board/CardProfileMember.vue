@@ -14,7 +14,6 @@
                     <div class="profile-pic bg-primary text-white py-4 text-center rounded-circle" v-else>
                         <h2 class="d-inline-block">{{ generateProfileName(this.data.current_member.name) }}</h2>
                     </div>
-
                     <div class="profile-info">
                         <h5 class="mb-0 ml-2 mt-2 profile-fullname">{{ this.data.current_member.name }}</h5>
                         <h6 class="ml-2 kanban-text profile-email">{{ this.data.current_member.email }}</h6>
@@ -103,7 +102,7 @@
                             'Content-Type': 'application/json'
                         }
                     }
-                    this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                    this.$axios.$put(`/api/card`, {
                         id: this.data.item._id,
                         members: members_id
                     }, config)

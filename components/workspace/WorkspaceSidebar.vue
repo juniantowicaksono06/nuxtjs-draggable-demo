@@ -225,9 +225,9 @@
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
             <div class="d-flex justify-content-between mt-3 mb-2" id="workspace_label" ref="workspace_label_ref">
                 <span class="">Workspace</span>
-                <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
+                <!-- <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
                     <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
-                </button>
+                </button> -->
             </div>
             <div id="workspace_container" ref="workspace_container_ref">
                 <div v-for="(work, index) in workspace" class="workspace">
@@ -251,7 +251,7 @@
                                     </span>
                                 </div>
                                 <div :class="(board._id == board_id ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
-                                    <a :href="`/project_management/board?board_id=${board._id}`" target="_blank" v-if="(board._id != board_id)">
+                                    <a :href="`/project_management/board?board_id=${board._id}`" v-if="(board._id != board_id)">
                                         <div class="d-flex justify-content-between">
                                             <span class="board-name">{{ board.name }}</span>
                                         </div>
@@ -382,36 +382,36 @@
                 }
             },
             saveBoard() {
-                // for(let i = 0; i < this.boards.length; i++) {
-                //     if(workspace_id == this.boards[i]._id) {
-                //         // element_index = i;
-                //         this.boards[i].lists.push({
-                            
-                //         })
-                //         break
-                //     }
-                // }
-                // this.boards
-                // console.log(this.boards)
-                this.boards.push({
-                    _id: Math.round(Math.random() * 10240),
-                    name: this.add_board.board_name,
-                    workspace_id: this.add_board.workspace_id,
-                    lists: [],
-                    members: [],
-                })
-                // this.data.workspace[this.add_board.workspace_index].workspace_data.push({
-                //     board_id: Math.round(Math.random() * 10240),
-                //     board_name: this.add_board.board_name,
-                //     board_visibility: this.add_board.board_visibility
-                // })
-                this.add_board = {
-                    workspace_id: null,
-                    workspace_index: null,
-                    board_name: '',
-                    // board_visibility: 'public'
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
                 }
-                this.$bvModal.hide('create_new_board')
+                this.$axios.$post(`/api/board`, new URLSearchParams({
+                    name: this.add_board.board_name,
+                    workspace_id: this.add_board.workspace_id
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        let {data} = response
+                        this.boards.push({
+                            _id: data._id,
+                            name: this.add_board.board_name,
+                            workspace_id: this.add_board.workspace_id,
+                            lists: [],
+                            members: [],
+                        })
+                        this.add_board = {
+                            workspace_id: null,
+                            workspace_index: null,
+                            board_name: '',
+                        }
+                        this.$bvModal.hide('create_new_board')
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
             },
             saveWorkspace() {
                 this.$bvModal.hide('create_new_workspace')
