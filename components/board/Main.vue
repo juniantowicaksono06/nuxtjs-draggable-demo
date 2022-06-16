@@ -1,12 +1,12 @@
 <!-- <style>
-    @import '../assets/styles/kanban.css';
+    @import '../assets/styles/board.css';
 </style> -->
 <template>
     <div class="w-100 h-100" id="content_wrap" v-on:click="closePopUp">
         <div class="w-100 h-100" v-if="!loading">
-            <Topbar :data="{
+            <!-- <Topbar :data="{
                 workspace: workspace
-            }" :key="sidebarKey" />
+            }" :key="sidebarKey" /> -->
             <div class="h-100 d-flex">
                 <div>
                     <WorkspaceSidebar :data="{
@@ -20,23 +20,34 @@
                             <div class="d-flex">
                                 <span>
                                     <div>
-                                        <p ref="board_input_ref" id="board_input_ref">{{ kanban.name }}</p>
+                                        <p ref="board_input_ref" id="board_input_ref">{{ board.name }}</p>
                                     </div>
-                                    <input ref="board_input" type="text" id="board_input" v-model="kanban.name" @focus="$event.target.select()"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, kanban._id)" />
+                                    <input ref="board_input" type="text" id="board_input" v-model="board.name" @focus="storeOldValue($event)"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, board._id)" />
                                 </span>
-                                <span class="ml-1" v-on:click="showModalMoveWorkspace" v-for="work in workspace" v-if="work._id == kanban.workspace_id._id">
+                                <span class="ml-1" v-for="work in workspace" v-if="work._id == board.workspace_id._id">
                                     <span class="text-white transparent-button font-sm btn">{{ work.name }} <span class="ml-1"></span></span>
+                                </span>
+                                <span class="ml-1 d-flex" v-for="work in workspace" v-if="work._id == board.workspace_id._id">
+                                    <div v-for="(member, member_index) in all_members" :key="member_index" class="px-1 py-1 position-relative member" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
+                                        marginLeft: '-20px'
+                                    } : {})">
+                                        <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
+                                        <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
+                                            {{ generateProfileName(member.name) }}
+                                        </div>
+                                    </div>
                                 </span>
                             </div>
                         </div>
                         <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
-                            <div id="kanban_container">
+                            <div id="kanban_container" ref="kanban_container_ref">
                                 <draggable tag="div" class="pb-5 d-flex" animation=250>
-                                    <div v-for="(k, index) in kanban.lists" :key="index">
+                                    <div v-for="(k, index) in board.lists" :key="index">
                                         <Card :data="{
                                             kanban: k,
                                             index: index,
-                                            board_id: kanban._id
+                                            board_id: board._id,
+                                            workspace_id: board.workspace_id._id
                                         }" />
                                     </div>
                                 </draggable>
@@ -94,15 +105,43 @@
         async mounted() {
             this.loadDataWorkspace()
             this.loadDataBoard()
+            this.loadMembers()
         },
         methods: {
+            storeOldValue(event) {
+                event.target.select()
+                this.old_value = this.board.name
+            },
+            generateProfileName(fullname) {
+                if(fullname) {
+                    let split_name = fullname.split(' ')
+                    let initial = '';
+                    if(split_name.length > 1) {
+                        initial = `${split_name[0].charAt(0)}${split_name[split_name.length - 1].charAt(0)}`
+                    }
+                    else if(split_name.length == 1) {
+                        initial = `${split_name[0].charAt(0)}`
+                    }
+                    return initial
+                }
+            },
+            async loadMembers() {
+                let urlParams = new URLSearchParams(window.location.search)
+                let id = urlParams.get('board_id')
+                let response = await this.$axios.$get(`/api/member?board_id=${id}`)
+                if(response.status == 'OK') {
+                    let {data} = response
+                    this.$store.commit('members/loadMembers', data)
+                    this.all_members = this.$store.state.members.all_members
+                }
+            },
             loadDataWorkspace() {
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/workspace`)
+                this.$axios.$get(`/api/workspace`)
                 .then((response_workspace) => {
                     if(response_workspace.status != 'OK') {
                         return
                     }
-                    this.$axios.$get(`${process.env.BACKEND_URL}/api/board`)
+                    this.$axios.$get(`/api/board`)
                     .then((response_board) => {
                         if(response_board.status != 'OK') {
                             return
@@ -119,30 +158,58 @@
                 let urlParams = new URLSearchParams(window.location.search)
                 let id = urlParams.get('board_id')
 
-                this.$axios.$get(`${process.env.BACKEND_URL}/api/board?id=${id}`)
+                this.$axios.$get(`/api/board?id=${id}`)
                 .then((response) => {
                     if(response.status == 'OK') {
                         this.loading = false
-                        this.kanban = response.data
+                        this.board = response.data
                         this.sidebarKey += 1
                         this.$nextTick(() => {
                             this.resizeBoard()
-                            document.title = `${this.kanban.name} Board`
+                            document.title = `${this.board.name} Board`
                         })
                     }
                 })
             },
             changeBoardName(event, board_id) {
+                let check = false
+                if(this.board.name.trim() == '' || this.board.name == this.old_value) {
+                    this.board.name = this.old_value
+                    this.old_value = ''
+                    check = true
+                }
+                this.old_value = ''
                 for(let a = 0; a < this.all_board.length; a++) {
                     if(this.all_board[a]._id == board_id) {
-                        this.all_board[a].name = this.kanban.name
+                        this.all_board[a].name = this.board.name
                     }
                 }
+                if(check) {
+                    this.resizeBoard()
+                    return 
+                }
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$put(`/api/board`, new URLSearchParams({
+                    name: this.board.name,
+                    id: this.board._id
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
             },
             changeWorkspace(event, target) {
-                this.kanban.workspace_id._id = this.workspace_id_selected
+                this.board.workspace_id._id = this.workspace_id_selected
                 for(let i = 0; i < this.all_board.length; i++) {
-                    if(this.kanban._id == this.all_board[i]._id) {
+                    if(this.board._id == this.all_board[i]._id) {
                         this.all_board[i].workspace_id = this.workspace_id_selected
                         break
                     }
@@ -151,14 +218,9 @@
                 this.$bvModal.hide("modal_move_workspace")
             },
             showModalMoveWorkspace() {
-                this.workspace_id_selected = this.kanban.workspace_id._id
+                this.workspace_id_selected = this.board.workspace_id._id
                 this.$bvModal.show("modal_move_workspace")
             },
-            // resizeKanbanContainer() {
-            //     let sidebar = document.getElementById("sidebar")
-            //     let width = window.innerWidth - sidebar.offsetWidth
-            //     document.getElementById('kanban_container').style.width = (width - 60) + 'px'
-            // },
             closePopUp() {
                 let a = document.getElementsByClassName("profile_pop_up")
                 for(let i = 0; i < a.length; i++) {
@@ -171,6 +233,10 @@
                 this.add_list_value = ''
                 this.$nextTick(() => {
                     this.$refs.add_list_ref.focus()
+                    let kanban_container_ref = this.$refs.kanban_container_ref
+                    if(kanban_container_ref.scrollWidth > kanban_container_ref.clientWidth) {
+                        kanban_container_ref.scrollTo(kanban_container_ref.scrollWidth, kanban_container_ref.scrollHeight)
+                    }
                 })
             },
             disableAddItem() {
@@ -192,13 +258,13 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$post(`${process.env.BACKEND_URL}/api/list`, new URLSearchParams({
+                this.$axios.$post(`/api/list`, new URLSearchParams({
                     name: this.add_list_value,
-                    board_id: this.kanban._id
+                    board_id: this.board._id
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        this.kanban.lists.push({
+                        this.board.lists.push({
                             "name": this.add_list_value,
                             "cards": []
                         })
@@ -219,6 +285,7 @@
         },
         data() {
             return {
+                all_members: this.$store.state.members.all_members,
                 sidebar_observer: null,
                 all_board: [],
                 sidebarKey: 0,
@@ -231,7 +298,7 @@
                 add_list_id: null,
                 add_list_value: "",
 
-                // FOR PROFILE CARD
+                // DATA FOR PROFILE CARD
                 profile_data: {
                     current_member: {},
                     member_list: {}
@@ -239,8 +306,8 @@
 
                 add_to_card_type: '',
 
-                // MAIN DATA FOR CARD
-                kanban: {}
+                // MAIN DATA FOR BOARD AND CARDS
+                board: {}
             }
         },
         components: {

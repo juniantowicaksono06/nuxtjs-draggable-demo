@@ -1,6 +1,3 @@
-<!-- <style>
-    @import '../assets/styles/kanban-add-to-card.css';
-</style> -->
 <template>
     <div class="card">
         <div class="card-header">
@@ -68,8 +65,14 @@
                     </div>
                 </div>
             </div>
-            <div id="confirmation">
-                
+            <div id="confirmation" :class="(data.card_type == 'confirmation' ? 'type-actice' : 'type-inactive')">
+                <div>
+                    <h4>{{ pop_up_text }}</h4>
+                </div>
+                <div class="form-group">
+                    <div class="btn btn-success">Yes</div>
+                    <div class="btn btn-default">No</div>
+                </div>
             </div>
         </div>
     </div>
@@ -83,9 +86,12 @@
                 selected_date: this.data.data_item.deadline.date == null ? this.currentDate() : this.data.data_item.deadline.date,
                 deadline: this.data.data_item.deadline,
                 date_context: null,
-                all_members: [],
+                all_members: this.$store.state.members.all_members,
                 selected_members: this.data.data_item.members,
-                checklist: this.data.data_item.checklists
+                checklist: this.data.data_item.checklists,
+
+                pop_up_text: this.data.pop_up_text,
+                pop_up_data: this.data.pop_up_data,
             }
         },
         props: {
@@ -106,30 +112,15 @@
             }
         },
         mounted() {
-            this.loadMembers()
         },
         methods: {
-            loadMembers() {
-                    this.$axios.$get(`${process.env.BACKEND_URL}/api/member`)
-                    .then((response) => {
-                        if(response.status == 'OK') {
-                            let {data} = response
-                            this.all_members = data
-                            return
-                        }
-                        alert('Telah terjadi kesalahan')
-                    }) 
-                    .catch((error) => {
-                        alert('Error: Telah terjadi kesalahan')
-                    })
-            },
             saveDeadline() {
                 let config = {
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                this.$axios.$put(`/api/card`, {
                     id: this.data.data_item._id,
                     deadline: {
                         done: false,
@@ -153,7 +144,7 @@
                         'Content-Type': 'application/json'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                this.$axios.$put(`/api/card`, {
                     id: this.data.data_item._id,
                     deadline: {
                         done: false,
@@ -184,7 +175,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$post(`${process.env.BACKEND_URL}/api/card/checklist`, new URLSearchParams({
+                this.$axios.$post(`/api/card/checklist`, new URLSearchParams({
                     name: this.checklist_name,
                     card_id: this.data.data_item._id
                 }), config)
@@ -231,7 +222,7 @@
                         'Content-Type': 'application/json'
                     }
                 }
-                this.$axios.$put(`${process.env.BACKEND_URL}/api/card`, {
+                this.$axios.$put(`/api/card`, {
                     id: this.data.data_item._id,
                     members: members_id
                 }, config)

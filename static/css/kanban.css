@@ -203,6 +203,9 @@ body, html {
 }
 .profile-pic-thumbs:hover, .member-active > .profile-pic-thumbs {
     transform: scale(1.3);
+    position: relative;
+    z-index: 9999999999999;
+    cursor: pointer;
     transition: .2s ease;
 }
 .profile-pic-info-container {

@@ -2,9 +2,9 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   target: 'static',
   axios: {
-    // BACKEND_URL: process.env.BACKEND_URL,
-    // proxyHeaders: false,
-    // credentials: false
+    baseURL: process.env.BACKEND_URL,
+    proxyHeaders: false,
+    credentials: false
   },
   env: {
     BACKEND_URL: process.env.BACKEND_URL,
@@ -13,7 +13,7 @@ export default {
     base: '/project_management/'
   },
   head: {
-    title: 'Kanban Test',
+    title: 'Project Management',
     htmlAttrs: {
       lang: 'en'
     },
