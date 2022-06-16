@@ -2,7 +2,7 @@
     <div class="kanban-card card" ref="card_ref">
         <div class="card-header kanban-header">
             <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ kanban_card.name }}</p> 
-            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban_card.name" v-on:blur="changeCardName($event)" />
+            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban_card.name" v-on:blur="changeCardName($event)" v-on:focus="storeOldValue" />
         </div>
         <div class="card-body kanban-body py-1 px-2" ref="card_body_ref">
             <draggable group="task" v-model="kanban_card.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="kanban_card._id">
@@ -42,7 +42,8 @@
                     board_id: '',
                     origin_list_id: '',
                     dest_list_id: ''
-                }
+                },
+                old_value: '',
             }
         },
         props: {
@@ -53,6 +54,9 @@
         mounted() {
         },
         methods: {
+            storeOldValue() {
+                this.old_value = this.kanban_card.name
+            },
             dragCard(item, card_id){
                 this.drag_end_data['id'] = item._id
                 this.drag_end_data['board_id'] = this.data.board_id
@@ -88,6 +92,12 @@
                 this.$refs.card_name_edit.select()
             },
             changeCardName(event) {
+                if(this.kanban_card.name.trim() == '' || this.kanban_card.name.trim() == this.old_value.trim()) {
+                    this.kanban_card.name = this.old_value
+                    this.old_value = ''
+                    return
+                }
+                this.old_value = ''
                 this.$refs.card_name_ref.style.display = 'block'
                 this.$refs.card_name_edit.style.display = 'none'
                 let config = {

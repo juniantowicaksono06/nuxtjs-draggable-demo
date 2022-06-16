@@ -6,7 +6,7 @@
 <template>
     <div class="px-3 py-3 container-fluid">
         <div class="px-2">
-            <h5 class="mb-2"><font-awesome-icon :icon="['fa', 'user']" /> Your boards</h5>
+            <h5 class="mb-2">Boards</h5>
         </div>
         <div class="row">
             <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in board_data">
@@ -31,25 +31,23 @@
             <b-modal id="create_new_board2" size="md" title="Add new board" hide-footer>
                 <div class="w-100">
                     <div class="form-group">
-                        <label class="kanban-text">
+                        <label for="board_title" class="kanban-text">
                             Board title
                         </label>
-                        <input type="text" class="form-control" placeholder="Board title" />
+                        <input type="text" class="form-control" placeholder="Board title" v-model="board_title" />
                     </div>
-                </div>
-                <!-- <div class="w-100 mt-2">
                     <div class="form-group">
-                        <label class="kanban-text">
-                            Visibility
+                        <label for="board_workspace" class="kanban-text">
+                            Workspace
                         </label>
-                        <select class="form-control">
-                            <option value="private">Private</option>
-                            <option value="public">Public</option>
+                        <select class="form-control" v-model="selected_workspace">
+                            <option value="" disabled selected hidden>Select Workspace</option>
+                            <option v-for="work in workspace_data" :value="work._id">{{ work.name }}</option>
                         </select>
                     </div>
-                </div> -->
+                </div>
                 <div class="w-100 mt-3">
-                    <button class="btn btn-block btn-primary">
+                    <button class="btn btn-block btn-primary" v-on:click="saveBoard">
                         Create board
                     </button>
                 </div>
@@ -64,10 +62,36 @@
         },
         data() {
             return {
-                board_data: this.data.board
+                board_data: this.data.board,
+                workspace_data: this.data.workspace,
+                selected_workspace: '',
+                board_title: ''
             }
         },
         methods: {
+            saveBoard() {
+                if(this.board_title.trim() == '' || this.selected_workspace.trim() == '') return
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$post(`/api/board`, new URLSearchParams({
+                    name: this.board_title,
+                    workspace_id: this.selected_workspace
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        let {data} = response
+                        let id = data._id
+                        window.location.href = `/project_management/board?board_id=${id}`
+                        this.$bvModal.hide('create_new_board2')
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
             loadAllDataBoard() {
                 let a = this.workspace
                 for(let i = 0; i < a.length; i++) {

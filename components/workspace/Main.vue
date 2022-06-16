@@ -9,16 +9,17 @@
 </style>
 <template>
     <div class="w-100 h-100" id="content_wrap">
-        <TopBar :data="{
+        <!-- <TopBar :data="{
                 workspace: workspace
-            }"/>
+            }"/> -->
         <div class="d-flex w-100 position-relative h-100">
             <Sidebar :data="{
                 workspace: workspace,
                 boards: all_board
             }" :key="sidebarKey" />
             <Content :data="{
-                board: all_board
+                board: all_board,
+                workspace: workspace
             }" :key="contentKey" />
         </div>
     </div>
@@ -41,6 +42,10 @@
         },
         methods: {
             loadDataWorkspace() {
+                // let urlParams = new URLSearchParams(window.location.search)
+                // let id = urlParams.get('workspace_id')
+                // let url = id ? `/api/workspace`
+
                 this.$axios.$get(`/api/workspace`)
                 .then((response_workspace) => {
                     if(response_workspace.status != 'OK') {

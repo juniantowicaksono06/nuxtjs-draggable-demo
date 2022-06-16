@@ -30,7 +30,7 @@
                 <div class="container-fluid" v-on:click="closePopUp">
                     <div class="d-flex justify-content-between" id="modal_header">
                         <div class="mb-1" style="width: 90%;">
-                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="changeItemName()" />
+                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="changeItemName" v-on:focus="storeOldValue(item.name)" />
                             <h6 class="pr-0 no-select">in list <b>{{ kanban_name }}</b></h6>
                         </div>
                         <div style="width: 10%; margin: 0 auto; text-align: right;">
@@ -71,11 +71,15 @@
                     <div class="row ml-0 pl-0 pr-0" id="modal_content">
                         <div class="col-12 col-sm-12 col-md-9 pl-0 mt-2">
                             <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Description</h5>
-                            <textarea class="form-control" placeholder="Add description" v-model="item.task_description" style="resize: none;"></textarea>
+                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditDescriptionButton"></textarea>
+                            <div :class="(show_edit_description ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
+                                <button class="btn btn-primary" v-on:click="changeDescription">Save Description</button>
+                                <button class="btn btn-default" v-on:click="hideEditDescriptionButton"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                            </div>
                             <!-- CHECKLISTS -->
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id">
                                 <div class="d-flex mb-2">
-                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist.name)" />
+                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist)" v-on:focus="storeOldValue(checklist.name)" />
                                     <span class="btn btn-transparent" v-on:click="deleteChecklist($event, checklist_index, checklist, item.checklists)">
                                         <font-awesome-icon :icon="['fa', 'trash']"/>
                                     </span>
@@ -90,7 +94,7 @@
                                 <!-- CHECKLIST CHILD -->
                                 <div v-for="(child, child_index) in checklist.childs" :key="child._id" class="row mt-2">
                                     <div class="col-1 py-1 pr-0 mr-0">
-                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="checklistHandle(child.done, child._id, checklist._id)" />
+                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="checklistHandle(child, checklist._id)" />
                                     </div>
                                     <div class="col-10 mt-0 px-0">
                                         <input class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent" :style="child.done ? {
@@ -100,7 +104,7 @@
                                         } : {
                                             fontSize: '12px',
                                             fontWeight: 'normal'
-                                        }" :readonly="(child.done)" v-model="child.name"  v-on:change="checklistHandle(child.name, child._id, checklist._id, 'name')" />
+                                        }" :readonly="(child.done)" v-model="child.name" v-on:focus="storeOldValue(child.name)"  v-on:change="checklistHandle(child.name, child._id, checklist._id, 'name')" />
                                     </div>
                                     <div class="float-right" style="margin-top: -5px;">
                                         <span class="kanban-text btn btn-transparent" v-on:click="deleteChecklistChild($event, child_index, child, checklist.childs, checklist._id)">
@@ -164,6 +168,7 @@
                 show_popup: false,
                 // To Show Profile
                 show_profile: false,
+                show_edit_description: false,
                 add_checklist_child: {
                     enable: false,
                     index: null,
@@ -177,7 +182,8 @@
                 // Target Element for Pop Up
                 target_element: null,
                 // Target Element for Profile Pop Up
-                target_element_profile: {}
+                target_element_profile: {},
+                old_value: ''
             }
         },
         mounted() {
@@ -207,15 +213,51 @@
             },
         },
         methods: {
-            changeChecklistName(name) {
+            storeOldValue(name) {
+                this.old_value = name
+            },
+            showEditDescriptionButton() {
+                this.show_edit_description = true
+            },
+            hideEditDescriptionButton() {
+                this.show_edit_description = false
+            },
+            changeDescription() {
                 let config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
+                let description = this.item.description.trim()
                 this.$axios.$put(`/api/card`, new URLSearchParams({
                     id: this.item._id,
-                    name: name
+                    description: description
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                        this.hideEditDescriptionButton()
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            changeChecklistName(checklist) {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                if(checklist.name.trim() == '' || this.old_value.trim() == checklist.name.trim()) {
+                    checklist.name = this.old_value
+                    this.old_value = ''
+                    return 
+                }
+                this.old_value = ''
+                this.$axios.$put(`/api/card`, new URLSearchParams({
+                    id: this.item._id,
+                    name: checklist.name
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
@@ -249,6 +291,11 @@
                 })
             },
             changeItemName() {
+                if(this.item.name.trim() == '' || this.item.name.trim() == this.old_value.trim()) {
+                    this.old_value = ''
+                    return
+                }
+                this.old_value = ''
                 let config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -471,7 +518,7 @@
                     })
                 }
             },
-            checklistHandle(value, child_id, parent_id, type='status') {
+            checklistHandle(checklist_child, parent_id, type='status') {
                 let config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -480,20 +527,25 @@
                 let data = {}
                 if(type == 'status') {
                     data = {
-                        done: value,
+                        done: checklist_child.done,
                         checklist_id: parent_id,
-                        id: child_id,
+                        id: checklist_child._id,
                         card_id: this.item._id
                     }
                 }
                 else if(type == 'name') {
+                    if(checklist_child.name.trim() == '' || checklist_child.name.trim() == this.old_value) {
+                        this.old_value = ''
+                        return
+                    }
                     data = {
-                        name: value,
+                        name: checklist_child.name,
                         checklist_id: parent_id,
-                        id: child_id,
+                        id: checklist_child._id,
                         card_id: this.item._id
                     }
                 }
+                this.old_value = ''
                 this.$axios.$put(`/api/card/checklist/child`, new URLSearchParams(data), config)
                 .then((response) => {
                     if(response.status == 'OK') {

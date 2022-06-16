@@ -1,7 +1,7 @@
 <style>
     #workspace_label {
         font-size: .95em;
-        padding-right: 8px;
+        padding: 10px 8px;
     }
     .workspace-text, .workspace-item-list {
         font-size: .75em;
@@ -28,8 +28,9 @@
         -webkit-user-select: none;
         -moz-user-select: none;
     }
-    #btn_sidebar_open:hover {
+    #btn_sidebar_open:hover, #workspace_label:hover {
         background-color: rgb(127,145,155,0.5);
+        cursor: pointer;
     }
     #sidebar_close {
         color: white;
@@ -47,7 +48,7 @@
         overflow-y: auto;
         overflow-x: hidden;
     }
-    .sidebar-anim-close #workspace_container, .sidebar-close #workspace_container {
+    .sidebar-anim-close #workspace_container {
         overflow: hidden;
     }
     .sidebar-anim-open #workspace_container {
@@ -117,8 +118,8 @@
         animation-fill-mode: forwards;
         overflow-x: hidden;
     }
-    .sidebar-anim-close > #sidebar_content span.board-name {
-        display: none;
+    .sidebar-anim-close > #sidebar_content span.board-name, .sidebar-anim-close #workspace_label, .sidebar-close #workspace_label {
+        display: none !important;
     }
     .sidebar-anim-open > #sidebar_content div.board-icon {
         display: none;
@@ -213,7 +214,7 @@
 </style>
 <template>
     <div id="sidebar" class="h-100 px-2 sidebar-close" ref="sidebar_ref">
-        <div id="sidebar_header" ref="sidebar_header_ref">
+        <div id="sidebar_header" ref="sidebar_header_ref" class="pt-3 pb-2">
             <div id="btn_sidebar_close" :class="(!sidebar_open ? 'd-none' : '')" v-on:click="sidebarClose">
                 <font-awesome-icon :icon="['fa', 'chevron-left']"/>
                 <span class="ml-2 no-wrap">Close</span>
@@ -224,7 +225,7 @@
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
             <div class="d-flex justify-content-between mt-3 mb-2" id="workspace_label" ref="workspace_label_ref">
-                <span class="">Workspace</span>
+                <a href="/project_management/" class="text-white">Workspace</a>
                 <!-- <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
                     <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
                 </button> -->
@@ -448,6 +449,7 @@
             },
             sidebarOpen() {
                 this.$refs.sidebar_ref.classList.remove('sidebar-anim-close')
+                this.$refs.sidebar_ref.classList.remove('sidebar-close')
                 this.$refs.sidebar_ref.classList.add('sidebar-anim-open')
                 this.sidebar_open = true
             },
