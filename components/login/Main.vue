@@ -85,7 +85,7 @@
                             path: "/",
                             maxAge: 60 * 60 * 12,
                         });
-                        window.location.href = '/'
+                        window.location.href = '/project_management/'
                     }
                 })
                 .catch((error) => {
