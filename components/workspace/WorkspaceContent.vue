@@ -6,12 +6,12 @@
 <template>
     <div class="px-3 py-3 container-fluid">
         <div class="px-2">
-            <h5 class="mb-2">Boards</h5>
+            <h5 class="mb-2 text-white">Boards</h5>
         </div>
         <div class="row">
             <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in board_data">
                 <a :href="`/project_management/board?board_id=${board._id}`">
-                    <div class="card workspace-card hover-pointer">
+                    <div class="card workspace-card hover-pointer" style="border: none;">
                         <div class="card-body px-2 py-2 bg-primary text-white">
                             <h6 class="mb-0 no-select">{{ board.name }}</h6>
                         </div>

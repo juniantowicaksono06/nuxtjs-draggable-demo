@@ -2,10 +2,6 @@
     @import '../assets/styles/kanban.css';
 </style> -->
 <style scoped>
-    #content_wrap {
-        background-color: #fff;
-        background-image: none;
-    }
 </style>
 <template>
     <div class="w-100 h-100" id="content_wrap">
@@ -42,10 +38,6 @@
         },
         methods: {
             loadDataWorkspace() {
-                // let urlParams = new URLSearchParams(window.location.search)
-                // let id = urlParams.get('workspace_id')
-                // let url = id ? `/api/workspace`
-
                 this.$axios.$get(`/api/workspace`)
                 .then((response_workspace) => {
                     if(response_workspace.status != 'OK') {

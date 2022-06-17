@@ -3,7 +3,7 @@
         font-size: .95em;
         padding: 10px 8px;
     }
-    .workspace-text, .workspace-item-list {
+    .sidebar-text, .sidebar-item-list {
         font-size: .75em;
     }
     .workspace-icon-square {
@@ -41,33 +41,33 @@
     .workspace > div {
         padding: 10px 10px;
     }
-    .workspace-item-list {
+    .sidebar-item-list {
         padding: 0px 5px;
     }
-    #workspace_container {
+    #sidebar_container {
         overflow-y: auto;
         overflow-x: hidden;
     }
-    .sidebar-anim-close #workspace_container {
+    .sidebar-anim-close #sidebar_container {
         overflow: hidden;
     }
-    .sidebar-anim-open #workspace_container {
+    .sidebar-anim-open #sidebar_container {
         overflow-y: auto;
     }
-    #sidebar_close:hover, .sidebar-anim-open #workspace_container .workspace > div.workspace-name:hover, .workspace-item div.workspace-item-list:hover {
+    #sidebar_close:hover, .sidebar-anim-open #sidebar_container .workspace > div.workspace-name:hover, .workspace-item div.sidebar-item-list:hover {
         background-color: rgb(127,145,155,0.5);
         cursor: pointer;
         user-select: none;
         -webkit-user-select: none;
         -moz-user-select: none;
     }
-    .sidebar-anim-open div.workspace-item-list-active {
+    .sidebar-anim-open div.sidebar-item-list-active {
         background-color: rgb(127,145,155,0.8);
     }
     .sidebar-anim-close .workspace > div.workspace-name:hover,.sidebar-close .workspace > div.workspace-name:hover {
         cursor: default;
     }
-    div.workspace-item-list > a, div.workspace-item-list > span {
+    div.sidebar-item-list > a, div.sidebar-item-list > span {
         display: block;
         width: 100%;
         padding: 10px;
@@ -89,7 +89,7 @@
         -moz-user-select: none;
         -webkit-user-select: none;
     }
-    #btn_sidebar_close:hover {
+    #btn_sidebar_close:hover, .sidebar-item:hover {
         cursor: pointer;
         background-color: rgb(127,145,155,0.5);
     }
@@ -106,13 +106,13 @@
     .sidebar-anim-close .workspace-item {
         display: block;
     }
-    .sidebar-anim-open .board-name, .sidebar-anim-open .workspace-title, .sidebar-anim-open .workspace-title, .sidebar-anim-open #workspace_label, .sidebar-anim-open .workspace-item-list .board-name-add  {
+    .sidebar-anim-open .board-name, .sidebar-anim-open .sidebar-item, .sidebar-anim-open .sidebar-item, .sidebar-anim-open #workspace_label, .sidebar-anim-open .sidebar-item-list .board-name-add  {
         animation-name: fade-in;
         animation-duration: 1s;
         animation-fill-mode: forwards;
         display: block;
     }
-    .sidebar-anim-close .board-name, .sidebar-anim-close .workspace-title, .sidebar-anim-close .workspace-title, .sidebar-anim-close #workspace_label, .sidebar-anim-close .board-name-add {
+    .sidebar-anim-close .board-name, .sidebar-anim-close .sidebar-item, .sidebar-anim-close .sidebar-item, .sidebar-anim-close #workspace_label, .sidebar-anim-close .board-name-add {
         animation-name: fade-out;
         animation-duration: 1s;
         animation-fill-mode: forwards;
@@ -134,7 +134,7 @@
         overflow-x: hidden;
         opacity: 0;
     }
-    .sidebar-close .workspace-title {
+    .sidebar-close .sidebar-item {
         opacity: 0;
         overflow-x: hidden;
     }
@@ -204,7 +204,7 @@
     .workspace-item-open {
         display: block;
     }
-    .workspace-item-list {
+    .sidebar-item-list {
         margin-bottom: 0;
         margin-top: 0;
     }
@@ -230,15 +230,15 @@
                     <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
                 </button> -->
             </div>
-            <div id="workspace_container" ref="workspace_container_ref">
+            <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-for="(work, index) in workspace" class="workspace">
-                    <div class="workspace-text hover-pointer workspace-name d-flex justify-content-between">
+                    <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
                         <div class="workspace-icon">
                             <span class="workspace-icon-square">
                                 <font-awesome-icon :icon="['fa', 'users']" />
                             </span>
                         </div>
-                        <div class="workspace-title d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
+                        <div class="sidebar-item d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
                             <span class="">{{ work.name }}</span>
                             <font-awesome-icon :icon="['fa', 'chevron-up']" class="mt-1" ref="chevron_ref" />
                         </div>
@@ -251,7 +251,7 @@
                                         <font-awesome-icon :icon="['fa', 'circle']" />
                                     </span>
                                 </div>
-                                <div :class="(board._id == board_id ? 'workspace-item-list workspace-item-list-active mb-0 w-100' : 'workspace-item-list mb-0 w-100')" >
+                                <div :class="(board._id == board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
                                     <a :href="`/project_management/board?board_id=${board._id}`" v-if="(board._id != board_id)">
                                         <div class="d-flex justify-content-between">
                                             <span class="board-name">{{ board.name }}</span>
@@ -266,13 +266,16 @@
                             </div>
                         </div>
                         <div>
-                            <div class="workspace-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
+                            <div class="sidebar-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
                                 <button class="btn btn-transparent text-white kanban-text px-2">
                                     <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
                                 </button>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="sidebar-item">
+                    <button class="btn btn-transparent text-white" v-on:click="actionLogout">Logout</button>
                 </div>
             </div>
         </div>
@@ -357,6 +360,12 @@
             }).observe(document.getElementById("sidebar"))
         },
         methods: {
+            actionLogout() {
+                this.$store.commit('auth/destroy')
+                this.$cookies.remove('credentials');
+                this.$router.push('/project_management/login');
+                // window.location.href = '/project_management/login'
+            },
             resizeKanbanContainer() {
                 let sidebar = document.getElementById("sidebar")
                 let width = window.innerWidth - sidebar.offsetWidth
@@ -370,7 +379,7 @@
                 if(typeof this.$refs.workspace_label_ref != 'undefined') {
                     let workspace_label_height = this.$refs.workspace_label_ref.offsetHeight
                     let sidebar_header_height = this.$refs.sidebar_header_ref.offsetHeight
-                    document.getElementById("workspace_container").style.height = ( window_height - (workspace_label_height + sidebar_header_height + 85) ) + 'px'
+                    document.getElementById("sidebar_container").style.height = ( window_height - (workspace_label_height + sidebar_header_height + 85) ) + 'px'
                 }
             },
             openCreateBoard(event, index, workspace_id) {

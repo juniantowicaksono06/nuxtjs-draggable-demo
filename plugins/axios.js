@@ -4,7 +4,7 @@ export default function ({ $axios, $toast, redirect, store }) {
     $axios.defaults.httpsAgent = new https.Agent({ rejectUnauthorized: false })
     $axios.onRequest(config => {
         if (store.state.auth.credentials) {
-            config.headers.common['Authorization'] = store.state.auth.credentials
+            config.headers.common['Authorization'] = `Bearer ${store.state.auth.credentials}`
         }
         
     })

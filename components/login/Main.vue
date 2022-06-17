@@ -1,6 +1,3 @@
-<!-- <style>
-    @import '../assets/styles/login.css';
-</style> -->
 <template>
     <div class="container-fluid h-100 w-100" id="content_wrap">
         <div class="position-relative h-100 w-100">
@@ -41,7 +38,7 @@
                                                 <input type="checkbox" class="form-check-input" v-model="remember_me_input">
                                                 <label class="form-check-label">Remember me</label>
                                             </div>
-                                            <button type="submit" class="btn btn-primary">Sign In</button>
+                                            <button type="button" class="btn btn-primary" v-on:click="actionLogin">Sign In</button>
                                         </div>
                                     </div>
                                     </div>
@@ -55,12 +52,45 @@
 </template>
 
 <script>
+    const CryptoJS = require("crypto-js");
     export default {
         data() {
             return {
                 username_input: '',
                 password_input: '',
                 remember_me_input: false
+            }
+        },
+        methods: {
+            actionLogin() {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$post(`/api/login`, {
+                    user_domain: this.username_input,
+                    password: this.password_input
+                }, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        let {data} = response
+                        let token = data.token
+                        const ciphertext = CryptoJS.AES.encrypt(
+                            token,
+                            process.env.SALT_KEY
+                        ).toString();
+                        this.$store.commit("auth/credentials", token);
+                        this.$cookies.set("credentials", ciphertext, {
+                            path: "/",
+                            maxAge: 60 * 60 * 12,
+                        });
+                        window.location.href = '/project_management/'
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Gagal login")
+                })
             }
         }
     }

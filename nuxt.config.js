@@ -8,9 +8,10 @@ export default {
   },
   env: {
     BACKEND_URL: process.env.BACKEND_URL,
+    SALT_KEY: process.env.SALT_KEY
   },
   router: {
-    base: '/project_management/'
+    base: '/project_management/',
   },
   head: {
     title: 'Project Management',
@@ -39,9 +40,9 @@ export default {
     '@/static/css/kanban-profile-card.css',
   ],
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  // plugins: [
-  //   '~/plugins/axios',
-  // ],
+  plugins: [
+    '~/plugins/axios',
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -61,7 +62,8 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    'cookie-universal-nuxt',
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
