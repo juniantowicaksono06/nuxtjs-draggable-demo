@@ -75,13 +75,23 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
-                        let token = data.token
+                        let {token, hasWorkspace} = data
                         const ciphertext = CryptoJS.AES.encrypt(
                             token,
                             process.env.SALT_KEY
                         ).toString();
+                        const ciphertextId = CryptoJS.AES.encrypt(
+                            JSON.stringify({
+                                hasWorkspace: hasWorkspace
+                            }),
+                            process.env.SALT_KEY
+                        ).toString();
                         this.$store.commit("auth/credentials", token);
                         this.$cookies.set("credentials", ciphertext, {
+                            path: "/",
+                            maxAge: 60 * 60 * 12,
+                        });
+                        this.$cookies.set("identity", ciphertextId, {
                             path: "/",
                             maxAge: 60 * 60 * 12,
                         });

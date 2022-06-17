@@ -5,7 +5,7 @@
 <script>
     import Workspace from '../components/workspace/Main.vue'
     export default {
-        // middleware: ['auth'],
+        middleware: ['selectworkspace'],
         name: "WorkspacePage",
         components: {
             Workspace

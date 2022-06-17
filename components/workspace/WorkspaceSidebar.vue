@@ -364,7 +364,6 @@
                 this.$store.commit('auth/destroy')
                 this.$cookies.remove('credentials');
                 this.$router.push('/project_management/login');
-                // window.location.href = '/project_management/login'
             },
             resizeKanbanContainer() {
                 let sidebar = document.getElementById("sidebar")
@@ -416,6 +415,11 @@
                             workspace_index: null,
                             board_name: '',
                         }
+                        let sidebar_data = {
+                            workspaces: this.workspace,
+                            boards: this.boards
+                        }
+                        // this.$store.commit('sidebar/setSidebarData', sidebar_data)
                         this.$bvModal.hide('create_new_board')
                     }
                 })

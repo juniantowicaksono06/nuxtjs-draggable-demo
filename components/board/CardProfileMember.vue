@@ -33,8 +33,6 @@
         data() {
             return {
                 member_list: this.data,
-                // show: this.show,
-                // target_element: this.target_element
             }
         },
         props: {
