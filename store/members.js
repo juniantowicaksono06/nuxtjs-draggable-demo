@@ -4,7 +4,7 @@ export const state = () => ({
 
 
 export const mutations = {
-    async loadMembers(state, value) {
+    loadMembers(state, value) {
         state.all_members = value
     },
 }

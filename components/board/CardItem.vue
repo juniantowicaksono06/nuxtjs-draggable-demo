@@ -205,6 +205,42 @@
                     }
                     total_checklist += this.item.checklists[i].childs.length
                 }
+                let update_date = false
+                if(checklist_done >= total_checklist && this.item.deadline.date != null) {
+                    if(this.item.deadline.done != true) {
+                        this.item.deadline.done = true
+                        update_date = true
+                    }
+                }
+                else {
+                    if(this.item.deadline.done) {
+                        this.item.deadline.done = false
+                        update_date = true
+                    }
+                }
+                
+                if(update_date) {
+                    let config = {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                    this.$axios.$put(`/api/card`, {
+                        id: this.item._id,
+                        deadline: {
+                            date: this.item.deadline.date,
+                            done: this.item.deadline.done
+                        }
+                    }, config)
+                    .then((response) => {
+                        if(response.status == 'OK') {
+                            // Do Something
+                        }
+                    })
+                    .catch((error) => {
+                        alert("Error: Telah terjadi kesalahan")
+                    })
+                }
                 return {
                     done: checklist_done >= total_checklist,
                     total_checklist: total_checklist,

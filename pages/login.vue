@@ -7,7 +7,7 @@
     export default {
         name: "LoginPage",
         layout: 'empty',
-        // middleware: ['authenticated'],
+        middleware: ['authenticated'],
         components: { Login },
         head() {
             return {

@@ -4,15 +4,11 @@
 <style scoped>
 </style>
 <template>
-    <div class="w-100 h-100" id="content_wrap">
+    <div class="w-100 h-100">
         <!-- <TopBar :data="{
                 workspace: workspace
             }"/> -->
         <div class="d-flex w-100 position-relative h-100">
-            <Sidebar :data="{
-                workspace: workspace,
-                boards: all_board
-            }" :key="sidebarKey" />
             <Content :data="{
                 board: all_board,
                 workspace: workspace
@@ -22,7 +18,7 @@
 </template>
 <script>
     import TopBar from "../Topbar.vue";
-    import Sidebar from "./WorkspaceSidebar.vue";
+    // import Sidebar from "./WorkspaceSidebar.vue";
     import Content from "./WorkspaceContent.vue";
     export default {
         data() {
@@ -61,7 +57,7 @@
         },
         components: {
             TopBar,
-            Sidebar,
+            // Sidebar,
             Content
         }
     }
