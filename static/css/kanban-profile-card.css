@@ -39,7 +39,7 @@
     top: 45px;
     left: 0;
     background-color: white;
-    z-index: 99999999999999999999999;
+    z-index: 99;
 }
 .profile-list-option {
     padding: 20px 10px;

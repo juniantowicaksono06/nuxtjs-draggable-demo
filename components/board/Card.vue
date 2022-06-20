@@ -2,7 +2,7 @@
     <div class="kanban-card card" ref="card_ref">
         <div class="card-header kanban-header">
             <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ kanban_card.name }}</p> 
-            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban_card.name" v-on:blur="changeCardName($event)" v-on:focus="storeOldValue" />
+            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban_card.name" v-on:blur="changeCardName($event)" v-on:focus="storeOldValue" v-on:keyup.enter="$event.target.blur()" />
         </div>
         <div class="card-body kanban-body py-1 px-2" ref="card_body_ref">
             <draggable group="task" v-model="kanban_card.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="kanban_card._id">

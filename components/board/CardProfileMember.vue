@@ -1,5 +1,5 @@
 <template>
-    <div :class="(show ? 'profile_pop_up d-block' : 'profile_pop_up d-none')" ref="profile_pop_up_ref">
+    <div :class="(show ? 'profile_pop_up d-block' : 'profile_pop_up d-none')" ref="profile_pop_up_ref" style="z-index: 99999;">
         <div class="card" @click.stop="">
             <div class="card-header py-1 px-2 bg-primary text-white profile-head">
                 <div class="float-right">
