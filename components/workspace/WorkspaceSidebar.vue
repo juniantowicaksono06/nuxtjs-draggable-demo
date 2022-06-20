@@ -231,45 +231,47 @@
                 </button> -->
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
-                <div v-for="(work, index) in workspace" class="workspace">
-                    <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
-                        <div class="workspace-icon">
-                            <span class="workspace-icon-square">
-                                <font-awesome-icon :icon="['fa', 'users']" />
-                            </span>
-                        </div>
-                        <div class="sidebar-item d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
-                            <span class="">{{ work.name }}</span>
-                            <font-awesome-icon :icon="['fa', 'chevron-up']" class="mt-1" ref="chevron_ref" />
-                        </div>
-                    </div>
-                    <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
-                        <div v-for="(board, board_index) in boards" :key="board._id" v-if="board.workspace_id == work._id">
-                            <div class="d-flex justify-content-between">
-                                <div class="board-icon">
-                                    <span class="board-icon-circle kanban-text">
-                                        <font-awesome-icon :icon="['fa', 'circle']" />
-                                    </span>
-                                </div>
-                                <div :class="(board._id == board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
-                                    <a :href="`/project_management/board?board_id=${board._id}`" v-if="(board._id != board_id)">
-                                        <div class="d-flex justify-content-between">
-                                            <span class="board-name">{{ board.name }}</span>
-                                        </div>
-                                    </a>
-                                    <span v-else>
-                                        <div class="d-flex justify-content-between">
-                                            <span class="board-name">{{ board.name }}</span>
-                                        </div>
-                                    </span>
-                                </div>
+                <div v-if="'workspace_id' in $store.state.auth.identity">
+                    <div v-for="(work, index) in workspace" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id">
+                        <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
+                            <div class="workspace-icon">
+                                <span class="workspace-icon-square">
+                                    <font-awesome-icon :icon="['fa', 'users']" />
+                                </span>
+                            </div>
+                            <div class="sidebar-item d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
+                                <span class="">{{ work.name }}</span>
+                                <font-awesome-icon :icon="['fa', 'chevron-up']" class="mt-1" ref="chevron_ref" />
                             </div>
                         </div>
-                        <div>
-                            <div class="sidebar-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
-                                <button class="btn btn-transparent text-white kanban-text px-2">
-                                    <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
-                                </button>
+                        <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
+                            <div v-for="(board, board_index) in boards" :key="board._id" v-if="board.workspace_id == work._id">
+                                <div class="d-flex justify-content-between">
+                                    <div class="board-icon">
+                                        <span class="board-icon-circle kanban-text">
+                                            <font-awesome-icon :icon="['fa', 'circle']" />
+                                        </span>
+                                    </div>
+                                    <div :class="(board._id == board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
+                                        <a :href="`/project_management/board?board_id=${board._id}`" v-if="(board._id != board_id)">
+                                            <div class="d-flex justify-content-between">
+                                                <span class="board-name">{{ board.name }}</span>
+                                            </div>
+                                        </a>
+                                        <span v-else>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="board-name">{{ board.name }}</span>
+                                            </div>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="sidebar-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
+                                    <button class="btn btn-transparent text-white kanban-text px-2">
+                                        <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -358,12 +360,13 @@
             new ResizeObserver(() => {
                 this.resizeKanbanContainer()
             }).observe(document.getElementById("sidebar"))
+            // console.log(this.$store.state.auth.identity)
         },
         methods: {
             actionLogout() {
-                this.$store.commit('auth/destroy')
                 this.$cookies.remove('credentials');
                 this.$router.push('/project_management/login');
+                // this.$store.commit('auth/destroy')
             },
             resizeKanbanContainer() {
                 let sidebar = document.getElementById("sidebar")

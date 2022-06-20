@@ -31,7 +31,7 @@
 </template>
 <script>
     export default {
-        middleware: ['auth', 'hasworkspace'],
+        middleware: ['auth', 'selectworkspace'],
         mounted() {
             this.loadData()
         },
@@ -50,6 +50,7 @@
                 }, config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        window.location.href = `/project_management/`
                     }
                 })
                 .catch((error) => {
