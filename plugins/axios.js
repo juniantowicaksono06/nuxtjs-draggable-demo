@@ -18,25 +18,9 @@ export default function ({ $axios, $toast, redirect, store }) {
     $axios.onError(error => {
       const code = parseInt(error.response && error.response.status)
         if (code == 500) {
-            $toast.error('Oops...Something went wrong, Please contact admin', {
-                duration: 3000,
-                action: {
-                    text: 'Cancel',
-                    onClick: (e, toastObject) => {
-                        toastObject.goAway(0)
-                    }
-                }
-            })
+            alert('Oops...Something went wrong')
         } else if (code == 401) {
-            $toast.error('Invalid username, password or access token expired', {
-                duration: 3000,
-                action: {
-                    text: 'Cancel',
-                    onClick: (e, toastObject) => {
-                        toastObject.goAway(0)
-                    }
-                }
-            })
+            alert('Invalid user domain, password or access token expired')
       }
 
     })

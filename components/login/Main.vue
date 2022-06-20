@@ -87,9 +87,7 @@
                         window.location.href = '/project_management/'
                     }
                 })
-                .catch((error) => {
-                    alert("Error: Gagal login")
-                })
+                .catch()
             }
         }
     }
