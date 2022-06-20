@@ -8,7 +8,7 @@
                             <div>
                                 <p ref="board_input_ref" id="board_input_ref">{{ board.name }}</p>
                             </div>
-                            <input ref="board_input" type="text" id="board_input" v-model="board.name" @focus="storeOldValue($event)"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, board._id)" />
+                            <input ref="board_input" v-on:keyup.enter="$event.target.blur()" type="text" id="board_input" v-model="board.name" @focus="storeOldValue($event)"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, board._id)" />
                         </span>
                         <span class="ml-1">
                             <span class="text-white transparent-button font-sm btn">{{ board.workspace_id ? board.workspace_id.name : '' }} <span class="ml-1"></span></span>
@@ -42,7 +42,7 @@
                                 <span class="mb-0" style="font-size: 14px;"><strong>+</strong> Add another list</span>
                             </div>
                             <div :class="((!add_list_enabled && add_list_id == null) ? 'add-list2 card d-none' : 'add-list2 card d-block')">
-                                <input ref="add_list_ref" v-model="add_list_value" class="form-control kanban-text" placeholder="Enter list title" />
+                                <input ref="add_list_ref" v-model="add_list_value" class="form-control kanban-text" placeholder="Enter list title" v-on:keyup.enter="addList" />
                                 <div class="d-flex mt-2">
                                     <button class="btn btn-primary kanban-text" v-on:click="addList">Add List</button>
                                     <button class="btn btn-transparent kanban-text" v-on:click="disableAddList()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
@@ -138,6 +138,7 @@
                     }
                 }
                 this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                document.title = this.board.name
                 if(check) {
                     this.resizeBoard()
                     return 
