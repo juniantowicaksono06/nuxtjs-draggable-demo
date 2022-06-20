@@ -10,9 +10,6 @@ export default {
     BACKEND_URL: process.env.BACKEND_URL,
     SALT_KEY: process.env.SALT_KEY
   },
-  router: {
-    base: '/project_management/',
-  },
   head: {
     title: 'Project Management',
     htmlAttrs: {

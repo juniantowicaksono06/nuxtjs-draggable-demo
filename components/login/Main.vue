@@ -84,7 +84,7 @@
                         this.$cookies.set("credentials", ciphertext, {
                             path: "/",
                         });
-                        window.location.href = '/project_management/'
+                        window.location.href = '/'
                     }
                 })
                 .catch()

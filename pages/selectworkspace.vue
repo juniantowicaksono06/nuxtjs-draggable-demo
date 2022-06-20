@@ -50,7 +50,7 @@
                 }, config)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        window.location.href = `/project_management/`
+                        window.location.href = `/`
                     }
                 })
                 .catch((error) => {

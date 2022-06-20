@@ -225,7 +225,7 @@
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
             <div class="d-flex justify-content-between mt-3 mb-2" id="workspace_label" ref="workspace_label_ref">
-                <a href="/project_management/" class="text-white">Workspace</a>
+                <a href="/" class="text-white">Workspace</a>
                 <!-- <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
                     <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
                 </button> -->
@@ -253,7 +253,7 @@
                                         </span>
                                     </div>
                                     <div :class="(board._id == board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
-                                        <a :href="`/project_management/board?board_id=${board._id}`" v-if="(board._id != board_id)">
+                                        <a :href="`/board?board_id=${board._id}`" v-if="(board._id != board_id)">
                                             <div class="d-flex justify-content-between">
                                                 <span class="board-name">{{ board.name }}</span>
                                             </div>
@@ -365,7 +365,7 @@
         methods: {
             actionLogout() {
                 this.$cookies.remove('credentials');
-                this.$router.push('/project_management/login');
+                this.$router.push('/login');
                 // this.$store.commit('auth/destroy')
             },
             resizeKanbanContainer() {

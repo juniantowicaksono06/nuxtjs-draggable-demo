@@ -10,7 +10,7 @@
         </div>
         <div class="row">
             <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in board_data">
-                <a :href="`/project_management/board?board_id=${board._id}`">
+                <a :href="`/board?board_id=${board._id}`">
                     <div class="card workspace-card hover-pointer" style="border: none;">
                         <div class="card-body px-2 py-2 bg-primary text-white">
                             <h6 class="mb-0 no-select">{{ board.name }}</h6>
@@ -84,7 +84,7 @@
                     if(response.status == 'OK') {
                         let {data} = response
                         let id = data._id
-                        window.location.href = `/project_management/board?board_id=${id}`
+                        window.location.href = `/board?board_id=${id}`
                         this.$bvModal.hide('create_new_board2')
                     }
                 })
