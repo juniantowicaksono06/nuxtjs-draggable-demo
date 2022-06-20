@@ -34,10 +34,10 @@
                                     </div>
                                     <div class="form-group">
                                         <div class="input-group justify-content-between">
-                                            <div class="input-group-prepend ml-4">
+                                            <!-- <div class="input-group-prepend ml-4">
                                                 <input type="checkbox" class="form-check-input" v-model="remember_me_input">
                                                 <label class="form-check-label">Remember me</label>
-                                            </div>
+                                            </div> -->
                                             <button type="button" class="btn btn-primary" v-on:click="actionLogin">Sign In</button>
                                         </div>
                                     </div>
@@ -80,20 +80,9 @@
                             token,
                             process.env.SALT_KEY
                         ).toString();
-                        const ciphertextId = CryptoJS.AES.encrypt(
-                            JSON.stringify({
-                                hasWorkspace: hasWorkspace
-                            }),
-                            process.env.SALT_KEY
-                        ).toString();
                         this.$store.commit("auth/credentials", token);
                         this.$cookies.set("credentials", ciphertext, {
                             path: "/",
-                            maxAge: 60 * 60 * 12,
-                        });
-                        this.$cookies.set("identity", ciphertextId, {
-                            path: "/",
-                            maxAge: 60 * 60 * 12,
                         });
                         window.location.href = '/project_management/'
                     }
