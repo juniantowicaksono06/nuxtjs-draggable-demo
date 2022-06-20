@@ -4,10 +4,6 @@
             <div class="h-100 d-flex">
                 <div>
                     <WorkspaceSidebar 
-                    :data="{
-                        workspace: this.sidebar_data.workspaces,
-                        boards: this.sidebar_data.boards
-                    }" 
                     :key="sidebarKey" />
                 </div>
                 <Nuxt />
@@ -27,13 +23,6 @@
         mounted() {
             this.loadDataWorkspaceAndMember()
         },
-        watch: {
-            '$store.state.sidebar.sidebar_data': function() {
-                if(window.location.pathname.indexOf('selectworkspace') > -1) return
-                this.sidebar_data = this.$store.state.sidebar.sidebar_data
-                this.sidebarKey += 1
-            }
-        },
         methods: {
             loadDataWorkspaceAndMember() {
                 this.$axios.$get(`/api/workspace`)
@@ -42,7 +31,7 @@
                         return
                     }
                     let {data} = response_workspace
-                    this.$axios.$get(`/api/member?workspace_id=${data._id}`)
+                    this.$axios.$get(`/api/member?workspace_id=${this.$store.state.auth.identity.workspace_id._id}`)
                     .then((response_member) => {
                         if(response_member.status == 'OK') {
                             let {data} = response_member
@@ -70,7 +59,6 @@
         data() {
             return {
                 sidebarKey: 0,
-                sidebar_data: this.$store.state.sidebar.sidebar_data,
                 loading: true,
             }
         }

@@ -88,6 +88,12 @@
         async mounted() {
             this.loadDataBoard()
         },
+        watch: {
+            '$route.query': function() {
+                this.board_id = this.$route.query.board_id
+                this.loadDataBoard()
+            }
+        },
         methods: {
             storeOldValue(event) {
                 event.target.select()
@@ -107,13 +113,19 @@
                 }
             },
             loadDataBoard() {
-                let urlParams = new URLSearchParams(window.location.search)
-                let id = urlParams.get('board_id')
+                let id = this.board_id
+                if(!id) {
+                    this.$router.push('/')
+                    return
+                }
 
                 this.$axios.$get(`/api/board?id=${id}`)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        // this.loading = false
+                        if('data' in response == false) {
+                            this.$router.push('/')
+                            return
+                        }
                         this.board = response.data
                         this.sidebarKey += 1
                         this.$nextTick(() => {
@@ -234,6 +246,7 @@
         },
         data() {
             return {
+                board_id: new URLSearchParams(window.location.search).get('board_id'),
                 all_members: this.$store.state.members.all_members,
                 sidebar_observer: null,
                 sidebarKey: 0,

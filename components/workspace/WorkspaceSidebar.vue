@@ -225,14 +225,15 @@
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
             <div class="d-flex justify-content-between mt-3 mb-2" id="workspace_label" ref="workspace_label_ref">
-                <a href="/" class="text-white">Workspace</a>
+                <nuxt-link to="/" class="text-white">Workspace</nuxt-link>
                 <!-- <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
                     <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
                 </button> -->
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-if="'workspace_id' in $store.state.auth.identity">
-                    <div v-for="(work, index) in workspace" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id">
+                    <!-- <p>{{ $store.state.sidebar.sidebar_data.boards }}</p> -->
+                    <div v-for="(work, index) in $store.state.sidebar.sidebar_data.workspaces" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id">
                         <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
                             <div class="workspace-icon">
                                 <span class="workspace-icon-square">
@@ -245,19 +246,19 @@
                             </div>
                         </div>
                         <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
-                            <div v-for="(board, board_index) in boards" :key="board._id" v-if="board.workspace_id == work._id">
+                            <div v-for="(board, board_index) in $store.state.sidebar.sidebar_data.boards" :key="$store.state.sidebar.sidebar_data.boards._id" v-if="$store.state.auth.identity.workspace_id._id == board.workspace_id">
                                 <div class="d-flex justify-content-between">
                                     <div class="board-icon">
                                         <span class="board-icon-circle kanban-text">
                                             <font-awesome-icon :icon="['fa', 'circle']" />
                                         </span>
                                     </div>
-                                    <div :class="(board._id == board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
-                                        <a :href="`/board?board_id=${board._id}`" v-if="(board._id != board_id)">
+                                    <div :class="(board._id == $route.query.board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
+                                        <span v-on:click="changeBoard(board._id)" v-if="(board._id != $route.query.board_id)">
                                             <div class="d-flex justify-content-between">
                                                 <span class="board-name">{{ board.name }}</span>
                                             </div>
-                                        </a>
+                                        </span>
                                         <span v-else>
                                             <div class="d-flex justify-content-between">
                                                 <span class="board-name">{{ board.name }}</span>
@@ -326,8 +327,6 @@
         data() {
             return {
                 board_id: null,
-                workspace: this.data.workspace,
-                boards: this.data.boards,
                 sidebar_open: false,
                 add_workspace: {
                     workspace_name: '',
@@ -345,6 +344,14 @@
                 type: Object
             }
         },
+        watch: {
+            '$route.query': function() {
+                this.$nextTick(() => {
+                    
+                    this.resizeKanbanContainer()
+                })
+            }
+        },
         mounted() {
             let urlParams = new URLSearchParams(window.location.search)
             this.board_id = urlParams.get('board_id')
@@ -360,9 +367,16 @@
             new ResizeObserver(() => {
                 this.resizeKanbanContainer()
             }).observe(document.getElementById("sidebar"))
-            // console.log(this.$store.state.auth.identity)
         },
         methods: {
+            changeBoard(board_id) {
+                this.$router.push({
+                    path: `/board`,
+                    query: {
+                        board_id: board_id
+                    }
+                })
+            },
             actionLogout() {
                 this.$cookies.remove('credentials');
                 this.$router.push('/login');
@@ -406,23 +420,20 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
-                        this.boards.push({
+                        let boards = structuredClone(this.$store.state.sidebar.sidebar_data.boards)
+                        let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                        boards.push({
                             _id: data._id,
                             name: this.add_board.board_name,
                             workspace_id: this.add_board.workspace_id,
                             lists: [],
                             members: [],
                         })
-                        this.add_board = {
-                            workspace_id: null,
-                            workspace_index: null,
-                            board_name: '',
-                        }
                         let sidebar_data = {
-                            workspaces: this.workspace,
-                            boards: this.boards
+                            workspaces: workspaces,
+                            boards: boards
                         }
-                        // this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                        this.$store.commit('sidebar/setSidebarData', sidebar_data)
                         this.$bvModal.hide('create_new_board')
                     }
                 })

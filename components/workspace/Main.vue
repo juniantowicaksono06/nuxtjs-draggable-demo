@@ -9,10 +9,7 @@
                 workspace: workspace
             }"/> -->
         <div class="d-flex w-100 position-relative h-100">
-            <Content :data="{
-                board: all_board,
-                workspace: workspace
-            }" :key="contentKey" />
+            <Content :key="contentKey" />
         </div>
     </div>
 </template>
@@ -23,37 +20,13 @@
     export default {
         data() {
             return {
-                workspace: [],
-                all_board: [],
                 sidebarKey: 0,
                 contentKey: 0
             }
         },
         mounted() {
-            this.loadDataWorkspace()
         },
         methods: {
-            loadDataWorkspace() {
-                this.$axios.$get(`/api/workspace`)
-                .then((response_workspace) => {
-                    if(response_workspace.status != 'OK') {
-                        return
-                    }
-                    this.$axios.$get(`/api/board`)
-                    .then((response_board) => {
-                        if(response_board.status != 'OK') {
-                            return
-                        }
-                        this.workspace = response_workspace.data
-                        this.all_board = response_board.data
-                        this.$nextTick()
-                        this.$forceUpdate()
-                        this.sidebarKey += 1
-                        this.contentKey += 2
-                    }) 
-                    
-                })
-            },
         },
         components: {
             TopBar,
