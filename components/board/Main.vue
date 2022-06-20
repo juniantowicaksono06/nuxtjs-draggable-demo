@@ -15,7 +15,7 @@
                         </span>
                         <!-- <span class="ml-1 d-flex" v-for="work in workspace" v-if="work._id == board.workspace_id._id"> -->
                             <div v-for="(member, member_index) in all_members" :key="member_index" class="ml-1 px-1 py-1 position-relative member" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
-                                marginLeft: '-20px'
+                                marginLeft: '-20px !important'
                             } : {})">
                                 <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
                                 <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
