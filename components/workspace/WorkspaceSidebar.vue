@@ -245,7 +245,7 @@
 <template>
     <div id="sidebar" class="h-100 px-2 sidebar-close" ref="sidebar_ref">
         <div id="sidebar_logo" ref="sidebar_logo_ref" class="pt-2">
-            <img src="img/IT-Rajawali.png" width="44" alt="">
+            <img src="/img/IT-Rajawali.png" width="44" alt="">
         </div>
         <div id="sidebar_header" ref="sidebar_header_ref" class="pt-3 pb-2">
             <div id="btn_sidebar_close" :class="(!sidebar_open ? 'd-none' : '')" v-on:click="sidebarClose">
@@ -273,9 +273,9 @@
                                     <i class="fa fa-users"></i>
                                 </span>
                             </div>
-                            <div class="sidebar-item d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
+                            <div class="d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
                                 <span class="">{{ work.name }}</span>
-                                <i class="fa fa-chevron-up"></i>
+                                <i class="fa fa-chevron-up d-inline-block mr-1 pt-1" ref="chevron_ref"></i>
                             </div>
                         </div>
                         <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
@@ -416,7 +416,6 @@
                     workspace_id: workspace_id,
                     workspace_index: index,
                     board_name: '',
-                    // board_visibility: 'public'
                 }
             },
             saveBoard() {

@@ -7,7 +7,7 @@
             <div class="float-left px-2 mb-2">
                 <div class="d-flex" v-if="(item.checklists.length > 0 || item.deadline.date != null)">
                     <span :class="(countChecklistChild.done ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="item.checklists.length > 0">
-                        <i class="fa fa-list-check"></i>
+                        <i class="fa fa-check"></i>
                         <span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
                     </span>
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
