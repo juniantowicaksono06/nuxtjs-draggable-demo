@@ -344,14 +344,6 @@
                 type: Object
             }
         },
-        watch: {
-            '$route.query': function() {
-                this.$nextTick(() => {
-                    
-                    this.resizeKanbanContainer()
-                })
-            }
-        },
         mounted() {
             let urlParams = new URLSearchParams(window.location.search)
             this.board_id = urlParams.get('board_id')
@@ -361,12 +353,7 @@
             // Listen to sidebar resize
             window.addEventListener('resize', () => {
                 this.calculateSidebarContainerHeight()
-                this.resizeKanbanContainer()
             })
-            this.resizeKanbanContainer()
-            new ResizeObserver(() => {
-                this.resizeKanbanContainer()
-            }).observe(document.getElementById("sidebar"))
         },
         methods: {
             changeBoard(board_id) {
@@ -381,14 +368,6 @@
                 this.$cookies.remove('credentials');
                 this.$router.push('/login');
                 // this.$store.commit('auth/destroy')
-            },
-            resizeKanbanContainer() {
-                let sidebar = document.getElementById("sidebar")
-                let width = window.innerWidth - sidebar.offsetWidth
-                let kanban_container = document.getElementById('kanban_container')
-                if(kanban_container) {
-                    kanban_container.style.width = (width - 60) + 'px'
-                }
             },
             calculateSidebarContainerHeight() {
                 let window_height = window.innerHeight

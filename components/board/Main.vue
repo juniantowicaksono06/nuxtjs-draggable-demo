@@ -87,14 +87,30 @@
     export default {
         async mounted() {
             this.loadDataBoard()
+            this.resizeKanbanContainer()
+            new ResizeObserver(() => {
+                this.resizeKanbanContainer()
+            }).observe(document.getElementById("sidebar"))
+            window.addEventListener('resize', () => {
+                this.resizeKanbanContainer()
+            })
         },
         watch: {
             '$route.query': function() {
                 this.board_id = this.$route.query.board_id
                 this.loadDataBoard()
+                this.resizeKanbanContainer()
             }
         },
         methods: {
+            resizeKanbanContainer() {
+                let sidebar = document.getElementById("sidebar")
+                let width = window.innerWidth - sidebar.offsetWidth
+                let kanban_container = document.getElementById('kanban_container')
+                if(kanban_container) {
+                    kanban_container.style.width = (width - 60) + 'px'
+                }
+            },
             storeOldValue(event) {
                 event.target.select()
                 this.old_value = this.board.name
@@ -150,7 +166,7 @@
                     }
                 }
                 this.$store.commit('sidebar/setSidebarData', sidebar_data)
-                document.title = this.board.name
+                document.title = `${this.board.name} Board`
                 if(check) {
                     this.resizeBoard()
                     return 
