@@ -21,7 +21,7 @@
             <div class="col-12 col-sm-6 col-md-3 mb-2">
                 <div class="card workspace-card hover-pointer bg-secondary" v-on:click="openCreateBoard">
                     <div class="card-body">
-                        <h6 class="mb-0 mt-2 text-center text-white"><font-awesome-icon :icon="['fa', 'plus']" /></h6>
+                        <h6 class="mb-0 mt-2 text-center text-white"><i class="fa fa-plus"></i></h6>
                         <h6 class="mb-0 text-center no-select text-white" style="margin: auto;">Create new board</h6>
                     </div>
                 </div>

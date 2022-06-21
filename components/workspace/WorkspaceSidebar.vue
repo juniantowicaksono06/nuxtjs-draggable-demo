@@ -194,6 +194,22 @@
             width: 60px;
         }
     }
+    @keyframes logo-anim-close {
+        from {
+            width: 84px;
+        }
+        to {
+            width: 44px;
+        }
+    }
+    @keyframes logo-anim-open {
+        from {
+            width: 44px;
+        }
+        to {
+            width: 84px;
+        }
+    }
     .workspace-item > ul {
         padding: 0;
         margin-bottom: 0;
@@ -211,38 +227,55 @@
     .workspace-card {
         min-height: 110px;
     }
+    #sidebar_logo {
+        display: flex;
+        justify-content: center;
+    }
+    .sidebar-anim-open > #sidebar_logo > img {
+        animation-name: logo-anim-open;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+    }
+    .sidebar-anim-close > #sidebar_logo > img {
+        animation-name: logo-anim-close;
+        animation-duration: 1s;
+        animation-fill-mode: forwards;
+    }
 </style>
 <template>
     <div id="sidebar" class="h-100 px-2 sidebar-close" ref="sidebar_ref">
+        <div id="sidebar_logo" ref="sidebar_logo_ref" class="pt-2">
+            <img src="img/IT-Rajawali.png" width="44" alt="">
+        </div>
         <div id="sidebar_header" ref="sidebar_header_ref" class="pt-3 pb-2">
             <div id="btn_sidebar_close" :class="(!sidebar_open ? 'd-none' : '')" v-on:click="sidebarClose">
-                <font-awesome-icon :icon="['fa', 'chevron-left']"/>
+                <i class="fa fa-chevron-left"></i>
                 <span class="ml-2 no-wrap">Close</span>
             </div>
             <div id="btn_sidebar_open" :class="(!sidebar_open ? '' : 'd-none')" v-on:click="sidebarOpen">
-                <font-awesome-icon :icon="['fa', 'chevron-right']" class="ml-2" />
+                <i class="fa fa-chevron-right ml-2"></i>
             </div>
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
-            <div class="d-flex justify-content-between mt-3 mb-2" id="workspace_label" ref="workspace_label_ref">
-                <nuxt-link to="/" class="text-white">Workspace</nuxt-link>
+            <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref">
+                <nuxt-link to="/" class="text-white d-inline-block w-100" v-if="$route.path != '/'">Workspace</nuxt-link>
+                <span v-else>Workspace</span>
                 <!-- <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
-                    <font-awesome-icon :icon="['fa', 'plus']" class="d-inline-block mt-1" />
+                    <i class="fa fa-plus"></i>
                 </button> -->
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-if="'workspace_id' in $store.state.auth.identity">
-                    <!-- <p>{{ $store.state.sidebar.sidebar_data.boards }}</p> -->
                     <div v-for="(work, index) in $store.state.sidebar.sidebar_data.workspaces" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id">
                         <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
                             <div class="workspace-icon">
                                 <span class="workspace-icon-square">
-                                    <font-awesome-icon :icon="['fa', 'users']" />
+                                    <i class="fa fa-users"></i>
                                 </span>
                             </div>
                             <div class="sidebar-item d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
                                 <span class="">{{ work.name }}</span>
-                                <font-awesome-icon :icon="['fa', 'chevron-up']" class="mt-1" ref="chevron_ref" />
+                                <i class="fa fa-chevron-up"></i>
                             </div>
                         </div>
                         <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
@@ -250,7 +283,7 @@
                                 <div class="d-flex justify-content-between">
                                     <div class="board-icon">
                                         <span class="board-icon-circle kanban-text">
-                                            <font-awesome-icon :icon="['fa', 'circle']" />
+                                            <i class="fa fa-circle"></i>
                                         </span>
                                     </div>
                                     <div :class="(board._id == $route.query.board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
@@ -270,7 +303,7 @@
                             <div>
                                 <div class="sidebar-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
                                     <button class="btn btn-transparent text-white kanban-text px-2">
-                                        <span><font-awesome-icon :icon="['fa', 'plus']"/> Create new board</span>
+                                        <span><i class="fa fa-plus"></i> Create new board</span>
                                     </button>
                                 </div>
                             </div>

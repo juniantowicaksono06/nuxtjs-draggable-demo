@@ -16,7 +16,7 @@
                                             <input v-model="username_input" type="text" class="form-control" placeholder="User Domain..." autofocus>
                                             <div class="input-group-append">
                                                 <div class="btn btn-primary login-normal-cursor">
-                                                    <font-awesome-icon :icon="['fa', 'user']"/>
+                                                    <i class="fa fa-user"></i>
                                                 </div>
                                             </div>
                                         </div>
@@ -27,7 +27,7 @@
                                             <input v-model="password_input" type="password" class="form-control" placeholder="Password..." autofocus>
                                             <div class="input-group-append">
                                                 <div class="btn btn-primary login-normal-cursor">
-                                                    <font-awesome-icon :icon="['fa', 'lock']"/>
+                                                    <i class="fa fa-lock"></i>
                                                 </div>
                                             </div>
                                         </div>

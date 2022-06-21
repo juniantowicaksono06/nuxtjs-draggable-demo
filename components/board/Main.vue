@@ -45,7 +45,7 @@
                                 <input ref="add_list_ref" v-model="add_list_value" class="form-control kanban-text" placeholder="Enter list title" v-on:keyup.enter="addList" />
                                 <div class="d-flex mt-2">
                                     <button class="btn btn-primary kanban-text" v-on:click="addList">Add List</button>
-                                    <button class="btn btn-transparent kanban-text" v-on:click="disableAddList()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                                    <button class="btn btn-transparent kanban-text" v-on:click="disableAddList()"><i class="fa fa-times"></i></button>
                                 </div>
                             </div>
                         </div>

@@ -64,7 +64,7 @@
         <ul class="topbar-list">
             <li class="topbar-list-item" v-on:click="toggleWorkspace">
                 <span>Workspace 
-                    <span class="ml-1"><font-awesome-icon :icon="['fa', 'chevron-down']" /></span>
+                    <span class="ml-1"><i class="fa fa-chevron-down"></i></span>
                 </span>
             </li>
         </ul>
@@ -74,7 +74,7 @@
                     <h6 class="text-center mb-0">
                         <span>Workspace</span>
                         <span class="float-right hover-pointer" v-on:click="hideWorkspace">
-                            <font-awesome-icon :icon="['fa', 'xmark']"/>
+                            <i class="fa fa-times"></i>
                         </span>
                     </h6>
                 </div>

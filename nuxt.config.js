@@ -32,6 +32,7 @@ export default {
   // ],
 
   css: [
+    '@fortawesome/fontawesome-free/css/all.min.css',
     '@/static/css/login.css',
     '@/static/css/kanban.css',
     '@/static/css/popup-card.css',
@@ -47,7 +48,7 @@ export default {
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
-    '@nuxtjs/fontawesome'
+    // '@nuxtjs/fontawesome'
   ],
 
   fontawesome: {

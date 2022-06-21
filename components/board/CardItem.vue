@@ -7,10 +7,11 @@
             <div class="float-left px-2 mb-2">
                 <div class="d-flex" v-if="(item.checklists.length > 0 || item.deadline.date != null)">
                     <span :class="(countChecklistChild.done ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="item.checklists.length > 0">
-                        <font-awesome-icon class="ml-1" :icon="['fa', 'list-check']"/><span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
+                        <i class="fa fa-list-check"></i>
+                        <span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
                     </span>
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
-                        <font-awesome-icon class="mr-1 kanban-text" :icon="['fa', 'clock']"/>
+                        <i class="fa fa-clock mr-1 kanban-text"></i>
                         <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" />
                         <span>{{ convertDate(item.deadline.date) }}</span>
                     </span>
@@ -35,7 +36,7 @@
                         </div>
                         <div style="width: 10%; margin: 0 auto; text-align: right;">
                             <button class="btn btn-transparent" v-on:click="hideModalItem($event)">
-                                <font-awesome-icon :icon="['fa', 'xmark']" />        
+                                <i class="fa fa-times"></i>
                             </button>
                         </div>
                     </div>
@@ -52,7 +53,7 @@
                                     </div>                               
                                     <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item.members.length > 0" v-on:click="showCardPopUp($event, 'members')">
                                         <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
-                                            <span><font-awesome-icon :icon="['fa', 'plus']" /></span>
+                                            <span><i class="fa fa-plus"></i></span>
                                         </p>
                                     </div>                               
                                 </div>
@@ -74,14 +75,14 @@
                             <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditDescriptionButton"></textarea>
                             <div :class="(show_edit_description ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
                                 <button class="btn btn-primary" v-on:click="changeDescription">Save Description</button>
-                                <button class="btn btn-default" v-on:click="hideEditDescriptionButton"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                                <button class="btn btn-default" v-on:click="hideEditDescriptionButton"><i class="fa fa-times"></i></button>
                             </div>
                             <!-- CHECKLISTS -->
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id">
                                 <div class="d-flex mb-2">
                                     <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" />
                                     <span class="btn btn-transparent" v-on:click="deleteChecklist($event, checklist_index, checklist, item.checklists)">
-                                        <font-awesome-icon :icon="['fa', 'trash']"/>
+                                        <i class="fa fa-trash"></i>
                                     </span>
                                 </div>
                                 <div class="mb-2">
@@ -108,14 +109,15 @@
                                     </div>
                                     <div class="float-right" style="margin-top: -5px;">
                                         <span class="kanban-text btn btn-transparent" v-on:click="deleteChecklistChild($event, child_index, child, checklist.childs, checklist._id)">
-                                            <font-awesome-icon :icon="['fa', 'trash']"/>
+                                            <i class="fa fa-trash"></i>
                                         </span>
                                     </div>
                                 </div>
                                 <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-block' : 'd-none')">
                                     <input v-on:keyup.enter="addChecklistChild" class="form-control kanban-text" placeholder="Add an item" v-model="add_checklist_child.item_name" />
                                     <button class="btn btn-primary mt-2 kanban-text" v-on:click="addChecklistChild">Add</button>
-                                    <button class="btn btn-transparent mt-2 kanban-text" v-on:click="disableAddChecklistChild()"><font-awesome-icon :icon="['fa', 'xmark']"/></button>
+                                    <button class="btn btn-transparent mt-2 kanban-text" v-on:click="disableAddChecklistChild()">
+                                    <i class="fa fa-times"></i></button>
                                 </div>
                                 <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-none' : 'd-block')">
                                     <button class="btn btn-light mt-2 kanban-text" v-on:click="enableAddChecklistChild(checklist_index, checklist._id)">Add an item</button>
@@ -125,15 +127,15 @@
                         <div class="col-12 col-sm-12 col-md-3 pl-0">
                             <p class="mb-1 text-bold kanban-text">Add to card</p>
                             <div class="modal-list-option" v-on:click="showCardPopUp($event, 'members')" ref="members_item_ref" @click.stop=''>
-                                <font-awesome-icon :icon="['fa', 'user']" class="kanban-text" />
+                                <i class="fa fa-user"></i>
                                 <span class="kanban-text ml-2">Member</span>
                             </div>
                             <div class="modal-list-option" v-on:click="showCardPopUp($event, 'checklist')" ref="checklist_item_ref" @click.stop=''>
-                                <font-awesome-icon :icon="['fa', 'check']" class="kanban-text" />
+                                <i class="fa fa-check"></i>
                                 <span class="kanban-text ml-2">Checklist</span>
                             </div>
                             <div class="modal-list-option" v-on:click="showCardPopUp($event, 'dates')" ref="dates_item_ref" @click.stop=''>
-                                <font-awesome-icon :icon="['fa', 'clock']" class="kanban-text" />
+                                <i class="fa fa-clock"></i>
                                 <span class="kanban-text ml-2">Dates</span>
                             </div>
                         </div>

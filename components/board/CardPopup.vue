@@ -7,7 +7,7 @@
                 <span v-if="(data.card_type == 'dates')">Dates</span>
                 <span v-if="(data.card_type == 'confirmation')">Confirmation</span>
                 <span class="float-right hover-pointer" v-on:click="closeCardPopUp">
-                    <font-awesome-icon :icon="['fa', 'xmark']"/>
+                    <i class="fa fa-times"></i>
                 </span>
             </h6>
         </div>
@@ -29,7 +29,7 @@
                                         {{ generateProfileName(member.name) }}
                                     </div>
                                     <p class="mb-0 mt-1 ml-2 profile-fullname member-fullname">{{ member.name }}</p>
-                                    <p class="mb-0 mt-1" v-for="selected in selected_members" v-if="(member._id == selected._id)"><font-awesome-icon :icon="['fa', 'check']" /></p>
+                                    <p class="mb-0 mt-1" v-for="selected in selected_members" v-if="(member._id == selected._id)"><i class="fa fa-check"></i></p>
                                 </div>
                             </div>
                         </div>
