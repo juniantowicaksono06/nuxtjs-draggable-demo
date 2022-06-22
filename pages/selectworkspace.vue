@@ -50,7 +50,8 @@
                 }, config)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        window.location.href = `/`
+                        // window.location.href = `/`
+                        this.$router.push('/')
                     }
                 })
                 .catch((error) => {

@@ -84,7 +84,8 @@
                         this.$cookies.set("credentials", ciphertext, {
                             path: "/",
                         });
-                        window.location.href = '/'
+                        // window.location.href = '/'
+                        this.$router.push('/')
                     }
                 })
                 .catch()

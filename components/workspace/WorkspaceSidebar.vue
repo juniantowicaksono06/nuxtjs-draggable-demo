@@ -391,7 +391,7 @@
         methods: {
             changeBoard(board_id) {
                 this.$router.push({
-                    path: `/board`,
+                    path: `/board/`,
                     query: {
                         board_id: board_id
                     }

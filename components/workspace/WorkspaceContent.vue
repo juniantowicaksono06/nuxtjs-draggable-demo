@@ -10,7 +10,7 @@
         </div>
         <div class="row">
             <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="board.workspace_id == $store.state.auth.identity.workspace_id._id">
-                <nuxt-link :to="`/board?board_id=${board._id}`">
+                <nuxt-link :to="`/board/?board_id=${board._id}`">
                     <div class="card workspace-card hover-pointer" style="border: none;">
                         <div class="card-body px-2 py-2 bg-primary text-white">
                             <h6 class="mb-0 no-select">{{ board.name }}</h6>
@@ -86,7 +86,7 @@
                             boards: boards
                         }
                         this.$store.commit('sidebar/setSidebarData', sidebar_data)
-                        this.$router.push(`/board?board_id=${data._id}`)
+                        this.$router.push(`/board/?board_id=${data._id}`)
                     }
                 })
                 .catch((error) => {

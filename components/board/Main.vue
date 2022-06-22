@@ -86,6 +86,7 @@
     import CardPopup from "./CardPopup.vue"
     export default {
         async mounted() {
+            this.board_id = this.$route.query.board_id
             this.loadDataBoard()
             this.resizeKanbanContainer()
             new ResizeObserver(() => {
@@ -100,7 +101,7 @@
                 this.board_id = this.$route.query.board_id
                 this.loadDataBoard()
                 this.resizeKanbanContainer()
-            }
+            },
         },
         methods: {
             resizeKanbanContainer() {
@@ -262,7 +263,7 @@
         },
         data() {
             return {
-                board_id: new URLSearchParams(window.location.search).get('board_id'),
+                board_id: null,
                 all_members: this.$store.state.members.all_members,
                 sidebar_observer: null,
                 sidebarKey: 0,
