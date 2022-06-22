@@ -14,7 +14,7 @@
                             <span class="text-white transparent-button font-sm btn">{{ board.workspace_id ? board.workspace_id.name : '' }} <span class="ml-1"></span></span>
                         </span>
                         <!-- <span class="ml-1 d-flex" v-for="work in workspace" v-if="work._id == board.workspace_id._id"> -->
-                            <div v-for="(member, member_index) in all_members" :key="member_index" class="ml-1 px-1 py-1 position-relative member" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
+                            <div v-for="(member, member_index) in $store.state.members.all_members" :key="member_index" class="ml-1 px-1 py-1 position-relative member" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
                                 marginLeft: '-20px !important'
                             } : {})">
                                 <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
@@ -28,7 +28,7 @@
                 <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
                     <div id="kanban_container" ref="kanban_container_ref">
                         <draggable tag="div" class="pb-5 d-flex" animation=250>
-                            <div v-for="(k, index) in board.lists" :key="index">
+                            <div v-for="(k, index) in board.lists" :key="k._id">
                                 <Card :data="{
                                     kanban: k,
                                     index: index,
@@ -102,8 +102,42 @@
                 this.loadDataBoard()
                 this.resizeKanbanContainer()
             },
+            'board_id': function() {
+                this.loadDataMember()
+            }
         },
         methods: {
+            loadDataBoard() {
+                let id = this.board_id
+                if(!id) {
+                    this.$router.push('/')
+                    return
+                }
+
+                this.$axios.$get(`/api/board?id=${id}`)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        if('data' in response == false) {
+                            this.$router.push('/')
+                            return
+                        }
+                        this.board = response.data
+                        this.$nextTick(() => {
+                            this.resizeBoard()
+                            document.title = `${this.board.name} Board`
+                        })
+                    }
+                })
+            },
+            loadDataMember() {
+                this.$axios.$get(`/api/member?board_id=${this.board_id}`)
+                .then((response_member) => {
+                    if(response_member.status == 'OK') {
+                        let {data} = response_member
+                        this.$store.commit('members/loadMembers', data)
+                    }
+                })
+            },
             resizeKanbanContainer() {
                 let sidebar = document.getElementById("sidebar")
                 let width = window.innerWidth - sidebar.offsetWidth
@@ -128,29 +162,6 @@
                     }
                     return initial
                 }
-            },
-            loadDataBoard() {
-                let id = this.board_id
-                if(!id) {
-                    this.$router.push('/')
-                    return
-                }
-
-                this.$axios.$get(`/api/board?id=${id}`)
-                .then((response) => {
-                    if(response.status == 'OK') {
-                        if('data' in response == false) {
-                            this.$router.push('/')
-                            return
-                        }
-                        this.board = response.data
-                        this.sidebarKey += 1
-                        this.$nextTick(() => {
-                            this.resizeBoard()
-                            document.title = `${this.board.name} Board`
-                        })
-                    }
-                })
             },
             changeBoardName(event, board_id) {
                 let check = false

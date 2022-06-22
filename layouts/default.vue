@@ -30,16 +30,6 @@
                     if(response_workspace.status != 'OK') {
                         return
                     }
-                    let {data} = response_workspace
-                    if(this.$store.state.auth.identity.workspace_id) {
-                        this.$axios.$get(`/api/member?workspace_id=${this.$store.state.auth.identity.workspace_id._id}`)
-                        .then((response_member) => {
-                            if(response_member.status == 'OK') {
-                                let {data} = response_member
-                                this.$store.commit('members/loadMembers', data)
-                            }
-                        })
-                    }
                     this.$axios.$get(`/api/board`)
                     .then((response_board) => {
                         if(response_board.status != 'OK') {
