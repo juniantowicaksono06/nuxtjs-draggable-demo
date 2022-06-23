@@ -1,6 +1,7 @@
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <template>
-    <div class="w-100 h-100">
-        <div class="d-flex position-relative w-100 h-100">
+    <div class="w-100 h-100" v-on:click="closePopUp">
+        <div class="d-flex w-100 h-100">
             <div class="container-fluid">
                 <div class="row" id="toolbar_section">
                     <div class="d-flex">
@@ -13,16 +14,32 @@
                         <span class="ml-1">
                             <span class="text-white transparent-button font-sm btn">{{ board.workspace_id ? board.workspace_id.name : '' }} <span class="ml-1"></span></span>
                         </span>
-                        <!-- <span class="ml-1 d-flex" v-for="work in workspace" v-if="work._id == board.workspace_id._id"> -->
-                            <div v-for="(member, member_index) in $store.state.members.all_members" :key="member_index" class="ml-1 px-1 py-1 position-relative member" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
-                                marginLeft: '-20px !important'
-                            } : {})">
-                                <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
-                                <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
-                                    {{ generateProfileName(member.name) }}
-                                </div>
+                        <div v-for="(member, member_index) in $store.state.members.all_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
+                            marginLeft: '-20px !important'
+                        } : {})">
+                            <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
+                            <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
+                                {{ generateProfileName(member.name) }}
                             </div>
-                        <!-- </span> -->
+                        </div>
+                        <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: 0" v-on:click="togglePopUp($event)">
+                            <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
+                                <span><i class="fa fa-plus"></i></span>
+                            </p>
+                        </div>                               
+                        <PopUp title="Guest Members" :show="show_popup" :popup_trigger="popup_trigger" @close="closePopUp">
+                            <template slot="component_render" @click.stop="">
+                                <div @click.stop="">
+                                    <div class="form-group">
+                                        <multiselect :options="guestMember" :searchable="true" :multiple="true" :close-on-select="false" :clear-on-select="true" track-by="name" label="name" v-model="member_multiselect" :hide-selected="true">
+                                        </multiselect>
+                                    </div>
+                                    <div class="form-group">
+                                        <button class="btn btn-primary btn-block" v-on:click="saveMember">Save</button>
+                                    </div>
+                                </div>
+                            </template>
+                        </PopUp>
                     </div>
                 </div>
                 <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
@@ -83,7 +100,9 @@
     import Card from "./Card.vue"
     import CardProfileMember from "./CardProfileMember.vue"
     import Topbar from "../Topbar.vue"
-    import CardPopup from "./CardPopup.vue"
+    import PopUp from './PopUp.vue'
+    import Multiselect from 'vue-multiselect'
+
     export default {
         async mounted() {
             this.board_id = this.$route.query.board_id
@@ -104,9 +123,59 @@
             },
             'board_id': function() {
                 this.loadDataMember()
+                this.loadDataAllMember()
             }
         },
+        computed: {
+            guestMember() {
+                return this.all_members.filter((value) => {
+                    let current_workspace = this.$store.state.auth.identity.workspace_id._id
+                    if(value.workspace_id != current_workspace) return value
+                })
+            },
+        },
         methods: {
+            saveMember() {
+                let member_exist = false
+                let index = null;
+                let members_id = []
+                let board_members_and_guest = structuredClone(this.$store.state.members.all_members)
+                let board_members = []
+                let current_workspace = this.$store.state.auth.identity.workspace_id._id
+                for(let a = 0; a < board_members_and_guest.length; a++) {
+                    if(board_members_and_guest[a].workspace_id == current_workspace) {
+                        board_members.push(board_members_and_guest[a])
+                    }
+                }
+                if(this.member_multiselect.length > 0) {
+                    for(let a = 0; a < this.member_multiselect.length; a++) {
+                        members_id.push(this.member_multiselect[a]._id)
+                        board_members.push(this.member_multiselect[a])
+                    }
+                }
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$store.commit('members/loadMembers', board_members)
+                this.$axios.$put(`/api/board/member`, {
+                    id: this.board_id,
+                    members: members_id
+                }, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                        this.show_popup = false
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            closePopUp() {
+                this.show_popup = false
+            },
             loadDataBoard() {
                 let id = this.board_id
                 if(!id) {
@@ -135,8 +204,42 @@
                     if(response_member.status == 'OK') {
                         let {data} = response_member
                         this.$store.commit('members/loadMembers', data)
+                        data = data.filter((value) => {
+                            let current_workspace = this.$store.state.auth.identity.workspace_id._id
+                            if(value.workspace_id != current_workspace) return value
+                        })
+                        this.member_multiselect = data
                     }
                 })
+            },
+            loadDataAllMember() {
+                this.$axios.$get(`/api/member`)
+                .then((response_member) => {
+                    if(response_member.status == 'OK') {
+                        let {data} = response_member
+                        this.all_members = data
+                    }
+                })
+            },
+            togglePopUp(event) {
+                this.show_popup = !this.show_popup
+                if(this.show_popup) {
+                    let rect = event.currentTarget.getBoundingClientRect()
+                    let obj = {
+                        top: rect.top,
+                        right: rect.right,
+                        bottom: rect.bottom,
+                        left: rect.left,
+                        width: rect.width,
+                        height: rect.height,
+                        x: rect.x,
+                        y: rect.y
+                    }
+                    this.popup_trigger = obj
+                }
+                else {
+                    this.popup_trigger = null
+                }
             },
             resizeKanbanContainer() {
                 let sidebar = document.getElementById("sidebar")
@@ -274,8 +377,12 @@
         },
         data() {
             return {
+                show_popup: false,
+                popup_trigger: null,
                 board_id: null,
-                all_members: this.$store.state.members.all_members,
+                all_members: [],
+                member_multiselect: [],
+                board_members: this.$store.state.members.all_members,
                 sidebar_observer: null,
                 sidebarKey: 0,
                 workspace_id_selected: null,
@@ -303,7 +410,8 @@
             draggable,
             Topbar,
             CardProfileMember,
-            CardPopup,
+            PopUp,
+            Multiselect
         }
     }
 </script>
