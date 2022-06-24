@@ -48,7 +48,7 @@
         overflow-y: auto;
         overflow-x: hidden;
     }
-    .sidebar-anim-close #sidebar_container {
+    .sidebar-anim-close #sidebar_container, .sidebar-close #sidebar_container {
         overflow: hidden;
     }
     .sidebar-anim-open #sidebar_container {
@@ -248,11 +248,11 @@
             <img src="/img/IT-Rajawali.png" width="44" alt="">
         </div>
         <div id="sidebar_header" ref="sidebar_header_ref" class="pt-3 pb-2">
-            <div id="btn_sidebar_close" :class="(!sidebar_open ? 'd-none' : '')" v-on:click="sidebarClose">
+            <div id="btn_sidebar_close" :class="(!sidebar_open ? 'd-none' : '')" v-on:click="closeSidebar">
                 <i class="fa fa-chevron-left"></i>
                 <span class="ml-2 no-wrap">Close</span>
             </div>
-            <div id="btn_sidebar_open" :class="(!sidebar_open ? '' : 'd-none')" v-on:click="sidebarOpen">
+            <div id="btn_sidebar_open" :class="(!sidebar_open ? '' : 'd-none')" v-on:click="openSidebar">
                 <i class="fa fa-chevron-right ml-2"></i>
             </div>
         </div>
@@ -260,9 +260,6 @@
             <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref">
                 <nuxt-link to="/" class="text-white d-inline-block w-100" v-if="$route.path != '/'">Workspace</nuxt-link>
                 <span v-else>Workspace</span>
-                <!-- <button class="btn btn-transparent text-white py-0 px-0" v-on:click="openAddWorkspace" >
-                    <i class="fa fa-plus"></i>
-                </button> -->
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-if="'workspace_id' in $store.state.auth.identity">
@@ -343,7 +340,7 @@
                         <label class="kanban-text">
                             Board title
                         </label>
-                        <input type="text" class="form-control" placeholder="Board title" v-model="add_board.board_name" />
+                        <input type="text" class="form-control" placeholder="Board title" v-model="add_board.board_name" v-on:keypress.enter="saveBoard()" />
                     </div>
                 </div>
                 <div class="w-100 mt-3">
@@ -387,6 +384,10 @@
             window.addEventListener('resize', () => {
                 this.calculateSidebarContainerHeight()
             })
+            new ResizeObserver(() => {
+                console.log("TES")
+                this.calculateSidebarContainerHeight()
+            }).observe(this.$refs.sidebar_logo_ref)
         },
         computed: {
             getMemberWorkspaceInBoard() {
@@ -419,7 +420,8 @@
                 if(typeof this.$refs.workspace_label_ref != 'undefined') {
                     let workspace_label_height = this.$refs.workspace_label_ref.offsetHeight
                     let sidebar_header_height = this.$refs.sidebar_header_ref.offsetHeight
-                    document.getElementById("sidebar_container").style.height = ( window_height - (workspace_label_height + sidebar_header_height + 85) ) + 'px'
+                    let workspace_icon = this.$refs.sidebar_logo_ref.offsetHeight
+                    this.$refs.sidebar_container_ref.style.height = ( window_height - (workspace_icon + workspace_label_height + sidebar_header_height + 35) ) + 'px'
                 }
             },
             openCreateBoard(event, index, workspace_id) {
@@ -492,12 +494,14 @@
                     workspace_item_ref.add('workspace-item-open')
                 return
             },
-            sidebarClose() {
+            closeSidebar() {
                 this.$refs.sidebar_ref.classList.remove('sidebar-anim-open')
                 this.$refs.sidebar_ref.classList.add('sidebar-anim-close')
+                this.$refs.sidebar_container_ref.scrollTo(0, 0)
                 this.sidebar_open = false
             },
-            sidebarOpen() {
+            openSidebar() {
+                this.$refs.sidebar_container_ref.scrollTo(0, 0)
                 this.$refs.sidebar_ref.classList.remove('sidebar-anim-close')
                 this.$refs.sidebar_ref.classList.remove('sidebar-close')
                 this.$refs.sidebar_ref.classList.add('sidebar-anim-open')

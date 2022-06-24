@@ -106,9 +106,9 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$post(`/api/board`, new URLSearchParams({
+                this.$axios.$put(`/api/list`, new URLSearchParams({
                     name: this.kanban_card.name,
-                    workspace_id: this.data.workspace_id
+                    id: this.kanban_card._id
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
