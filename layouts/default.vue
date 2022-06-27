@@ -46,6 +46,9 @@
                         this.loading = false
                     }) 
                 })
+                .catch((error) => {
+
+                })
             }
         },
         data() {

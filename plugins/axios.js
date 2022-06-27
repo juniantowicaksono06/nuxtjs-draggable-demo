@@ -1,6 +1,6 @@
 import https from 'https'
 
-export default function ({ $axios, $toast, redirect, store }) {
+export default function ({ $axios, $toast, redirect, store, app }) {
     $axios.defaults.httpsAgent = new https.Agent({ rejectUnauthorized: false })
     $axios.onRequest(config => {
         if (store.state.auth.credentials) {
@@ -21,7 +21,9 @@ export default function ({ $axios, $toast, redirect, store }) {
             alert('Oops...Something went wrong')
         } else if (code == 401) {
             alert('Invalid user domain, password or access token expired')
+            store.commit('auth/destroy')
+            app.$cookies.remove('credentials')
+            return redirect('/login/')
       }
-
     })
   }
