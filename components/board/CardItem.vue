@@ -138,13 +138,26 @@
                                 <i class="fa fa-clock"></i>
                                 <span class="kanban-text ml-2">Dates</span>
                             </div>
+                            <div class="mt-5">
+                                <div class="modal-list-option" v-on:click="showCardPopUp($event, 'confirmation', {
+                                    btn_confirm_block: true,
+                                    btn_confirm_yes: 'danger',
+                                    confirm_text: 'Are you sure you want to archive this card?',
+                                    action_confirm_yes: archiveItem,
+                                    action_confirm_no: closeCardPopUp
+                                })" ref="archive_item_ref" @click.stop="">
+                                    <i class="fa fa-archive"></i>
+                                    <span class="kanban-text ml-2">Archive</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="card_pop_up" ref="card_pop_up_ref" :class="(show_popup ? 'd-block' : 'd-none')" @click.stop="">
                         <CardPopup :data="{
                             card_type: card_type,
-                            data_item: item
-                        }" 
+                            data_item: item,
+                        }"
+                        :option="option"
                         :closeCardPopUp="closeCardPopUp" 
                         :generateProfileName="generateProfileName"
                        />
@@ -167,6 +180,7 @@
                 item: this.data.item,
                 show_modal: false,
                 kanban_name: this.data.card_name,
+                option: {},
                 // To Show Pop Up
                 show_popup: false,
                 // To Show Profile
@@ -195,6 +209,7 @@
                     this.setPopupOffset()
                 })
             })
+            this.initOption()
         },
         computed: {
             countChecklistChild() {
@@ -252,6 +267,20 @@
             },
         },
         methods: {
+            archiveItem() {
+                this.closeCardPopUp()
+                this.hideModalItem()
+                this.$emit('archiveItem', this.data.index_item, this.item._id)
+            },
+            initOption() {
+                this.option = {
+                    btn_confirm_block: true,
+                    btn_confirm_yes: 'danger',
+                    confirm_text: '',
+                    action_confirm_yes: null,
+                    action_confirm_no: null
+                }
+            },
             storeOldValue(name) {
                 this.old_value = name
             },
@@ -412,16 +441,13 @@
                 .catch((error) => {
                     alert('Error: Telah terjadi kesalahan')
                 })
-                // checklist.splice(child_index, 1) 
             },
             showModalItem(event, data, card_name) {
-                // this.$bvModal.show("modal_item")
                 this.closePopUp()
                 this.show_modal = true
             },
             hideModalItem(event) {
                 this.show_modal = false
-                // this.$bvModal.hide("modal_item")
             },
             closePopUp() {
                 this.closeProfileCard()
@@ -430,6 +456,7 @@
             closeCardPopUp() {
                 this.show_popup = false
                 this.card_type = ''
+                this.initOption()
             },
             setPopupOffset() {
                 setTimeout(() => {
@@ -455,9 +482,10 @@
                     }
                 })
             },
-            showCardPopUp(event, type) {
+            showCardPopUp(event, type, option = {}) {
                 this.show_popup = !this.show_popup
                 if(!this.show_popup) return
+                this.option = option
                 this.$nextTick(() => {
                     let element = event.currentTarget.getBoundingClientRect()
                     this.target_element = event.currentTarget
