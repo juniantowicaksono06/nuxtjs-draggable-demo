@@ -385,7 +385,6 @@
                 this.calculateSidebarContainerHeight()
             })
             new ResizeObserver(() => {
-                console.log("TES")
                 this.calculateSidebarContainerHeight()
             }).observe(this.$refs.sidebar_logo_ref)
         },

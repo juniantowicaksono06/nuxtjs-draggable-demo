@@ -129,8 +129,11 @@
         computed: {
             guestMember() {
                 return this.all_members.filter((value) => {
-                    let current_workspace = this.$store.state.auth.identity.workspace_id._id
-                    if(value.workspace_id != current_workspace) return value
+                    if(this.board.workspace_id){
+                        let current_workspace = this.board.workspace_id._id
+                        let current_user_id = this.$store.state.auth.identity._id
+                        if(value.workspace_id != current_workspace && current_user_id != value._id) return value
+                    }
                 })
             },
         },
@@ -205,8 +208,9 @@
                         let {data} = response_member
                         this.$store.commit('members/loadMembers', data)
                         data = data.filter((value) => {
-                            let current_workspace = this.$store.state.auth.identity.workspace_id._id
-                            if(value.workspace_id != current_workspace) return value
+                            let current_workspace = this.board.workspace_id._id
+                            let current_user_id = this.$store.state.auth.identity._id
+                            if(value.workspace_id != current_workspace && current_user_id != value._id) return value
                         })
                         this.member_multiselect = data
                     }
