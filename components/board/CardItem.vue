@@ -516,6 +516,7 @@
             isDeadline(date) {
                 let d = new Date(date)
                 let currentDate = new Date()
+                d.setDate(d.getDate() + 1)
                 if(d.getTime() < currentDate.getTime()) return true
                 return false
             },
