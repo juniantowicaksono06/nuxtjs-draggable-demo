@@ -142,7 +142,7 @@
                 let member_exist = false
                 let index = null;
                 let members_id = []
-                let board_members_and_guest = structuredClone(this.$store.state.members.all_members)
+                let board_members_and_guest = Object.assign([], this.$store.state.members.all_members)
                 let board_members = []
                 let current_workspace = this.$store.state.auth.identity.workspace_id._id
                 for(let a = 0; a < board_members_and_guest.length; a++) {
@@ -278,7 +278,7 @@
                     check = true
                 }
                 this.old_value = ''
-                let sidebar_data = structuredClone(this.$store.state.sidebar.sidebar_data)
+                let sidebar_data = Object.assign([], this.$store.state.sidebar.sidebar_data)
                 for(let a = 0; a < sidebar_data.boards.length; a++) {
                     if(sidebar_data.boards[a]._id == board_id) {
                         sidebar_data.boards[a].name = this.board.name

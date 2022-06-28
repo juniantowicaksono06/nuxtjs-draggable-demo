@@ -390,7 +390,7 @@
         },
         computed: {
             getMemberWorkspaceInBoard() {
-                let boards = structuredClone(this.$store.state.sidebar.sidebar_data.boards)
+                let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                 let workspace_id = []
                 for(let i = 0; i < boards.length; i++) {
                     if(boards[i].members.includes(this.$store.state.auth.identity._id)) {
@@ -444,7 +444,7 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
-                        let boards = structuredClone(this.$store.state.sidebar.sidebar_data.boards)
+                        let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
                         boards.push({
                             _id: data._id,
