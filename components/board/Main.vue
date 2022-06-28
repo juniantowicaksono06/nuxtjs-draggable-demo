@@ -44,8 +44,8 @@
                 </div>
                 <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
                     <div id="kanban_container" ref="kanban_container_ref">
-                        <draggable tag="div" class="pb-5 d-flex" animation=250>
-                            <div v-for="(k, index) in board.lists" :key="k._id">
+                        <draggable v-model="board.lists" tag="div" class="pb-5 d-flex" animation=250 @end="endDrag">
+                            <div v-for="(k, index) in board.lists" :key="k._id" v-on:mousedown="dragCard(k._id, index)">
                                 <Card :data="{
                                     kanban: k,
                                     index: index,
@@ -138,6 +138,28 @@
             },
         },
         methods: {
+            endDrag($event) {
+                this.drag_data['index'] = $event.newIndex.toString()
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$put(`/api/list/slide`, this.drag_data, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                        this.drag_data = {}
+                    }
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
+            },
+            dragCard(card_id, index){
+                this.drag_data['board_id'] = this.board_id
+                this.drag_data['list_id'] = card_id
+            },
             saveMember() {
                 let member_exist = false
                 let index = null;
@@ -406,7 +428,8 @@
                 add_to_card_type: '',
 
                 // MAIN DATA FOR BOARD AND CARDS
-                board: {}
+                board: {},
+                drag_data: {}
             }
         },
         components: {

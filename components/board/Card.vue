@@ -18,7 +18,6 @@
                 <strong>+</strong> Add Item
             </div>
             <div class="add-item kanban-item w-100 px-0 py-0 kanban-text" :class="((add_item_enabled == true && kanban_card._id == add_item_id) ? 'd-block' : 'd-none')">
-                <!-- <textarea ref="add_item_ref" v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text add-item" style="resize: none;" placeholder="Enter a title for this card"></textarea> -->
                 <input ref="add_item_ref" type="text" v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text add-item" style="resize: none;" placeholder="Enter a title for this card"  v-on:keyup.enter="addItem">
                 <div class="d-flex mt-2">
                     <button class="btn btn-primary kanban-text" v-on:click="addItem">Add Item</button>
