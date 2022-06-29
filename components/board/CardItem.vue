@@ -395,7 +395,7 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         // Do Something
-                        this.hideEditDescriptionButton()
+                        this.hideEditButton('description')
                     }
                 })
                 .catch((error) => {
