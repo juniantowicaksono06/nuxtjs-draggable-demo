@@ -66,7 +66,7 @@
                         list_id: this.kanban_card.cards[index]._id
                     }
                 }
-                this.$axios.$delete(`/api/card/${id}`, config)
+                this.$axios.$delete(`/api/card/`, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                     }

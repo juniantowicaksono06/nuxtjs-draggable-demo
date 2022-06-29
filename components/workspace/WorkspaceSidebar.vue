@@ -257,7 +257,7 @@
             </div>
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
-            <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref">
+            <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace_id">
                 <nuxt-link to="/" class="text-white d-inline-block w-100" v-if="$route.path != '/'">Workspace</nuxt-link>
                 <span v-else>Workspace</span>
             </div>
