@@ -1,3 +1,9 @@
+<style scoped>
+    #comment_list {
+        max-height: 600px;
+        overflow: auto;
+    }
+</style>
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
         <div class="py-2 px-2">
@@ -9,6 +15,10 @@
                     <span :class="(countChecklistChild.done && countChecklistChild.checklist_done != 0 ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="item.checklists.length > 0">
                         <i class="fa fa-check"></i>
                         <span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
+                    </span>
+                    <span class="kanban-text mr-2" v-if="item.comments">
+                        <i class="fa fa-comment"></i>
+                        <span class="px-1 kanban-text">{{ item.comments.length }}</span>
                     </span>
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
                         <i class="fa fa-clock mr-1 kanban-text"></i>
@@ -30,10 +40,12 @@
             <b-modal class="modal-item" v-model="show_modal" @hide="closePopUp" hide-footer size="lg" hide-header>
                 <div class="container-fluid" v-on:click="closePopUp">
                     <div class="d-flex justify-content-between" id="modal_header">
+                        <!-- CARD ITEM NAME -->
                         <div class="mb-1" style="width: 90%;">
                             <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="changeItemName" v-on:focus="storeOldValue(item.name)" v-on:keyup.enter="$event.target.blur()" />
                             <h6 class="pr-0 no-select">in list <b>{{ kanban_name }}</b></h6>
                         </div>
+                        <!-- CLOSE MODAL BUTTON -->
                         <div style="width: 10%; margin: 0 auto; text-align: right;">
                             <button class="btn btn-transparent" v-on:click="hideModalItem($event)">
                                 <i class="fa fa-times"></i>
@@ -70,15 +82,15 @@
                         </div>
                     </div>
                     <div class="row ml-0 pl-0 pr-0" id="modal_content">
-                        <div class="col-12 col-sm-12 col-md-9 pl-0 mt-2">
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 pl-0 mt-2">
                             <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Description</h5>
-                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditDescriptionButton"></textarea>
-                            <div :class="(show_edit_description ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
+                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditButton('description')" rows="5"></textarea>
+                            <div :class="(show_edit_button['description'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
                                 <button class="btn btn-primary" v-on:click="changeDescription">Save Description</button>
-                                <button class="btn btn-default" v-on:click="hideEditDescriptionButton"><i class="fa fa-times"></i></button>
+                                <button class="btn btn-default" v-on:click="hideEditButton('description')"><i class="fa fa-times"></i></button>
                             </div>
                             <!-- CHECKLISTS -->
-                            <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id">
+                            <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id" v-if="item.checklists.length > 0">
                                 <div class="d-flex mb-2">
                                     <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" />
                                     <span class="btn btn-transparent" v-on:click="deleteChecklist($event, checklist_index, checklist, item.checklists)">
@@ -124,7 +136,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-sm-12 col-md-3 pl-0">
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-3 pl-0">
                             <p class="mb-1 text-bold kanban-text">Add to card</p>
                             <div class="modal-list-option" v-on:click="showCardPopUp($event, 'members')" ref="members_item_ref" @click.stop=''>
                                 <i class="fa fa-user"></i>
@@ -151,6 +163,28 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- COMMENTS -->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 mt-3 pl-0" id="comments">
+                            <div class="form-group pl-0 ml-0">
+                                <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Comments</h5>
+                                <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-on:focus="showEditButton('comments')" v-model="comment"></textarea>
+                            </div>
+                            <div :class="(show_edit_button['comments'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
+                                <button class="btn btn-primary" v-on:click="sendComment">
+                                    Send
+                                </button>
+                                <button class="btn btn-default" v-on:click="hideEditButton('comments')">
+                                    <span><i class="fa fa-times"></i></span>
+                                </button>
+                            </div>
+                            <div class="row mt-3" id="comment_list" v-if="item.comments">
+                                <div class="col-12">
+                                    <div v-for="(comment, comment_index) in item.comments">
+                                        <Comment :data="{...comment, initialName: generateProfileName(comment.name), index: comment_index}" @editComment="editComment" @replyComment="replyComment" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div id="card_pop_up" ref="card_pop_up_ref" :class="(show_popup ? 'd-block' : 'd-none')" @click.stop="">
                         <CardPopup :data="{
@@ -172,6 +206,8 @@
     import draggable from 'vuedraggable'
     import CardProfileMember from './CardProfileMember.vue'
     import CardPopup from './CardPopup.vue'
+    import Comment from './Comment.vue'
+    import * as moment from 'moment'
     export default {
         data() {
             return {
@@ -181,11 +217,16 @@
                 show_modal: false,
                 kanban_name: this.data.card_name,
                 option: {},
+                show_edit_button: {
+                    comments: false,
+                    description: false
+                },
+                comment: '',
                 // To Show Pop Up
                 show_popup: false,
                 // To Show Profile
                 show_profile: false,
-                show_edit_description: false,
+                // show_edit_description: false,
                 add_checklist_child: {
                     enable: false,
                     index: null,
@@ -267,6 +308,56 @@
             },
         },
         methods: {
+            editComment(index, value) {
+                this.item.comments[index].text = value            
+            },
+            replyComment(text) {
+                let profile = this.$store.state.auth.identity.name
+                
+                this.hideEditButton('comments')
+                let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+                let date = new Date().toLocaleString('en-US', {
+                    timeZone: currentTimezone
+                })
+                if(this.item.comments) {
+                    this.item.comments.unshift({
+                        name: profile,
+                        date: date,
+                        user_domain: this.$store.state.auth.identity.user_domain,
+                        profile_pic: '',
+                        text: text
+                    })
+                }
+                this.comment = ''
+            },
+            sendComment() {
+                let profile = this.$store.state.auth.identity.name
+                
+                this.hideEditButton('comments')
+                let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+                let date = new Date().toLocaleString('en-US', {
+                    timeZone: currentTimezone
+                })
+                if(this.item.comments) {
+                    this.item.comments.unshift({
+                        name: profile,
+                        date: date,
+                        user_domain: this.$store.state.auth.identity.user_domain,
+                        profile_pic: '',
+                        text: this.comment
+                    })
+                }
+                else {
+                    this.item.comments = [{
+                        name: profile,
+                        date: date,
+                        user_domain: this.$store.state.auth.identity.user_domain,
+                        profile_pic: '',
+                        text: this.comment
+                    }]
+                }
+                this.comment = ''
+            },
             archiveItem() {
                 this.closeCardPopUp()
                 this.hideModalItem()
@@ -284,11 +375,11 @@
             storeOldValue(name) {
                 this.old_value = name
             },
-            showEditDescriptionButton() {
-                this.show_edit_description = true
+            showEditButton(target) {
+                this.show_edit_button[`${target}`] = true
             },
-            hideEditDescriptionButton() {
-                this.show_edit_description = false
+            hideEditButton(target) {
+                this.show_edit_button[`${target}`] = false
             },
             changeDescription() {
                 let config = {
@@ -629,6 +720,7 @@
         components: {
             draggable,
             CardProfileMember,
+            Comment,
             CardPopup
         },
         props: {
