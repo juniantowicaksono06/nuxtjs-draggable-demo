@@ -44,8 +44,8 @@
                 </div>
                 <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
                     <div id="kanban_container" ref="kanban_container_ref">
-                        <draggable tag="div" class="pb-5 d-flex" animation=250>
-                            <div v-for="(k, index) in board.lists" :key="k._id">
+                        <draggable v-model="board.lists" tag="div" class="pb-5 d-flex" animation=250 @end="endDrag">
+                            <div v-for="(k, index) in board.lists" :key="k._id" v-on:mousedown="dragCard(k._id, index)">
                                 <Card :data="{
                                     kanban: k,
                                     index: index,
@@ -138,11 +138,33 @@
             },
         },
         methods: {
+            endDrag($event) {
+                this.drag_data['index'] = $event.newIndex.toString()
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$put(`/api/list/slide`, this.drag_data, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        // Do Something
+                        this.drag_data = {}
+                    }
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
+            },
+            dragCard(card_id, index){
+                this.drag_data['board_id'] = this.board_id
+                this.drag_data['list_id'] = card_id
+            },
             saveMember() {
                 let member_exist = false
                 let index = null;
                 let members_id = []
-                let board_members_and_guest = structuredClone(this.$store.state.members.all_members)
+                let board_members_and_guest = Object.assign([], this.$store.state.members.all_members)
                 let board_members = []
                 let current_workspace = this.$store.state.auth.identity.workspace_id._id
                 for(let a = 0; a < board_members_and_guest.length; a++) {
@@ -278,7 +300,7 @@
                     check = true
                 }
                 this.old_value = ''
-                let sidebar_data = structuredClone(this.$store.state.sidebar.sidebar_data)
+                let sidebar_data = Object.assign([], this.$store.state.sidebar.sidebar_data)
                 for(let a = 0; a < sidebar_data.boards.length; a++) {
                     if(sidebar_data.boards[a]._id == board_id) {
                         sidebar_data.boards[a].name = this.board.name
@@ -406,7 +428,8 @@
                 add_to_card_type: '',
 
                 // MAIN DATA FOR BOARD AND CARDS
-                board: {}
+                board: {},
+                drag_data: {}
             }
         },
         components: {

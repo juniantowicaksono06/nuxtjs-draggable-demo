@@ -45,13 +45,33 @@
                         'Content-Type': 'application/json'
                     }
                 }
+                if(!this.selected_workspace) return
                 this.$axios.$post(`/api/workspace/select`, {
                     workspace_id: this.selected_workspace
                 }, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         // window.location.href = `/`
-                        this.$router.push('/')
+                        this.$axios.$get(`/api/workspace`)
+                        .then((response_workspace) => {
+                            if(response_workspace.status != 'OK') {
+                                return
+                            }
+                            this.$axios.$get(`/api/board`)
+                            .then((response_board) => {
+                                if(response_board.status != 'OK') {
+                                    return
+                                }
+                                this.$store.commit('sidebar/setSidebarData', {
+                                    workspaces: response_workspace.data,
+                                    boards: response_board.data
+                                })
+                                this.$router.push('/')
+                            }) 
+                        })
+                        .catch((error) => {
+
+                        })
                     }
                 })
                 .catch((error) => {

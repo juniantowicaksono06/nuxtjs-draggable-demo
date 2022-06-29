@@ -257,7 +257,7 @@
             </div>
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
-            <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref">
+            <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace_id">
                 <nuxt-link to="/" class="text-white d-inline-block w-100" v-if="$route.path != '/'">Workspace</nuxt-link>
                 <span v-else>Workspace</span>
             </div>
@@ -390,7 +390,7 @@
         },
         computed: {
             getMemberWorkspaceInBoard() {
-                let boards = structuredClone(this.$store.state.sidebar.sidebar_data.boards)
+                let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                 let workspace_id = []
                 for(let i = 0; i < boards.length; i++) {
                     if(boards[i].members.includes(this.$store.state.auth.identity._id)) {
@@ -444,7 +444,7 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
-                        let boards = structuredClone(this.$store.state.sidebar.sidebar_data.boards)
+                        let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
                         boards.push({
                             _id: data._id,

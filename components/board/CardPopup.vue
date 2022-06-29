@@ -12,6 +12,7 @@
             </h6>
         </div>
         <div class="card-body px-1 py-1">
+            <!-- MEMBERS TYPES -->
             <div id="members_type" :class="(data.card_type == 'members' ? 'type-active': 'type-inactive')">
                 <div class="row">
                     <div class="col-12">
@@ -36,10 +37,11 @@
                     </div>
                 </div>
             </div>
+            <!-- CHECKLIST TYPES -->
             <div id="checklist_type" :class="(data.card_type == 'checklist' ? 'type-active': 'type-inactive')">
                 <div class="row">
                     <div class="col-12">
-                        <input class="form-control kanban-text" placeholder="Title" v-model="checklist_name" />
+                        <input class="form-control kanban-text" placeholder="Title" v-model="checklist_name" v-on:keypress.enter="addChecklist" />
                     </div>
                     <div class="col-12 mt-2">
                         <button class="btn btn-primary kanban-text" v-on:click="addChecklist">
@@ -48,6 +50,7 @@
                     </div>
                 </div>
             </div>
+            <!-- DATES TYPES -->
             <div id="dates_type" :class="(data.card_type == 'dates' ? 'type-active': 'type-inactive')">
                 <b-row>
                     <b-col md="auto" style="margin: 0 auto;">
@@ -65,13 +68,16 @@
                     </div>
                 </div>
             </div>
+            <!-- CONFIRMATION TYPES -->
             <div id="confirmation" :class="(data.card_type == 'confirmation' ? 'type-actice' : 'type-inactive')">
-                <div>
-                    <h4>{{ pop_up_text }}</h4>
-                </div>
-                <div class="form-group">
-                    <div class="btn btn-success">Yes</div>
-                    <div class="btn btn-default">No</div>
+                <div class="px-3">
+                    <div>
+                        <h6>{{ option.confirm_text }}</h6>
+                    </div>
+                    <div class="form-group mt-3">
+                        <div :class="option.btn_confirm_block ? `${btnYesType} btn-block` : `${btnYesType}`" v-on:click="actionConfirmYes">Yes</div>
+                        <div :class="option.btn_confirm_block ? 'btn btn-default btn-block' : 'btn btn-default'" v-on:click="actionConfirmNo">No</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,9 +95,12 @@
                 all_members: this.$store.state.members.all_members,
                 selected_members: this.data.data_item.members,
                 checklist: this.data.data_item.checklists,
-
-                pop_up_text: this.data.pop_up_text,
-                pop_up_data: this.data.pop_up_data,
+            }
+        },
+        computed: {
+            btnYesType() {
+                if(this.option.btn_confirm_yes) return `btn btn-${this.option.btn_confirm_yes}`
+                return 'btn btn-success'
             }
         },
         props: {
@@ -107,13 +116,19 @@
             removeChecklist: {
                 type: Function
             },
-            confirmed: {
-                type: Function
+            option: {
+                type: Object
             }
         },
         mounted() {
         },
         methods: {
+            actionConfirmNo() {
+                this.option.action_confirm_no()
+            },
+            actionConfirmYes() {
+                this.option.action_confirm_yes()
+            },
             saveDeadline() {
                 let config = {
                     headers: {

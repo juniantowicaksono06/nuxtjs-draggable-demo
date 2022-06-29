@@ -1,10 +1,10 @@
-<style>
+<style scoped>
     .workspace-card {
         min-height: 110px;
     }
 </style>
 <template>
-    <div class="px-3 py-3 container-fluid">
+    <div class="px-3 py-3 container-fluid" style="overflow: auto;">
         <div class="px-2">
             <h5 class="mb-2 text-white">Boards</h5>
         </div>
@@ -34,7 +34,7 @@
                         <label for="board_title" class="kanban-text">
                             Board title
                         </label>
-                        <input type="text" class="form-control" placeholder="Board title" v-model="board_title" />
+                        <input type="text" class="form-control" placeholder="Board title" v-model="board_title" v-on:keypress.enter="saveBoard" />
                     </div>
                 </div>
                 <div class="w-100 mt-3">
@@ -72,7 +72,7 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
-                        let boards = structuredClone(this.$store.state.sidebar.sidebar_data.boards)
+                        let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
                         boards.push({
                             _id: data._id,
