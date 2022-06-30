@@ -19,7 +19,7 @@
 </style>
 <template>
     <div class="row mb-3 mt-2">
-        <div class="col-12">
+        <div class="col-12" style="height: 48px;">
             <div class="">
                 <div v-if="typeof data.profile_pic != 'undefined' && data.profile_pic != ''" class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left">
                 </div>
@@ -28,8 +28,8 @@
                 </div>
                 <div class="row">
                     <div class="col-6 col-sm-6 col-md-8">
-                        <p class="comment-person">{{ data.name }}</p>
-                        <p class="comment-nik">{{ data.user_domain }}</p>
+                        <p class="comment-person">{{ data.by }}</p>
+                        <!-- <p class="comment-nik">{{ data.user_domain }}</p> -->
                     </div>
                     <div class="col-6 col-sm-6 col-md-4 pr-0 text-right">
                         <p class="comment-date no-select text-right d-inline-block">{{ convertCommentDate }}</p>
@@ -41,12 +41,13 @@
             </div>
         </div>
         <div class="col-12">
-            <div class="card" v-if="!edit || data.user_domain != $store.state.auth.identity.user_domain">
+            <!-- <div class="card" v-if="!edit || data.user_domain != $store.state.auth.identity.user_domain"> -->
+            <div class="card">
                 <div class="card-body px-2 py-2">
                     <div class="comment-text">{{ data.text }}</div>
                 </div>
             </div>
-            <div class="form-group" v-if="edit">
+            <!-- <div class="form-group" v-if="edit">
                 <textarea class="form-control w-100" ref="edit_comment_ref" rows="5" style="resize:none" placeholder="Add a comment" v-model="comment"></textarea>
                 <div class="mt-2">
                     <button class="btn btn-primary" v-on:click="editComment" v-if="data.user_domain == $store.state.auth.identity.user_domain">
@@ -59,15 +60,15 @@
                         <span><i class="fa fa-times"></i> Cancel</span>
                     </button>
                 </div>
-            </div>
-            <div class="mt-1 d-flex">
+            </div> -->
+            <!-- <div class="mt-1 d-flex">
                 <button class="btn kanban-text py-0 my-0" v-if="!edit && $store.state.auth.identity.user_domain != data.user_domain" v-on:click="toggleEdit('reply')">
                     Reply
                 </button>
                 <button class="btn kanban-text py-0 my-0" v-on:click="toggleEdit" v-else-if="!edit && $store.state.auth.identity.user_domain == data.user_domain">
                     Edit
                 </button>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -83,7 +84,7 @@
                 let date = new Date(this.data.date).toLocaleString('en-US', {
                     timeZone: currentTimezone
                 })
-                return `${moment(date).format('D MMMM YYYY, H:mm:ss')}`
+                return `${moment(date).format('D MMMM YYYY H:mm:ss')}`
             }
         },
         data() {

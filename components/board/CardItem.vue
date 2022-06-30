@@ -16,10 +16,10 @@
                         <i class="fa fa-check"></i>
                         <span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
                     </span>
-                    <span class="kanban-text mr-2" v-if="item.comments">
+                    <!-- <span class="kanban-text mr-2" v-if="item.comments">
                         <i class="fa fa-comment"></i>
                         <span class="px-1 kanban-text">{{ item.comments.length }}</span>
-                    </span>
+                    </span> -->
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
                         <i class="fa fa-clock mr-1 kanban-text"></i>
                         <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" />
@@ -165,8 +165,17 @@
                         </div>
                         <!-- COMMENTS -->
                         <div class="col-12 col-sm-12 col-md-12 col-lg-9 mt-3 pl-0" id="comments">
-                            <div class="form-group pl-0 ml-0">
+                            <div class="form-group">
                                 <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Comments</h5>
+                            </div>
+                            <div class="row mt-3 mb-3" id="comment_list" ref="comment_list_ref" v-if="item.comments" :key="load_comment">
+                                <div class="col-12">
+                                    <div v-for="(comment, comment_index) in item.comments" :key="comment._id">
+                                        <Comment :data="{...comment, initialName: generateProfileName(comment.by), index: comment_index}" @editComment="editComment" @replyComment="replyComment" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group pl-0 ml-0">
                                 <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-on:focus="showEditButton('comments')" v-model="comment"></textarea>
                             </div>
                             <div :class="(show_edit_button['comments'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
@@ -176,13 +185,6 @@
                                 <button class="btn btn-default" v-on:click="hideEditButton('comments')">
                                     <span><i class="fa fa-times"></i></span>
                                 </button>
-                            </div>
-                            <div class="row mt-3" id="comment_list" v-if="item.comments">
-                                <div class="col-12">
-                                    <div v-for="(comment, comment_index) in item.comments">
-                                        <Comment :data="{...comment, initialName: generateProfileName(comment.name), index: comment_index}" @editComment="editComment" @replyComment="replyComment" />
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -241,7 +243,8 @@
                 target_element: null,
                 // Target Element for Profile Pop Up
                 target_element_profile: {},
-                old_value: ''
+                old_value: '',
+                load_comment: false
             }
         },
         mounted() {
@@ -250,6 +253,7 @@
                     this.setPopupOffset()
                 })
             })
+            this.item.comments = []
             this.initOption()
         },
         computed: {
@@ -308,6 +312,18 @@
             },
         },
         methods: {
+            initModal() {
+                this.$axios.$get(`/api/card/${this.item._id}`)
+                .then((response) => {
+                    let {status} = response
+                    if(status == 'OK') {
+                        let {data} = response
+                        this.item.comments = [...data.comments]
+                        this.load_comment = true
+                    }
+                })
+                .catch(error => alert("Error: Telah terjadi kesalahan"))
+            },
             editComment(index, value) {
                 this.item.comments[index].text = value            
             },
@@ -340,22 +356,35 @@
                 })
                 if(this.item.comments) {
                     this.item.comments.unshift({
-                        name: profile,
-                        date: date,
-                        user_domain: this.$store.state.auth.identity.user_domain,
-                        profile_pic: '',
-                        text: this.comment
+                        by: profile,
+                        text: this.comment,
+                        date: new Date()
                     })
                 }
                 else {
                     this.item.comments = [{
-                        name: profile,
-                        date: date,
-                        user_domain: this.$store.state.auth.identity.user_domain,
-                        profile_pic: '',
-                        text: this.comment
+                        by: profile,
+                        text: this.comment,
+                        date: new Date()
                     }]
                 }
+                this.$refs.comment_list_ref.scrollTo(0, 0)
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$post(`/api/card/comment`, new URLSearchParams({
+                    id: this.item._id,
+                    text: this.comment
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                    }
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
                 this.comment = ''
             },
             archiveItem() {
@@ -536,6 +565,7 @@
             showModalItem(event, data, card_name) {
                 this.closePopUp()
                 this.show_modal = true
+                this.initModal()
             },
             hideModalItem(event) {
                 this.show_modal = false
