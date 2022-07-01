@@ -336,7 +336,7 @@
                     timeZone: currentTimezone
                 })
                 if(this.item.comments) {
-                    this.item.comments.unshift({
+                    this.item.comments.push({
                         name: profile,
                         date: date,
                         user_domain: this.$store.state.auth.identity.user_domain,
@@ -355,7 +355,7 @@
                     timeZone: currentTimezone
                 })
                 if(this.item.comments) {
-                    this.item.comments.unshift({
+                    this.item.comments.push({
                         by: profile,
                         text: this.comment,
                         date: new Date()
@@ -368,12 +368,14 @@
                         date: new Date()
                     }]
                 }
-                this.$refs.comment_list_ref.scrollTo(0, 0)
                 let config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
+                setTimeout(() => {
+                    this.$refs.comment_list_ref.scrollTo(0, this.$refs.comment_list_ref.scrollHeight)
+                }, 100)
                 this.$axios.$post(`/api/card/comment`, new URLSearchParams({
                     id: this.item._id,
                     text: this.comment
