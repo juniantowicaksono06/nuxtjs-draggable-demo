@@ -93,7 +93,16 @@
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id" v-if="item.checklists.length > 0">
                                 <div class="d-flex mb-2">
                                     <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" />
-                                    <span class="btn btn-transparent" v-on:click="deleteChecklist($event, checklist_index, checklist, item.checklists)">
+                                    <span class="btn btn-transparent" v-on:click="showCardPopUp($event, 'confirmation', {
+                                        btn_confirm_block: true,
+                                        btn_confirm_yes: 'danger',
+                                        confirm_text: checklist.childs.length > 0 ? 'Are you sure you want to delete this checklist and it\'s child?' : 'Are you sure you want to delete this checklist?',
+                                        action_confirm_yes: deleteChecklist,
+                                        action_confirm_no: closeCardPopUp,
+                                        data: [
+                                            checklist_index, item.checklists
+                                        ]
+                                    })"  @click.stop=''>
                                         <i class="fa fa-trash"></i>
                                     </span>
                                 </div>
@@ -120,7 +129,16 @@
                                         }" v-on:keyup.enter="$event.target.blur()" :readonly="(child.done)" v-model="child.name" v-on:focus="storeOldValue(child.name)"  v-on:change="checklistChildHandle(child, checklist._id, 'name')" />
                                     </div>
                                     <div class="float-right" style="margin-top: -5px;">
-                                        <span class="kanban-text btn btn-transparent" v-on:click="deleteChecklistChild($event, child_index, child, checklist.childs, checklist._id)">
+                                        <span class="kanban-text btn btn-transparent" v-on:click="showCardPopUp($event, 'confirmation', {
+                                        btn_confirm_block: true,
+                                        btn_confirm_yes: 'danger',
+                                        confirm_text: 'Are you sure you want to delete this checklist?',
+                                        action_confirm_yes: deleteChecklistChild,
+                                        action_confirm_no: closeCardPopUp,
+                                        data: [
+                                            child_index, checklist.childs, checklist._id
+                                        ]
+                                    })" @click.stop="">
                                             <i class="fa fa-trash"></i>
                                         </span>
                                     </div>
@@ -519,7 +537,7 @@
                     return initial
                 }
             },
-            deleteChecklist(event, index, selected_checklist, checklist) {
+            deleteChecklist(index, checklist) {
                 let config = {
                     headers: {
                         'Content-Type': 'application/json'
@@ -529,19 +547,18 @@
                         id: checklist[index]._id
                     }
                 }
+                this.closeCardPopUp()
                 this.$axios.$delete(`/api/card/checklist`, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         checklist.splice(index, 1)
-                        return
                     }
-                    alert('Telah terjadi kesalahan')
                 }) 
                 .catch((error) => {
                     alert('Error: Telah terjadi kesalahan')
                 })
             },
-            deleteChecklistChild(event, child_index, selected_checklist, checklist, parent_id) {
+            deleteChecklistChild(child_index, checklist, parent_id) {
                 let config = {
                     headers: {
                         'Content-Type': 'application/json'
@@ -552,6 +569,7 @@
                         checklist_id: parent_id
                     }
                 }
+                this.closeCardPopUp()
                 this.$axios.$delete(`/api/card/checklist/child`, config)
                 .then((response) => {
                     if(response.status == 'OK') {

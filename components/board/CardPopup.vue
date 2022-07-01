@@ -127,7 +127,12 @@
                 this.option.action_confirm_no()
             },
             actionConfirmYes() {
-                this.option.action_confirm_yes()
+                if(this.option.data) {
+                    this.option.action_confirm_yes(...this.option.data)
+                }
+                else {
+                    this.option.action_confirm_yes()
+                }
             },
             saveDeadline() {
                 let config = {
