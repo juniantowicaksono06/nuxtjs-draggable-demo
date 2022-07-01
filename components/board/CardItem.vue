@@ -329,6 +329,33 @@
                 }
             },
         },
+        watch: {
+            'item.checklists': {
+                handler: function(checklist) {
+                    if(checklist.length == 0 || this.item.deadline.date == '' || this.item.deadline.date == null) return
+                    let checklist_child = []
+                    for(let i = 0; i < checklist.length; i++) {
+                        checklist_child.push(...checklist[i].childs)
+                    }
+                    if(checklist_child.length > 0) {
+                        let child_done = checklist_child.filter((val) => {
+                            if(val.done) {
+                                return val.done
+                            }
+                        })
+                        if(checklist_child.length == child_done.length && this.item.deadline.done === false && this.item.deadline.date) {
+                            this.toggleDeadline()      
+                            this.item.deadline.done = true
+                        }
+                        else if(checklist_child.length > child_done.length && this.item.deadline.done === true && this.item.deadline.date) {
+                            this.toggleDeadline()      
+                            this.item.deadline.done = false
+                        }
+                    }
+                },
+                deep: true
+            }
+        },
         methods: {
             initModal() {
                 this.$axios.$get(`/api/card/${this.item._id}`)
