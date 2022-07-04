@@ -20,6 +20,9 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="form-error text-danger">
+                                            <span class="kanban-text">{{ username_error }}</span>
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <label class="login-text">Password</label>
@@ -30,6 +33,9 @@
                                                     <i class="fa fa-lock"></i>
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="form-error text-danger">
+                                            <span class="kanban-text">{{ password_error }}</span>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -56,13 +62,31 @@
     export default {
         data() {
             return {
+                username_error: '',
                 username_input: '',
                 password_input: '',
+                password_error: '',
                 remember_me_input: false
             }
         },
         methods: {
+            triggerWarning(type = '') {
+                this.username_error = ''
+                this.password_error = ''
+                if(type == 'empty') {
+                    if(this.username_input.trim() == '') {
+                        this.username_error = 'Username cannot be empty'
+                    }
+                    if(this.password_input.trim() == '') {
+                        this.password_error = 'Password cannot be empty'
+                    }
+                }
+            },
             actionLogin() {
+                if(this.username_input.trim() == '' || this.password_input.trim() == '') {
+                    this.triggerWarning('empty'); 
+                    return
+                }
                 let config = {
                     headers: {
                         'Content-Type': 'application/json'

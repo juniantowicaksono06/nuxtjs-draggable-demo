@@ -9,16 +9,19 @@
             <h5 class="mb-2 text-white">Boards</h5>
         </div>
         <div class="row">
-            <div class="col-12 col-sm-6 col-md-3 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="board.workspace_id == $store.state.auth.identity.workspace_id._id || board.members.includes($store.state.auth.identity._id)">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="board.workspace_id == $store.state.auth.identity.workspace_id._id || board.members.includes($store.state.auth.identity._id)" :key="board._id">
                 <nuxt-link :to="`/board/?board_id=${board._id}`">
                     <div class="card workspace-card hover-pointer" style="border: none;">
                         <div class="card-body px-2 py-2 bg-primary text-white">
                             <h6 class="mb-0 no-select">{{ board.name }}</h6>
+                            <div class="mt-4">
+                                <h6><i class="fa fa-check" :key="board._id"></i><span class="ml-2">Task Completed: </span> <span v-if="board.lists.task_total > 0">{{ board.lists.task_finish }} / {{ board.lists.task_total }} ({{ Math.round(100 * (board.lists.task_finish / board.lists.task_total)) }}%)</span><span v-else>0 / 0</span></h6>
+                            </div>
                         </div>
                     </div>
                 </nuxt-link>
             </div>
-            <div class="col-12 col-sm-6 col-md-3 mb-2">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 mb-2">
                 <div class="card workspace-card hover-pointer bg-secondary" v-on:click="openCreateBoard">
                     <div class="card-body">
                         <h6 class="mb-0 mt-2 text-center text-white"><i class="fa fa-plus"></i></h6>

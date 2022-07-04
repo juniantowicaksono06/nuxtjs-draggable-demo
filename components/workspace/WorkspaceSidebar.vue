@@ -258,7 +258,8 @@
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
             <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace_id">
-                <nuxt-link to="/" class="text-white d-inline-block w-100" v-if="$route.path != '/'">Workspace</nuxt-link>
+                <!-- <nuxt-link to="/" class="text-white d-inline-block w-100" v-if="$route.path != '/'">Workspace</nuxt-link> -->
+                <span v-if="$route.path != '/'" v-on:click="changeWorkspace">Workspace</span>
                 <span v-else>Workspace</span>
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
@@ -401,6 +402,10 @@
             }
         },
         methods: {
+            changeWorkspace() {
+                this.$emit('loadWorkspaceContent', false)
+                this.$router.push('/')
+            },
             changeBoard(board_id) {
                 this.$router.push({
                     path: `/board/`,

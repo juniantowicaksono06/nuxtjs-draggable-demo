@@ -4,7 +4,7 @@
             <div class="h-100 d-flex">
                 <div>
                     <WorkspaceSidebar 
-                    :key="sidebarKey" />
+                    :key="sidebarKey" @loadWorkspaceContent="loadDataWorkspaceAndMember" />
                 </div>
                 <Nuxt />
             </div>
@@ -24,7 +24,7 @@
             this.loadDataWorkspaceAndMember()
         },
         methods: {
-            loadDataWorkspaceAndMember() {
+            loadDataWorkspaceAndMember(init = true) {
                 this.$axios.$get(`/api/workspace`)
                 .then((response_workspace) => {
                     if(response_workspace.status != 'OK') {
@@ -40,10 +40,12 @@
                             boards: response_board.data
                         })
 
-                        this.$nextTick()
-                        this.$forceUpdate()
-                        this.sidebarKey += 1
-                        this.loading = false
+                        if(init) {
+                            this.$nextTick()
+                            this.$forceUpdate()
+                            this.sidebarKey += 1
+                            this.loading = false
+                        }
                     }) 
                 })
                 .catch((error) => {

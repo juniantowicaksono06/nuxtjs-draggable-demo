@@ -32,6 +32,6 @@
             TopBar,
             // Sidebar,
             Content
-        }
+        },
     }
 </script>
