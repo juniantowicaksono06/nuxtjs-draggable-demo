@@ -382,7 +382,9 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        const {data} = response
                         this.board.lists.push({
+                            "_id": data._id,
                             "name": this.add_list_value,
                             "cards": []
                         })
