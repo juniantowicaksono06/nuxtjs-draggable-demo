@@ -22,13 +22,13 @@
                     </span> -->
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
                         <i class="fa fa-clock mr-1 kanban-text"></i>
-                        <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" />
+                        <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" v-if="!data.archive" />
                         <span>{{ convertDate(item.deadline.date) }}</span>
                     </span>
                 </div>
             </div>
             <div class="float-right profile-pic-container justify-content-end">
-                <div v-for="(member, member_index) in item.members" class="px-1 py-1 position-relative  member" v-on:click="openProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name">
+                <div v-for="(member, member_index) in item.members" :key="member._id" class="px-1 py-1 position-relative  member" v-on:click="!data.archive ? openProfileCard($event, member, item) : ''" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name">
                     <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
                     <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
                         {{ generateProfileName(member.name) }}
@@ -42,8 +42,13 @@
                     <div class="d-flex justify-content-between" id="modal_header">
                         <!-- CARD ITEM NAME -->
                         <div class="mb-1" style="width: 90%;">
-                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="changeItemName" v-on:focus="storeOldValue(item.name)" v-on:keyup.enter="$event.target.blur()" />
-                            <h6 class="pr-0 no-select">in list <b>{{ kanban_name }}</b></h6>
+                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="changeItemName" v-on:focus="storeOldValue(item.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
+                            <span class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-else>{{ item.name }}</span>
+                            <h6 class="pr-0 no-select" v-if="!data.archive">in list <b>{{ kanban_name }}</b></h6>
+                            <h4 class="pr-0 no-select text-center text-danger" v-else><span><i class="fa fa-archive mr-2"></i></span> This card is archived</h4>
+                            <div class="mt-2" v-if="data.archive" v-on:click="restoreArchive">
+                                <div class="btn btn-primary"><i class="fa fa-trash-restore"></i> Restore</div>
+                            </div>
                         </div>
                         <!-- CLOSE MODAL BUTTON -->
                         <div style="width: 10%; margin: 0 auto; text-align: right;">
@@ -55,15 +60,15 @@
                     <div class="row">
                         <div class="col-12">
                             <div id="member_and_deadline_container">
-                                <div>
-                                    <h6 class="kanban-text" v-if="item.members.length > 0">Members</h6>
-                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="openProfileCard($event, member, item)" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
+                                <div :key="show_modal">
+                                    <h6 class="kanban-text" v-if="item.members.length > 0" :key="show_modal">Members</h6>
+                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="openProfileCard($event, member, item)" :key="member._id" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
                                         <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
                                         <div class="profile-pic-thumbs bg-primary text-white text-center py-1 rounded-circle" v-else>
                                             {{ generateProfileName(member.name) }}
                                         </div>
                                     </div>                               
-                                    <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item.members.length > 0" v-on:click="showCardPopUp($event, 'members')">
+                                    <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item.members.length > 0 && !data.archive" v-on:click="showCardPopUp($event, 'members')">
                                         <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
                                             <span><i class="fa fa-plus"></i></span>
                                         </p>
@@ -72,8 +77,11 @@
                                 <div v-if="item.deadline.date != null">
                                     <h6 class="kanban-text">Due date</h6>
                                     <div style="margin: auto;">
-                                        <input type="checkbox" class="d-inline-block mt-2 mr-1" v-model="item.deadline.done" v-on:click="toggleDeadline" />
-                                        <div :class="(item.deadline.done ? 'd-inline-block btn bg-success text-white' : isDeadline(item.deadline.date) ? 'd-inline-block btn bg-danger text-white' : 'd-inline-block btn bg-gray')" v-on:click="showCardPopUp($event, 'dates')" @click.stop="">
+                                        <input type="checkbox" class="d-inline-block mt-2 mr-1" v-model="item.deadline.done" v-on:click="toggleDeadline" :disabled="!data.archive ? false : true" />
+                                        <div :class="(item.deadline.done ? 'd-inline-block btn bg-success text-white' : isDeadline(item.deadline.date) ? 'd-inline-block btn bg-danger text-white' : 'd-inline-block btn bg-gray')" v-on:click="showCardPopUp($event, 'dates')" @click.stop="" v-if="!data.archive">
+                                            <h6 class="kanban-text mb-0">{{ convertDate(item.deadline.date, true) }}</h6>
+                                        </div>
+                                        <div :class="(item.deadline.done ? 'd-inline-block btn bg-success text-white' : isDeadline(item.deadline.date) ? 'd-inline-block btn bg-danger text-white' : 'd-inline-block btn bg-gray')" @click.stop="" v-else>
                                             <h6 class="kanban-text mb-0">{{ convertDate(item.deadline.date, true) }}</h6>
                                         </div>
                                     </div>
@@ -82,17 +90,19 @@
                         </div>
                     </div>
                     <div class="row ml-0 pl-0 pr-0" id="modal_content">
-                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 pl-0 mt-2">
+                        <div :class="data.archive ? 'col-12 col-sm-12 col-md-12 col-lg-12 pl-0 mt-2' : 'col-12 col-sm-12 col-md-12 col-lg-9 pl-0 mt-2'">
                             <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Description</h5>
-                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditButton('description')" rows="5"></textarea>
-                            <div :class="(show_edit_button['description'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
+                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditButton('description')" rows="5" v-if="!data.archive"></textarea>
+                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" rows="5" disabled="true" v-else></textarea>
+                            <div :class="(show_edit_button['description'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')" v-if="!data.archive">
                                 <button class="btn btn-primary" v-on:click="changeDescription">Save Description</button>
                                 <button class="btn btn-default" v-on:click="hideEditButton('description')"><i class="fa fa-times"></i></button>
                             </div>
                             <!-- CHECKLISTS -->
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id" v-if="item.checklists.length > 0">
                                 <div class="d-flex mb-2">
-                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" />
+                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
+                                    <span class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-else>{{ item.name }}</span>
                                     <span class="btn btn-transparent" v-on:click="showCardPopUp($event, 'confirmation', {
                                         btn_confirm_block: true,
                                         btn_confirm_yes: 'danger',
@@ -102,7 +112,7 @@
                                         data: [
                                             checklist_index, item.checklists
                                         ]
-                                    })"  @click.stop=''>
+                                    })"  @click.stop='' v-if="!data.archive">
                                         <i class="fa fa-trash"></i>
                                     </span>
                                 </div>
@@ -116,19 +126,28 @@
                                 <!-- CHECKLIST CHILD -->
                                 <div v-for="(child, child_index) in checklist.childs" :key="child._id" class="row mt-2">
                                     <div class="col-1 py-1 pr-0 mr-0">
-                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="checklistChildHandle(child, checklist._id)" />
+                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="checklistChildHandle(child, checklist._id)" v-if="!data.archive" />
+                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-else disabled="true" />
                                     </div>
                                     <div class="col-10 mt-0 px-0">
                                         <input class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent" :style="child.done ? {
-                                            fontSize: '12px',
+                                            fontSize: '14px',
                                             fontWeight: 'normal',
                                             textDecoration: 'line-through'
                                         } : {
-                                            fontSize: '12px',
+                                            fontSize: '14px',
                                             fontWeight: 'normal'
-                                        }" v-on:keyup.enter="$event.target.blur()" :readonly="(child.done)" v-model="child.name" v-on:focus="storeOldValue(child.name)"  v-on:change="checklistChildHandle(child, checklist._id, 'name')" />
+                                        }" v-on:keyup.enter="$event.target.blur()" :readonly="(child.done)" v-model="child.name" v-on:focus="storeOldValue(child.name)"  v-on:change="checklistChildHandle(child, checklist._id, 'name')" v-if="!data.archive" />
+                                        <span class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent"  :style="child.done ? {
+                                            fontSize: '14px',
+                                            fontWeight: 'normal',
+                                            textDecoration: 'line-through'
+                                        } : {
+                                            fontSize: '14px',
+                                            fontWeight: 'normal'
+                                        }" v-else>{{ child.name }}</span>
                                     </div>
-                                    <div class="float-right" style="margin-top: -5px;">
+                                    <div class="float-right" style="margin-top: -5px;" v-if="!data.archive">
                                         <span class="kanban-text btn btn-transparent" v-on:click="showCardPopUp($event, 'confirmation', {
                                         btn_confirm_block: true,
                                         btn_confirm_yes: 'danger',
@@ -143,18 +162,19 @@
                                         </span>
                                     </div>
                                 </div>
-                                <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-block' : 'd-none')">
+                                <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-block' : 'd-none')" v-if="!data.archive">
                                     <input v-on:keyup.enter="addChecklistChild" class="form-control kanban-text" placeholder="Add an item" v-model="add_checklist_child.item_name" />
                                     <button class="btn btn-primary mt-2 kanban-text" v-on:click="addChecklistChild">Add</button>
                                     <button class="btn btn-transparent mt-2 kanban-text" v-on:click="disableAddChecklistChild()">
                                     <i class="fa fa-times"></i></button>
                                 </div>
-                                <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-none' : 'd-block')">
+                                <div :class="(add_checklist_child.index == checklist_index && add_checklist_child.enable ? 'd-none' : 'd-block')" v-if="!data.archive">
                                     <button class="btn btn-light mt-2 kanban-text" v-on:click="enableAddChecklistChild(checklist_index, checklist._id)">Add an item</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-sm-12 col-md-12 col-lg-3 pl-0">
+                        <!-- ADD TO CARD SECTION -->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-3 pl-0" v-if="!data.archive">
                             <p class="mb-1 text-bold kanban-text">Add to card</p>
                             <div class="modal-list-option" v-on:click="showCardPopUp($event, 'members')" ref="members_item_ref" @click.stop=''>
                                 <i class="fa fa-user"></i>
@@ -182,7 +202,7 @@
                             </div>
                         </div>
                         <!-- COMMENTS -->
-                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 mt-3 pl-0" id="comments">
+                        <div :class="data.archive ? 'col-12 col-sm-12 col-md-12 col-lg-12 mt-3 pl-0' : 'col-12 col-sm-12 col-md-12 col-lg-9 mt-3 pl-0'" id="comments">
                             <div class="form-group">
                                 <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Comments</h5>
                             </div>
@@ -194,7 +214,8 @@
                                 </div>
                             </div>
                             <div class="form-group pl-0 ml-0">
-                                <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-on:focus="showEditButton('comments')" v-model="comment"></textarea>
+                                <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-on:focus="showEditButton('comments')" v-model="comment" v-if="!data.archive"></textarea>
+                                <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-model="comment" disabled="true" v-else></textarea>
                             </div>
                             <div :class="(show_edit_button['comments'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
                                 <button class="btn btn-primary" v-on:click="sendComment">
@@ -206,7 +227,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="card_pop_up" ref="card_pop_up_ref" :class="(show_popup ? 'd-block' : 'd-none')" @click.stop="">
+                    <div id="card_pop_up" ref="card_pop_up_ref" :class="(show_popup ? 'd-block' : 'd-none')" @click.stop="" v-if="!data.archive">
                         <CardPopup :data="{
                             card_type: card_type,
                             data_item: item,
@@ -271,7 +292,9 @@
                     this.setPopupOffset()
                 })
             })
-            this.item.comments = []
+            if(!this.data.archive) {
+                this.item.comments = []
+            }
             this.initOption()
         },
         computed: {
@@ -358,16 +381,23 @@
         },
         methods: {
             initModal() {
+                if(this.data.archive === true) return
                 this.$axios.$get(`/api/card/${this.item._id}`)
                 .then((response) => {
                     let {status} = response
                     if(status == 'OK') {
                         let {data} = response
-                        this.item.comments = [...data.comments]
+                        if(data) {
+                            this.item.comments = [...data.comments]
+                        }
                         this.load_comment = true
                     }
                 })
                 .catch(error => alert("Error: Telah terjadi kesalahan"))
+            },
+            restoreArchive() {
+                this.hideModalItem()
+                this.$emit('restoreArchive', this.item)
             },
             editComment(index, value) {
                 this.item.comments[index].text = value            
@@ -446,6 +476,25 @@
                     confirm_text: '',
                     action_confirm_yes: null,
                     action_confirm_no: null
+                }
+                if(this.data.archive) {
+                    let members = Object.assign([], this.$store.state.members.all_members)
+                    members = members.filter((value) => {
+                        if(this.item.members.includes(value._id)) {
+                            return value
+                        }
+                        else {
+                            let exist = false
+                            this.item.members.some((member) => {
+                                if(member._id == value._id) {
+                                    exist = true
+                                    return true
+                                }
+                            })
+                            if(exist) return value
+                        }
+                    })
+                    this.item.members = members
                 }
             },
             storeOldValue(name) {

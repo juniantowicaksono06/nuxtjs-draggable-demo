@@ -190,6 +190,7 @@
                 this.date_context = ctx
             },
             addChecklist() {
+                if(this.checklist_name == '') return
                 let config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'

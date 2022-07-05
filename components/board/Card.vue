@@ -63,7 +63,7 @@
                     data: {
                         id: id,
                         board_id: this.data.board_id,
-                        list_id: this.kanban_card.cards[index]._id
+                        list_id: this.kanban_card._id
                     }
                 }
                 this.$axios.$delete(`/api/card/`, config)

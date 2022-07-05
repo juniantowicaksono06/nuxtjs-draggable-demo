@@ -1,4 +1,10 @@
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style scoped>
+    #guest_member_list {
+        max-width: 80vw;
+        overflow: hidden;
+    }
+</style>
 <template>
     <div class="w-100 h-100" v-on:click="closePopUp">
         <div class="d-flex w-100 h-100">
@@ -14,12 +20,14 @@
                         <span class="ml-1">
                             <span class="text-white transparent-button font-sm btn">{{ board.workspace_id ? board.workspace_id.name : '' }} <span class="ml-1"></span></span>
                         </span>
-                        <div v-for="(member, member_index) in $store.state.members.all_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
-                            marginLeft: '-20px !important'
-                        } : {})">
-                            <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
-                            <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
-                                {{ generateProfileName(member.name) }}
+                        <div id="guest_member_list">
+                            <div v-for="(member, member_index) in $store.state.members.all_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
+                                marginLeft: '-20px !important'
+                            } : {})">
+                                <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
+                                <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
+                                    {{ generateProfileName(member.name) }}
+                                </div>
                             </div>
                         </div>
                         <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: 0" v-on:click="togglePopUp($event)">
@@ -27,6 +35,9 @@
                                 <span><i class="fa fa-plus"></i></span>
                             </p>
                         </div>                               
+                        <div class="text-white transparent-button font-sm btn ml-3" ref="archive_ref" id="archive_ref" v-on:click="openArchiveModal">
+                            <span>Archive</span>
+                        </div>
                         <PopUp title="Guest Members" :show="show_popup" :popup_trigger="popup_trigger" @close="closePopUp">
                             <template slot="component_render" @click.stop="">
                                 <div @click.stop="">
@@ -70,6 +81,18 @@
                 </div>
             </div>
         </div>
+        <b-modal id="card_archive_list" hide-footer size="md" title="Card Archive List">
+            <div class="row">
+                <div class="col-12">
+                    <div v-for="archive in archive_card" :key="archive._id">
+                        <CardItem :data="{
+                            item: archive,
+                            archive: true
+                        }" @restoreArchive="restoreArchive" />
+                    </div>
+                </div>
+            </div>
+        </b-modal>
         <!-- Modal Select And Move Board to Workspace -->
         <b-modal id="modal_move_workspace" hide-footer size="md" title="Edit Workspace">
             <div class="row">
@@ -102,6 +125,7 @@
     import Topbar from "../Topbar.vue"
     import PopUp from './PopUp.vue'
     import Multiselect from 'vue-multiselect'
+    import CardItem from './CardItem.vue'
 
     export default {
         async mounted() {
@@ -138,6 +162,50 @@
             },
         },
         methods: {
+            restoreArchive(item) {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                this.$axios.$post(`/api/restore`, new URLSearchParams({
+                    id: item._id,
+                }), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        const {data} = response
+                        this.board.lists.some((value, index) => {
+                            if(value._id == item.list_id) {
+                                item._id = data._id
+                                this.board.lists[index].cards.push(item)
+                                return true
+                            }
+                        })
+                    }
+                    this.closeArchiveModal()
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            openArchiveModal() {
+                this.$axios.$get(`/api/archive`)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        let {data} = response
+                        this.$bvModal.show('card_archive_list')
+                        this.archive_card = data.filter((value) => {
+                            return value.board_id._id == this.board._id
+                        })
+                    }
+                }) 
+                .catch((error) => {
+                    alert('Error: Telah terjadi kesalahan')
+                })
+            },
+            closeArchiveModal() {
+                this.$bvModal.hide('card_archive_list')
+            },
             endDrag($event) {
                 this.drag_data['index'] = $event.newIndex.toString()
                 let config = {
@@ -431,12 +499,18 @@
 
                 // MAIN DATA FOR BOARD AND CARDS
                 board: {},
-                drag_data: {}
+
+                // DATA FOR SLIDE LIST
+                drag_data: {},
+
+                // DATA FOR ARCHIVE CARD
+                archive_card: []
             }
         },
         components: {
             Card,
             draggable,
+            CardItem,
             Topbar,
             CardProfileMember,
             PopUp,
