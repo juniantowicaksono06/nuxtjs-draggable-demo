@@ -209,7 +209,7 @@
                             <div class="row mt-3 mb-3" id="comment_list" ref="comment_list_ref" v-if="item.comments" :key="load_comment">
                                 <div class="col-12">
                                     <div v-for="(comment, comment_index) in item.comments" :key="comment._id">
-                                        <Comment :data="{...comment, initialName: generateProfileName(comment.by), index: comment_index}" @editComment="editComment" @replyComment="replyComment" />
+                                        <Comment :data="{...comment, initialName: generateProfileName(comment.by), index: comment_index}" @editComment="editComment" />
                                     </div>
                                 </div>
                             </div>
@@ -247,7 +247,7 @@
     import draggable from 'vuedraggable'
     import CardProfileMember from './CardProfileMember.vue'
     import CardPopup from './CardPopup.vue'
-    import Comment from './Comment.vue'
+    import Comment from '../global/Comment.vue'
     import * as moment from 'moment'
     export default {
         data() {

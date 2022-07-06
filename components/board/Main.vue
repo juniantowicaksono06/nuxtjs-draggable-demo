@@ -93,7 +93,7 @@
                 </div>
                 <div class="col-12" v-else>
                     <div class="text-center">
-                        <h1><span><i class="fa fa-times-circle text-danger"></i></span></h1>
+                        <h1><span><i class="fa fa-exclamation-circle text-secondary"></i></span></h1>
                         <h5 class="text-center">NO ARCHIVE FOUND!</h5>
                     </div>
                 </div>
@@ -195,7 +195,7 @@
                 })
             },
             openArchiveModal() {
-                this.$axios.$get(`/api/archive`)
+                this.$axios.$get(`/api/archive?board_id=${this.board._id}`)
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response

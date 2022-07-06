@@ -1,9 +1,9 @@
-<style>
+<style @scoped>
     #workspace_label {
         font-size: .95em;
-        padding: 10px 8px;
+        /* padding: 10px 8px; */
     }
-    .sidebar-text, .sidebar-item-list {
+    .sidebar-text, .sidebar-item {
         font-size: .75em;
     }
     .workspace-icon-square {
@@ -41,7 +41,7 @@
     .workspace > div {
         padding: 10px 10px;
     }
-    .sidebar-item-list {
+    .sidebar-item {
         padding: 0px 5px;
     }
     #sidebar_container {
@@ -54,20 +54,20 @@
     .sidebar-anim-open #sidebar_container {
         overflow-y: auto;
     }
-    #sidebar_close:hover, .sidebar-anim-open #sidebar_container .workspace > div.workspace-name:hover, .workspace-item div.sidebar-item-list:hover {
+    #sidebar_close:hover, .sidebar-anim-open #sidebar_container .workspace > div.workspace-name:hover, .workspace-item div.sidebar-item:hover {
         background-color: rgb(127,145,155,0.5);
         cursor: pointer;
         user-select: none;
         -webkit-user-select: none;
         -moz-user-select: none;
     }
-    .sidebar-anim-open div.sidebar-item-list-active {
+    .sidebar-anim-open div.sidebar-item-active {
         background-color: rgb(127,145,155,0.8);
     }
     .sidebar-anim-close .workspace > div.workspace-name:hover,.sidebar-close .workspace > div.workspace-name:hover {
         cursor: default;
     }
-    div.sidebar-item-list > a, div.sidebar-item-list > span {
+    div.sidebar-item > a, div.sidebar-item > span {
         display: block;
         width: 100%;
         padding: 10px;
@@ -106,7 +106,7 @@
     .sidebar-anim-close .workspace-item {
         display: block;
     }
-    .sidebar-anim-open .board-name, .sidebar-anim-open .sidebar-item, .sidebar-anim-open .sidebar-item, .sidebar-anim-open #workspace_label, .sidebar-anim-open .sidebar-item-list .board-name-add  {
+    .sidebar-anim-open .board-name, .sidebar-anim-open .sidebar-item, .sidebar-anim-open .sidebar-item, .sidebar-anim-open #workspace_label, .sidebar-anim-open .sidebar-item .board-name-add  {
         animation-name: fade-in;
         animation-duration: 1s;
         animation-fill-mode: forwards;
@@ -118,7 +118,7 @@
         animation-fill-mode: forwards;
         overflow-x: hidden;
     }
-    .sidebar-anim-close > #sidebar_content span.board-name, .sidebar-anim-close #workspace_label, .sidebar-close #workspace_label {
+    .sidebar-anim-close > #sidebar_content span.board-name, .sidebar-anim-close .sidebar-item, .sidebar-close .sidebar-item {
         display: none !important;
     }
     .sidebar-anim-open > #sidebar_content div.board-icon {
@@ -220,7 +220,7 @@
     .workspace-item-open {
         display: block;
     }
-    .sidebar-item-list {
+    .sidebar-item {
         margin-bottom: 0;
         margin-top: 0;
     }
@@ -257,10 +257,17 @@
             </div>
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
-            <div :class="($route.path == '/' ? 'd-flex justify-content-between mt-3 mb-2 sidebar-item-list-active' : 'd-flex justify-content-between mt-3 mb-2')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace_id">
-                <!-- <nuxt-link to="/" class="text-white d-inline-block w-100" v-if="$route.path != '/'">Workspace</nuxt-link> -->
-                <span v-if="$route.path != '/'" v-on:click="changeWorkspace">Workspace</span>
-                <span v-else>Workspace</span>
+            <div id="menu" ref="menu_ref" class="mb-2">
+                <div :class="($route.path == '/' ? 'd-flex justify-content-between sidebar-item-active sidebar-item' : 'd-flex justify-content-between sidebar-item')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace_id">
+                    <span v-if="$route.path != '/'" v-on:click="changeWorkspace">Workspace</span>
+                    <span v-else>Workspace</span>
+                </div>
+                <div :class="($route.path == '/mom' ? 'd-flex justify-content-between workspace-name sidebar-item-active sidebar-item' : 'd-flex justify-content-between workspace-name sidebar-item')">
+                    <nuxt-link to="/mom" v-if="$route.path != '/mom'" class="text-white">
+                        MOM
+                    </nuxt-link>
+                    <span v-else>MOM</span>
+                </div>
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-if="'workspace_id' in $store.state.auth.identity">
@@ -284,7 +291,7 @@
                                             <i class="fa fa-circle"></i>
                                         </span>
                                     </div>
-                                    <div :class="(board._id == $route.query.board_id ? 'sidebar-item-list sidebar-item-list-active mb-0 w-100' : 'sidebar-item-list mb-0 w-100')" >
+                                    <div :class="(board._id == $route.query.board_id ? 'sidebar-item sidebar-item-active mb-0 w-100' : 'sidebar-item mb-0 w-100')" >
                                         <span v-on:click="changeBoard(board._id)" v-if="(board._id != $route.query.board_id)">
                                             <div class="d-flex justify-content-between">
                                                 <span class="board-name">{{ board.name }}</span>
@@ -299,7 +306,7 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="sidebar-item-list mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
+                                <div class="sidebar-item mb-0 board-name-add" v-on:click="openCreateBoard($event, index, work._id)" >
                                     <button class="btn btn-transparent text-white kanban-text px-2">
                                         <span><i class="fa fa-plus"></i> Create new board</span>
                                     </button>
@@ -422,10 +429,10 @@
             calculateSidebarContainerHeight() {
                 let window_height = window.innerHeight
                 if(typeof this.$refs.workspace_label_ref != 'undefined') {
-                    let workspace_label_height = this.$refs.workspace_label_ref.offsetHeight
+                    let menu_height = this.$refs.menu_ref.offsetHeight
                     let sidebar_header_height = this.$refs.sidebar_header_ref.offsetHeight
                     let workspace_icon = this.$refs.sidebar_logo_ref.offsetHeight
-                    this.$refs.sidebar_container_ref.style.height = ( window_height - (workspace_icon + workspace_label_height + sidebar_header_height + 35) ) + 'px'
+                    this.$refs.sidebar_container_ref.style.height = ( window_height - (workspace_icon + menu_height + sidebar_header_height + 35) ) + 'px'
                 }
             },
             openCreateBoard(event, index, workspace_id) {
