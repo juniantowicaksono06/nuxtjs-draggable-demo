@@ -83,12 +83,18 @@
         </div>
         <b-modal id="card_archive_list" hide-footer size="md" title="Card Archive List">
             <div class="row">
-                <div class="col-12">
+                <div class="col-12" v-if="archive_card.length">
                     <div v-for="archive in archive_card" :key="archive._id">
                         <CardItem :data="{
                             item: archive,
                             archive: true
                         }" @restoreArchive="restoreArchive" />
+                    </div>
+                </div>
+                <div class="col-12" v-else>
+                    <div class="text-center">
+                        <h1><span><i class="fa fa-times-circle text-danger"></i></span></h1>
+                        <h5 class="text-center">NO ARCHIVE FOUND!</h5>
                     </div>
                 </div>
             </div>
@@ -368,7 +374,8 @@
                     check = true
                 }
                 this.old_value = ''
-                let sidebar_data = Object.assign([], this.$store.state.sidebar.sidebar_data)
+                // let sidebar_data = Object.assign([], this.$store.state.sidebar.sidebar_data)
+                let sidebar_data = JSON.parse(JSON.stringify(this.$store.state.sidebar.sidebar_data))
                 for(let a = 0; a < sidebar_data.boards.length; a++) {
                     if(sidebar_data.boards[a]._id == board_id) {
                         sidebar_data.boards[a].name = this.board.name
@@ -467,7 +474,9 @@
             },
             resizeBoard() {
                 if("board_input" in this.$refs) {
-                    this.$refs.board_input.style.width = (this.$refs.board_input_ref.offsetWidth + 30) + 'px';
+                    this.$nextTick(() => {
+                        this.$refs.board_input.style.width = (this.$refs.board_input_ref.offsetWidth + 30) + 'px';
+                    })
                 }
             },
         },

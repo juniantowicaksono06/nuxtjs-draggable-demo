@@ -71,7 +71,6 @@ import { get } from 'http'
                         this.$refs.pop_up_ref.style.left = (getClient.left - ((getClient.x + getClient.width) - window.innerWidth) - 20) + 'px'
                     }
                     else {
-                        console.log(popup_wrapper)
                         this.$refs.pop_up_ref.style.left = (popup_wrapper.x - 10) + 'px'
                     }
                 })
