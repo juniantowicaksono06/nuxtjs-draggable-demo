@@ -477,25 +477,25 @@
                     action_confirm_yes: null,
                     action_confirm_no: null
                 }
-                if(this.data.archive) {
-                    let members = Object.assign([], this.$store.state.members.all_members)
-                    members = members.filter((value) => {
-                        if(this.item.members.includes(value._id)) {
-                            return value
-                        }
-                        else {
-                            let exist = false
-                            this.item.members.some((member) => {
-                                if(member._id == value._id) {
-                                    exist = true
-                                    return true
-                                }
-                            })
-                            if(exist) return value
-                        }
-                    })
-                    this.item.members = members
-                }
+                // if(this.data.archive) {
+                //     let members = Object.assign([], this.$store.state.members.all_members)
+                //     members = members.filter((value) => {
+                //         if(this.item.members.includes(value._id)) {
+                //             return value
+                //         }
+                //         else {
+                //             let exist = false
+                //             this.item.members.some((member) => {
+                //                 if(member._id == value._id) {
+                //                     exist = true
+                //                     return true
+                //                 }
+                //             })
+                //             if(exist) return value
+                //         }
+                //     })
+                //     this.item.members = members
+                // }
             },
             storeOldValue(name) {
                 this.old_value = name
