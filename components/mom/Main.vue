@@ -18,9 +18,9 @@
         margin-left: 0;
     }
     ul {
-        margin-top: 5px;
+        margin-top: 2px;
         list-style-type: none;
-        margin-bottom: 5px;
+        margin-bottom: 2px;
         margin-left: 0;
         padding-left: 0;
     }
@@ -60,7 +60,7 @@
                                             <div class="card-header">
                                                 <h5 class="mb-0 text-center">Meeting Notes</h5>
                                             </div>
-                                            <div class="card-body">
+                                            <div class="card-body py-2 px-2">
                                                 <div class="px-2 py-2" v-if="data_mom.length > 0">
                                                     <pre><div v-html="mom_data.text"></div></pre>
                                                 </div>
@@ -110,10 +110,10 @@
                         let card_text = ``;
                         let card_index = 0
                         list.cards.forEach((card) => {
-                          card_text += `<div class="mb-0"><h6 class="mb-0">    <strong>${list_index += 1}. ${card.name}</strong> <span class="badge badge-primary">[${list.name}]</span></h6></div>`
+                          card_text += `<div class="mb-0"><h6 class="mb-0">    <strong>${list_index += 1}. ${card.name}</strong> <span class="badge badge-primary"><span style="opacity: 0">[</span>${list.name}<span style="opacity: 0">]</span></span></h6></div>`
                           let comment_text = ''
                           card.comments.forEach((comment) => {
-                              comment_text += `<div class=""><ul><li>          <strong>-</strong> ${comment.text}</li></ul></div>`
+                              comment_text += `<div><span class="mb-0"><strong>            ${this.convertDate(comment.date)}</strong></span></div><ul><li>            <strong>-</strong> ${comment.text}</li></ul>`
                           })
                           card_text += comment_text
                           card_index++;
@@ -125,11 +125,12 @@
             }
         },
         methods: {
-            getListsName(lists) {
-                let list_name = lists.map((list) => {
-                    return list.name
+            convertDate(date) {
+                let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+                let date_1 = new Date(date).toLocaleString('en-US', {
+                    timeZone: currentTimezone
                 })
-                return list_name.join(', ')
+                return `${moment(date_1).format('D MMMM YYYY')}`
             },
             searchMom() {
                 this.$axios.$get(`/api/mom?start=${this.start_date}&end=${this.end_date}`)
