@@ -113,7 +113,7 @@
                           card_text += `<div class="mb-0"><h6 class="mb-0">    <strong>${list_index += 1}. ${card.name}</strong> <span class="badge badge-primary"><span style="opacity: 0">[</span>${list.name}<span style="opacity: 0">]</span></span></h6></div>`
                           let comment_text = ''
                           card.comments.forEach((comment) => {
-                              comment_text += `<div><span class="mb-0"><strong>            ${this.convertDate(comment.date)}</strong></span></div><ul><li>            <strong>-</strong> ${comment.text}</li></ul>`
+                              comment_text += `<div><span class="mb-0"><strong>         ${this.convertDate(comment.date)}</strong></span></div><ul><li>         <strong>-</strong> ${comment.text}</li></ul>`
                           })
                           card_text += comment_text
                           card_index++;
