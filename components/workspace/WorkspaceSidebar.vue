@@ -262,12 +262,6 @@
                     <span v-if="$route.path != '/'" v-on:click="changeWorkspace">Workspace</span>
                     <span v-else>Workspace</span>
                 </div>
-                <div :class="($route.path == '/mom' ? 'd-flex justify-content-between workspace-name sidebar-item-active sidebar-item' : 'd-flex justify-content-between workspace-name sidebar-item')">
-                    <nuxt-link to="/mom" v-if="$route.path != '/mom'" class="text-white">
-                        MOM
-                    </nuxt-link>
-                    <span v-else>MOM</span>
-                </div>
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-if="'workspace_id' in $store.state.auth.identity">
@@ -314,6 +308,12 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div :class="($route.path == '/mom' ? 'sidebar-item-active sidebar-item' : 'sidebar-item sidebar-item')">
+                    <nuxt-link to="/mom" v-if="$route.path != '/mom'" class="text-white btn btn-transparent text-left">
+                        MOM
+                    </nuxt-link>
+                    <span v-else>MOM</span>
                 </div>
                 <div class="sidebar-item">
                     <button class="btn btn-transparent text-white" v-on:click="actionLogout">Logout</button>
@@ -432,7 +432,7 @@
                     let menu_height = this.$refs.menu_ref.offsetHeight
                     let sidebar_header_height = this.$refs.sidebar_header_ref.offsetHeight
                     let workspace_icon = this.$refs.sidebar_logo_ref.offsetHeight
-                    this.$refs.sidebar_container_ref.style.height = ( window_height - (workspace_icon + menu_height + sidebar_header_height + 35) ) + 'px'
+                    this.$refs.sidebar_container_ref.style.height = ( window_height - (workspace_icon + menu_height + sidebar_header_height + 20) ) + 'px'
                 }
             },
             openCreateBoard(event, index, workspace_id) {

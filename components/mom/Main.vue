@@ -3,7 +3,7 @@
         background-color: rgba(228, 228, 228, 0.9);
         backdrop-filter: blur(5px);
         border-radius: 10px;
-        overflow: hidden;
+        /* overflow: hidden; */
     }
     #comment_list {
         /* max-height: 80vh; */
@@ -42,14 +42,24 @@
                                     <div class="col-12">
                                         <h5>Choose a Date</h5>
                                     </div>
-                                    <div class="col-12 col-md-4">
-                                        <b-form-datepicker id="start_date" v-model="start_date" class="mb-2"></b-form-datepicker>
+                                    <div class="col-12 col-sm-12 col-md-12 col-lg-4">
+                                        <div class="form-group">
+                                            <label for="end_date">Start Date</label>
+                                            <b-form-datepicker id="start_date" v-model="start_date" class="mb-2"></b-form-datepicker>
+                                        </div>
                                     </div>
-                                    <div class="col-12 col-md-4">
-                                        <b-form-datepicker  id="end_date" v-model="end_date" class="mb-2"></b-form-datepicker>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <button class="btn btn-primary" v-on:click="searchMom"><i class="fa fa-search"></i> Search</button>
+                                    <div class="col-12 col-sm-12 col-md-12 col-lg-6">
+                                        <div class="form-group">
+                                            <label for="end_date">End Date</label>
+                                            <div class="row">
+                                                <div class="col-12 col-sm-12 col-md-12 col-lg-8">
+                                                    <b-form-datepicker  id="end_date" v-model="end_date" class="mb-2"></b-form-datepicker>
+                                                </div>
+                                                <div class="col-12 col-sm-12 col-md-12 col-lg-4">
+                                                    <button class="btn btn-primary" v-on:click="searchMom"><i class="fa fa-search"></i> Search</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -113,7 +123,7 @@
                           card_text += `<div class="mb-0"><h6 class="mb-0">    <strong>${list_index += 1}. ${card.name}</strong> <span class="badge badge-primary"><span style="opacity: 0">[</span>${list.name}<span style="opacity: 0">]</span></span></h6></div>`
                           let comment_text = ''
                           card.comments.forEach((comment) => {
-                              comment_text += `<div><span class="mb-0"><strong>         ${this.convertDate(comment.date)}</strong></span></div><ul><li>         <strong>-</strong> ${comment.text}</li></ul>`
+                              comment_text += `<ul><li>         <strong>-</strong> ${comment.text}</li></ul>`
                           })
                           card_text += comment_text
                           card_index++;
