@@ -35,9 +35,28 @@
                 <div class="w-100">
                     <div class="form-group">
                         <label for="board_title" class="kanban-text">
-                            Board title
+                            Board Title
                         </label>
-                        <input type="text" class="form-control" placeholder="Board title" v-model="board_title" v-on:keypress.enter="saveBoard" />
+                        <input type="text" class="form-control" placeholder="Board Title" v-model="board_title" v-on:keypress.enter="saveBoard" />
+                    </div>
+                    <div class="form-group">
+                        <label for="access_url" class="kanban-text">
+                            Access URL
+                        </label>
+                        <input type="text" class="form-control" placeholder="Access URL" v-model="board_url" v-on:keypress.enter="saveBoard" />
+                    </div>
+                    <div class="form-group">
+                        <label for="project_owner" class="kanban-text">
+                            Project Owner
+                        </label>
+                        <input type="text" class="form-control" placeholder="Project Owner" v-model="board_project_owner" v-on:keypress.enter="saveBoard" />
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="kanban-text">
+                            Description
+                        </label>
+                        <!-- <input type="text" class="form-control" placeholder="Description" v-model="board_title" v-on:keypress.enter="saveBoard" /> -->
+                        <textarea id="" rows="3" class="form-control" v-model="board_description" style="resize: none;" placeholder="Add a Description"></textarea>
                     </div>
                 </div>
                 <div class="w-100 mt-3">
@@ -57,7 +76,10 @@
         data() {
             return {
                 selected_workspace: '',
-                board_title: ''
+                board_title: '',
+                board_url: '',
+                board_description: '',
+                board_project_owner: '',
             }
         },
         methods: {
@@ -68,10 +90,20 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$post(`/api/board`, new URLSearchParams({
+                let dataSend = {
                     name: this.board_title,
                     workspace_id: this.$store.state.auth.identity.workspace_id._id
-                }), config)
+                }
+                if(this.board_url) {
+                    dataSend['url'] = this.board_url
+                }
+                if(this.board_project_owner) {
+                    dataSend['project_owner'] = this.board_project_owner
+                }
+                if(this.description) {
+                    dataSend['description'] = this.description
+                }
+                this.$axios.$post(`/api/board`, new URLSearchParams(dataSend), config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
@@ -80,6 +112,9 @@
                         boards.push({
                             _id: data._id,
                             name: this.board_title,
+                            description: this.board_description,
+                            url: this.board_url,
+                            project_owner: this.board_project_owner,
                             workspace_id: this.$store.state.auth.identity.workspace_id._id,
                             lists: [],
                             members: [],

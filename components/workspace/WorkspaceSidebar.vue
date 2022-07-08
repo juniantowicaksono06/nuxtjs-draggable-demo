@@ -309,8 +309,8 @@
                         </div>
                     </div>
                 </div>
-                <div :class="($route.path == '/mom' ? 'sidebar-item-active sidebar-item' : 'sidebar-item sidebar-item')">
-                    <nuxt-link to="/mom" v-if="$route.path != '/mom'" class="text-white btn btn-transparent text-left">
+                <div :class="($route.path == '/mom/' ? 'sidebar-item-active sidebar-item' : 'sidebar-item sidebar-item')">
+                    <nuxt-link to="/mom/" v-if="$route.path != '/mom/'" class="text-white btn btn-transparent text-left">
                         MOM
                     </nuxt-link>
                     <span v-else>MOM</span>
@@ -346,9 +346,28 @@
                 <div class="w-100">
                     <div class="form-group">
                         <label class="kanban-text">
-                            Board title
+                            Board Title
                         </label>
-                        <input type="text" class="form-control" placeholder="Board title" v-model="add_board.board_name" v-on:keypress.enter="saveBoard()" />
+                        <input type="text" class="form-control" placeholder="Board Title" v-model="add_board.board_name" v-on:keypress.enter="saveBoard()" />
+                    </div>
+                    <div class="form-group">
+                        <label class="kanban-text">
+                            Access URL
+                        </label>
+                        <input type="text" class="form-control" placeholder="Access URL" v-model="add_board.board_url" v-on:keypress.enter="saveBoard()" />
+                    </div>
+                    <div class="form-group">
+                        <label class="kanban-text">
+                            Project Owner
+                        </label>
+                        <input type="text" class="form-control" placeholder="Project Owner" v-model="add_board.board_project_owner" v-on:keypress.enter="saveBoard()" />
+                    </div>
+                    <div class="form-group">
+                        <label class="kanban-text">
+                            Description
+                        </label>
+                        <!-- <input type="text" class="form-control" placeholder="Description" v-model="add_board.board_name" v-on:keypress.enter="saveBoard()" /> -->
+                        <textarea rows="3" class="form-control" placeholder="Add a Description" v-model="add_board.board_description" style="resize: none;"></textarea>
                     </div>
                 </div>
                 <div class="w-100 mt-3">
@@ -374,6 +393,9 @@
                     workspace_id: null,
                     workspace_index: null,
                     board_name: '',
+                    board_url: '',
+                    board_project_owner: '',
+                    board_description: '',
                 }
             }    
         },
@@ -441,6 +463,9 @@
                     workspace_id: workspace_id,
                     workspace_index: index,
                     board_name: '',
+                    board_url: '',
+                    board_project_owner: '',
+                    board_description: '',
                 }
             },
             saveBoard() {
@@ -449,10 +474,20 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                this.$axios.$post(`/api/board`, new URLSearchParams({
+                let dataSend = {
                     name: this.add_board.board_name,
                     workspace_id: this.add_board.workspace_id
-                }), config)
+                }
+                if(this.add_board.board_url) {
+                    dataSend['url'] = this.add_board.board_url
+                }
+                if(this.add_board.board_project_owner) {
+                    dataSend['project_owner'] = this.add_board.board_project_owner
+                }
+                if(this.add_board.description) {
+                    dataSend['description'] = this.add_board.description
+                }
+                this.$axios.$post(`/api/board`, new URLSearchParams(dataSend), config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
@@ -461,6 +496,9 @@
                         boards.push({
                             _id: data._id,
                             name: this.add_board.board_name,
+                            description: this.add_board.board_description,
+                            url: this.add_board.board_url,
+                            project_owner: this.add_board.board_project_owner,
                             workspace_id: this.add_board.workspace_id,
                             lists: [],
                             members: [],

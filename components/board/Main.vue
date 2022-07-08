@@ -38,6 +38,9 @@
                         <div class="text-white transparent-button font-sm btn ml-3" ref="archive_ref" id="archive_ref" v-on:click="openArchiveModal">
                             <span>Archive</span>
                         </div>
+                        <div class="text-white transparent-button font-sm btn ml-3" ref="edit_board_ref" id="edit_board_ref" v-on:click="openEditBoardModal">
+                            <span>Edit Board</span>
+                        </div>
                         <PopUp title="Guest Members" :show="show_popup" :popup_trigger="popup_trigger" @close="closePopUp">
                             <template slot="component_render" @click.stop="">
                                 <div @click.stop="">
@@ -81,6 +84,40 @@
                 </div>
             </div>
         </div>
+        <b-modal id="edit_board_modal" hide-footer size="md" title="Edit Board">
+            <div class="row">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label for="board_title" class="kanban-text">
+                            Board Title
+                        </label>
+                        <input type="text" class="form-control" placeholder="Board Title" v-model="board_title" v-on:keypress.enter="saveBoard" />
+                    </div>
+                    <div class="form-group">
+                        <label for="access_url" class="kanban-text">
+                            Access URL
+                        </label>
+                        <input type="text" class="form-control" placeholder="Access URL" v-model="board_url" v-on:keypress.enter="saveBoard" />
+                    </div>
+                    <div class="form-group">
+                        <label for="project_owner" class="kanban-text">
+                            Project Owner
+                        </label>
+                        <input type="text" class="form-control" placeholder="Project Owner" v-model="board_project_owner" v-on:keypress.enter="saveBoard" />
+                    </div>
+                    <div class="form-group">
+                        <label for="description" class="kanban-text">
+                            Description
+                        </label>
+                        <!-- <input type="text" class="form-control" placeholder="Description" v-model="board_title" v-on:keypress.enter="saveBoard" /> -->
+                        <textarea id="" rows="3" class="form-control" v-model="board_description" style="resize: none;" placeholder="Add a Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary btn-block" v-on:click="saveBoard">Save</button>
+                    </div>
+                </div>
+            </div>
+        </b-modal>
         <b-modal id="card_archive_list" hide-footer size="md" title="Card Archive List">
             <div class="row">
                 <div class="col-12" v-if="archive_card.length">
@@ -154,6 +191,9 @@
             'board_id': function() {
                 this.loadDataMember()
                 this.loadDataAllMember()
+            },
+            'board.name': function() {
+                this.resizeBoard()
             }
         },
         computed: {
@@ -168,6 +208,55 @@
             },
         },
         methods: {
+            saveBoard() {
+
+                if(this.board_title.trim() == '') return
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+                let dataSend = {
+                    id: this.board._id,
+                    name: this.board_title,
+                }
+                if(this.board_url) {
+                    dataSend['url'] = this.board_url
+                }
+                if(this.board_project_owner) {
+                    dataSend['project_owner'] = this.board_project_owner
+                }
+                if(this.description) {
+                    dataSend['description'] = this.description
+                }
+                this.$axios.$put(`/api/board`, new URLSearchParams(dataSend), config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        let boards = JSON.stringify(this.$store.state.sidebar.sidebar_data.boards)
+                        boards = JSON.parse(boards)
+                        let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                        boards.some((value, index) => {
+                            if(value._id == this.board._id) {
+                                boards[index].name = this.board_title
+                                boards[index].url = this.board_url
+                                boards[index].project_owner = this.board_project_owner
+                                boards[index].description = this.board_description
+
+                                this.board.name = this.board_title
+                                this.board.url = this.board_url
+                                this.board.project_owner = this.board_project_owner
+                                this.board.description = this.board_description
+                                let sidebar_data = {
+                                    workspaces: workspaces,
+                                    boards: boards
+                                }
+                                this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                                return true
+                            }
+                        })
+                    }
+                })
+            },
             restoreArchive(item) {
                 let config = {
                     headers: {
@@ -193,6 +282,9 @@
                 .catch((error) => {
                     alert("Error: Telah terjadi kesalahan")
                 })
+            },
+            openEditBoardModal() {
+                this.$bvModal.show('edit_board_modal')
             },
             openArchiveModal() {
                 this.$axios.$get(`/api/archive?board_id=${this.board._id}`)
@@ -293,6 +385,10 @@
                         this.$nextTick(() => {
                             this.resizeBoard()
                             document.title = `${this.board.name} Board`
+                            this.board_title = this.board.name
+                            this.board_url = this.board.url
+                            this.board_project_owner = this.board.project_owner
+                            this.board_description = this.board.description
                         })
                     }
                 })
@@ -485,6 +581,10 @@
                 show_popup: false,
                 popup_trigger: null,
                 board_id: null,
+                board_title: '',
+                board_url: '',
+                board_description: '',
+                board_project_owner: '',
                 all_members: [],
                 member_multiselect: [],
                 board_members: this.$store.state.members.all_members,
