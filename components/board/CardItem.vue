@@ -16,10 +16,10 @@
                         <i class="fa fa-check"></i>
                         <span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
                     </span>
-                    <!-- <span class="kanban-text mr-2" v-if="item.comments">
+                    <span class="kanban-text mr-2" v-if="item.comments != 0">
                         <i class="fa fa-comment"></i>
                         <span class="px-1 kanban-text">{{ item.comments.length }}</span>
-                    </span> -->
+                    </span>
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
                         <i class="fa fa-clock mr-1 kanban-text"></i>
                         <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" v-if="!data.archive" />
@@ -293,9 +293,6 @@
                     this.setPopupOffset()
                 })
             })
-            if(!this.data.archive) {
-                this.item.comments = []
-            }
             this.initOption()
         },
         computed: {
