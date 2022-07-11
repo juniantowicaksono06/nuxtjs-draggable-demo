@@ -31,6 +31,7 @@
 <script>
     import draggable from 'vuedraggable'
     import CardItem from './CardItem.vue'
+    import Swal from 'sweetalert2'
     export default {
         data() {
             return {
@@ -69,6 +70,16 @@
                 this.$axios.$delete(`/api/card/`, config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        Swal.fire({
+                            text: 'Card has been archived',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                     }
                 }) 
                 .catch((error) => {

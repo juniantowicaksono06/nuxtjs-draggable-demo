@@ -380,6 +380,7 @@
     </div>
 </template>
 <script>
+    import Swal from 'sweetalert2'
     export default {
         data() {
             return {
@@ -490,6 +491,16 @@
                 this.$axios.$post(`/api/board`, new URLSearchParams(dataSend), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        Swal.fire({
+                            text: 'Board has been created',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                         let {data} = response
                         let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces

@@ -15,7 +15,7 @@
                             <div>
                                 <p ref="board_input_ref" id="board_input_ref">{{ board.name }}</p>
                             </div>
-                            <input ref="board_input" v-on:keyup.enter="$event.target.blur()" type="text" id="board_input" v-model="board.name" @focus="storeOldValue($event)"  v-on:keyup="resizeBoard" v-on:blur="changeBoardName($event, board._id)" />
+                            <input ref="board_input" v-on:keyup.enter="$event.target.blur()" type="text" id="board_input" v-model="board.name" @focus="storeOldValue($event)"  v-on:keyup="resizeBoard" v-on:blur="renameBoard($event, board._id)" />
                         </span>
                         <span class="ml-1">
                             <span class="text-white transparent-button font-sm btn">{{ board.workspace_id ? board.workspace_id.name : '' }} <span class="ml-1"></span></span>
@@ -169,6 +169,7 @@
     import PopUp from './PopUp.vue'
     import Multiselect from 'vue-multiselect'
     import CardItem from './CardItem.vue'
+    import Swal from 'sweetalert2'
 
     export default {
         async mounted() {
@@ -232,6 +233,16 @@
                 this.$axios.$put(`/api/board`, new URLSearchParams(dataSend), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        Swal.fire({
+                            text: 'Board has been saved',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                         let boards = JSON.stringify(this.$store.state.sidebar.sidebar_data.boards)
                         boards = JSON.parse(boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
@@ -255,6 +266,17 @@
                             }
                         })
                     }
+                }).catch((error) => {
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
             restoreArchive(item) {
@@ -268,6 +290,16 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        Swal.fire({
+                            text: 'Card has been restore',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                         const {data} = response
                         this.board.lists.some((value, index) => {
                             if(value._id == item.list_id) {
@@ -462,7 +494,7 @@
                     return initial
                 }
             },
-            changeBoardName(event, board_id) {
+            renameBoard(event, board_id) {
                 let check = false
                 if(this.board.name.trim() == '' || this.board.name == this.old_value) {
                     this.board.name = this.old_value
@@ -495,10 +527,29 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         // Do Something
+                        Swal.fire({
+                            text: 'Board has been rename',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                     }
                 })
                 .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
             changeWorkspace(event, target) {
@@ -558,6 +609,16 @@
                             "_id": data._id,
                             "name": this.add_list_value,
                             "cards": []
+                        })
+                        Swal.fire({
+                            text: 'List has been created',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
                         })
                         this.disableAddList()
                         return 
