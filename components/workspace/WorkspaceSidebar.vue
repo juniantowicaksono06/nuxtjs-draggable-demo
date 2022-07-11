@@ -313,7 +313,7 @@
                     <nuxt-link to="/mom/" v-if="$route.path != '/mom/'" class="text-white btn btn-transparent text-left">
                         MOM
                     </nuxt-link>
-                    <span v-else>MOM</span>
+                    <span v-else class="text-white btn btn-transparent text-left">MOM</span>
                 </div>
                 <div class="sidebar-item">
                     <button class="btn btn-transparent text-white" v-on:click="actionLogout">Logout</button>

@@ -42,7 +42,7 @@
                     <div class="d-flex justify-content-between" id="modal_header">
                         <!-- CARD ITEM NAME -->
                         <div class="mb-1" style="width: 90%;">
-                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="changeItemName" v-on:focus="storeOldValue(item.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
+                            <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="renameItem" v-on:focus="storeOldValue(item.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
                             <span class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-else>{{ item.name }}</span>
                             <h6 class="pr-0 no-select" v-if="!data.archive">in list <b>{{ kanban_name }}</b></h6>
                             <h4 class="pr-0 no-select text-center text-danger" v-else><span><i class="fa fa-archive mr-2"></i></span> This card is archived</h4>
@@ -249,6 +249,7 @@
     import CardPopup from './CardPopup.vue'
     import Comment from '../global/Comment.vue'
     import * as moment from 'moment'
+    import Swal from 'sweetalert2'
     export default {
         data() {
             return {
@@ -546,11 +547,29 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        // Do Something
+                        Swal.fire({
+                            text: 'Checklist has been rename',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                     }
                 })
                 .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
             toggleDeadline() {
@@ -576,7 +595,7 @@
                     alert("Error: Telah terjadi kesalahan")
                 })
             },
-            changeItemName() {
+            renameItem() {
                 if(this.item.name.trim() == '' || this.item.name.trim() == this.old_value.trim()) {
                     this.old_value = ''
                     return
@@ -593,11 +612,29 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        // Do Something
+                        Swal.fire({
+                            text: 'Card item has been renamed',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                     }
                 })
                 .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
             generateProfileName(fullname) {
@@ -628,10 +665,29 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         checklist.splice(index, 1)
+                        Swal.fire({
+                            text: 'Checklist group has been deleted',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                     }
                 }) 
                 .catch((error) => {
-                    alert('Error: Telah terjadi kesalahan')
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
             deleteChecklistChild(child_index, checklist, parent_id) {
@@ -650,12 +706,29 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         checklist.splice(child_index, 1)
-                        return
+                        Swal.fire({
+                            text: 'Checklist has been deleted',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                     }
-                    alert('Telah terjadi kesalahan')
                 }) 
                 .catch((error) => {
-                    alert('Error: Telah terjadi kesalahan')
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
             showModalItem(event, data, card_name) {

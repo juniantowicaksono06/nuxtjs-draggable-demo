@@ -2,7 +2,7 @@
     <div class="kanban-card card" ref="card_ref">
         <div class="card-header kanban-header">
             <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ kanban_card.name }}</p> 
-            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban_card.name" v-on:blur="changeCardName($event)" v-on:focus="storeOldValue" v-on:keyup.enter="$event.target.blur()" />
+            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="kanban_card.name" v-on:blur="renameCard($event)" v-on:focus="storeOldValue" v-on:keyup.enter="$event.target.blur()" />
         </div>
         <div class="card-body kanban-body py-1 px-2" ref="card_body_ref">
             <draggable group="task" v-model="kanban_card.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="kanban_card._id">
@@ -83,7 +83,16 @@
                     }
                 }) 
                 .catch((error) => {
-                    alert('Error: Telah terjadi kesalahan')
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
                 this.kanban_card.cards.splice(index, 1)
             },
@@ -124,7 +133,7 @@
                 this.$refs.card_name_edit.focus()
                 this.$refs.card_name_edit.select()
             },
-            changeCardName(event) {
+            renameCard(event) {
                 if(this.kanban_card.name.trim() == '' || this.kanban_card.name.trim() == this.old_value.trim()) {
                     this.kanban_card.name = this.old_value
                     this.old_value = ''
@@ -144,11 +153,29 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
-                        return 
+                        Swal.fire({
+                            text: 'List has been renamed',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                     }
                 })
                 .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
             showAddItemInput(event, card_id) {
@@ -179,6 +206,16 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        Swal.fire({
+                            text: 'Card item has been created',
+                            toast: true,
+                            timer: 3000,
+                            position: 'bottom-right',
+                            showConfirmButton: false,
+                            showCancelButton: false,
+                            icon: 'success',
+                            title: 'Success'
+                        })
                         let {data} = response
                         this.kanban_card.cards.push({
                             "deadline": {
@@ -192,12 +229,19 @@
                             "checklists": []
                         })
                         this.disableAddItem()
-                        return
                     }
-                    alert('Telah terjadi kesalahan')
                 }) 
                 .catch((error) => {
-                    alert('Error: Telah terjadi kesalahan')
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
                 })
             },
         },
