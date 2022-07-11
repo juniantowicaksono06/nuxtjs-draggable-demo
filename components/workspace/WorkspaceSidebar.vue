@@ -11,7 +11,7 @@
         margin-left: -5px;
     }
     #sidebar {
-        width: 300px;
+        width: 200px;
         position: relative;
         background-color: rgb(71,98,112);
         color: white;

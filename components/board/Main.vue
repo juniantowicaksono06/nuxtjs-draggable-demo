@@ -426,6 +426,7 @@
                 })
             },
             loadDataMember() {
+                if(!this.board) return false
                 this.$axios.$get(`/api/member?board_id=${this.board_id}`)
                 .then((response_member) => {
                     if(response_member.status == 'OK') {
@@ -471,9 +472,9 @@
             },
             resizeKanbanContainer() {
                 let sidebar = document.getElementById("sidebar")
-                let width = window.innerWidth - sidebar.offsetWidth
                 let kanban_container = document.getElementById('kanban_container')
-                if(kanban_container) {
+                if(kanban_container && sidebar) {
+                    let width = window.innerWidth - sidebar.offsetWidth
                     kanban_container.style.width = (width - 60) + 'px'
                 }
             },
