@@ -9,14 +9,14 @@
         <div class="py-2 px-2">
             <span class="kanban-text">{{ item.name }}</span>
         </div>
-        <div class="w-100" v-if="(item.members.length > 0 || item.checklists.length > 0 || item.deadline.date != null)">
+        <div class="w-100" v-if="(item.members.length > 0 || item.checklists.length > 0 || item.deadline.date != null || item.comments.length > 0)">
             <div class="float-left px-2 mb-2">
-                <div class="d-flex" v-if="(item.checklists.length > 0 || item.deadline.date != null)">
+                <div class="d-flex">
                     <span :class="(countChecklistChild.done && countChecklistChild.checklist_done != 0 ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="item.checklists.length > 0">
                         <i class="fa fa-check"></i>
                         <span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
                     </span>
-                    <span class="kanban-text mr-2" v-if="item.comments != 0">
+                    <span class="kanban-text mr-2" v-if="item.comments.length > 0">
                         <i class="fa fa-comment"></i>
                         <span class="px-1 kanban-text">{{ item.comments.length }}</span>
                     </span>

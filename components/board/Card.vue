@@ -226,7 +226,8 @@
                             "name": task_name,
                             "description": "",
                             "members": [],
-                            "checklists": []
+                            "checklists": [],
+                            "comments": []
                         })
                         this.disableAddItem()
                     }
