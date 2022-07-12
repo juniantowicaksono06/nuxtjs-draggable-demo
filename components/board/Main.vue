@@ -94,6 +94,17 @@
                         <input type="text" class="form-control" placeholder="Board Title" v-model="board_title" v-on:keypress.enter="saveBoard" />
                     </div>
                     <div class="form-group">
+                        <label class="kanban-text">
+                            Project Platform
+                        </label>
+                        <select class="form-control" v-model="board_platform">
+                            <option value="">Select Platform</option>
+                            <option value="Aplikasi Mobile">Aplikasi Mobile</option>
+                            <option value="Bot Telegram">Bot Telegram</option>
+                            <option value="Web">Web</option>
+                        </select>
+                    </div>
+                    <div class="form-group" v-if="board_platform == 'Web'">
                         <label for="access_url" class="kanban-text">
                             Access URL
                         </label>
@@ -220,8 +231,16 @@
                     id: this.board._id,
                     name: this.board_title,
                 }
-                if(this.board_url) {
-                    dataSend['url'] = this.board_url
+                // if(this.board_url) {
+                //     dataSend['url'] = this.board_url
+                // }
+                if(this.board_platform) {
+                    if(this.board_platform == 'Web' && this.board_url) {
+                        dataSend['url'] = this.board_url
+                    }
+                    else if(this.board_platform != 'Web') {
+                        dataSend['url'] = this.board_platform
+                    }
                 }
                 if(this.board_project_owner) {
                     dataSend['project_owner'] = this.board_project_owner
@@ -253,7 +272,7 @@
                                 boards[index].description = this.board_description
 
                                 this.board.name = this.board_title
-                                this.board.url = this.board_url
+                                this.board.url = this.board_platform != 'Web' ? this.board_platform : this.board_url
                                 this.board.project_owner = this.board_project_owner
                                 this.board.description = this.board_description
                                 let sidebar_data = {
@@ -418,6 +437,13 @@
                             document.title = `${this.board.name} Board`
                             this.board_title = this.board.name
                             this.board_url = this.board.url
+                            if(this.$isValidUrl(this.board_url)) {
+                                this.board_platform = 'Web'
+                            }
+                            else {
+                                this.board_platform = this.board_url
+                                this.board_url = ''
+                            }
                             this.board_project_owner = this.board.project_owner
                             this.board_description = this.board.description
                         })
@@ -643,6 +669,7 @@
                 popup_trigger: null,
                 board_id: null,
                 board_title: '',
+                board_platform: '',
                 board_url: '',
                 board_description: '',
                 board_project_owner: '',

@@ -32,8 +32,16 @@
                                     <div class="mt-4">
                                         <h6 class="kanban-text"><i class="fa fa-check" :key="board._id"></i><span class="ml-2">Task Completed: </span> <span v-if="board.lists.task_total > 0">{{ board.lists.task_finish }} / {{ board.lists.task_total }} ({{ Math.round(100 * (board.lists.task_finish / board.lists.task_total)) }}%)</span><span v-else>0 / 0</span></h6>
                                     </div>
-                                    <div v-if="board.url">
-                                        <h6 class="kanban-text"><i class="fa fa-globe"></i><span class="ml-2">URL: <a :href="board.url" v-on:click.stop="" class="text-white" v-if="isValidUrl(board.url)">{{ board.url }}</a><span v-else>{{ board.url }}</span></span></h6>
+                                    <div v-if="$isValidUrl(board.url)">
+                                        <h6 class="kanban-text"><i class="fa fa-globe"></i><span class="ml-2">Platform: Web</span></h6>
+                                        <h6 class="kanban-text"><i class="fa fa-link"></i><span class="ml-2">URL: <a :href="board.url" v-on:click.stop="" class="text-white" v-if="$isValidUrl(board.url)">{{ board.url }}</a><span v-else>{{ board.url }}</span></span></h6>
+                                    </div>
+                                    <div v-else-if="board.url">
+                                        <h6 class="kanban-text">
+                                            <i class="fa fa-mobile ml-1 position-absolute" v-if="board.url == 'Aplikasi Mobile'"></i>
+                                            <i class="fa fa-robot position-absolute" v-if="board.url.includes('Bot')"></i>
+                                            <span class="pl-3 ml-1">Platform: {{ board.url }}</span>
+                                        </h6>
                                     </div>
                                     <div v-if="board.project_owner">
                                         <div v-if="board.project_owner.trim() != '' && board.project_owner != null">
@@ -68,6 +76,17 @@
                                 <input type="text" class="form-control" placeholder="Board Title" v-model="board_title" v-on:keypress.enter="saveBoard" />
                             </div>
                             <div class="form-group">
+                                <label class="kanban-text">
+                                    Project Platform
+                                </label>
+                                <select class="form-control" v-model="board_platform">
+                                    <option value="">Select Platform</option>
+                                    <option value="Aplikasi Mobile">Aplikasi Mobile</option>
+                                    <option value="Bot Telegram">Bot Telegram</option>
+                                    <option value="Web">Web</option>
+                                </select>
+                            </div>
+                            <div class="form-group" v-if="board_platform == 'Web'">
                                 <label for="access_url" class="kanban-text">
                                     Access URL
                                 </label>
@@ -109,6 +128,7 @@
                 selected_workspace: '',
                 board_title: '',
                 board_url: '',
+                board_platform: '',
                 board_description: '',
                 board_project_owner: '',
             }
@@ -125,8 +145,16 @@
                     name: this.board_title,
                     workspace_id: this.$store.state.auth.identity.workspace_id._id
                 }
-                if(this.board_url) {
-                    dataSend['url'] = this.board_url
+                // if(this.board_url) {
+                //     dataSend['url'] = this.board_url
+                // }
+                if(this.board_platform) {
+                    if(this.board_platform == 'Web' && this.board_url) {
+                        dataSend['url'] = this.board_url
+                    }
+                    else if(this.board_platform != 'Web') {
+                        dataSend['url'] = this.board_platform
+                    }
                 }
                 if(this.board_project_owner) {
                     dataSend['project_owner'] = this.board_project_owner
@@ -154,7 +182,7 @@
                             _id: data._id,
                             name: this.board_title,
                             description: this.board_description,
-                            url: this.board_url,
+                            url: this.board_platform == 'Web' ? this.board_url : this.board_platform,
                             project_owner: this.board_project_owner,
                             workspace_id: this.$store.state.auth.identity.workspace_id._id,
                             lists: [],
@@ -175,10 +203,6 @@
             openCreateBoard() {
                 this.$bvModal.show('create_new_board2')
             },
-            isValidUrl(urlString) {
-                var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-                return !!pattern.test(urlString.toLowerCase());
-            }
         },
         props: {
             data: {

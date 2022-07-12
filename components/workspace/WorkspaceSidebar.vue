@@ -352,6 +352,17 @@
                     </div>
                     <div class="form-group">
                         <label class="kanban-text">
+                            Project Platform
+                        </label>
+                        <select class="form-control" v-model="board_platform">
+                            <option value="">Select Platform</option>
+                            <option value="Aplikasi Mobile">Aplikasi Mobile</option>
+                            <option value="Bot Telegram">Bot Telegram</option>
+                            <option value="Web">Web</option>
+                        </select>
+                    </div>
+                    <div class="form-group" v-if="board_platform == 'Web'">
+                        <label class="kanban-text">
                             Access URL
                         </label>
                         <input type="text" class="form-control" placeholder="Access URL" v-model="add_board.board_url" v-on:keypress.enter="saveBoard()" />
@@ -390,10 +401,12 @@
                     workspace_name: '',
                     workspace_visibility: 'public'
                 },
+                board_platform: '',
                 add_board: {
                     workspace_id: null,
                     workspace_index: null,
                     board_name: '',
+                    // board_platform: "",
                     board_url: '',
                     board_project_owner: '',
                     board_description: '',
@@ -479,8 +492,16 @@
                     name: this.add_board.board_name,
                     workspace_id: this.add_board.workspace_id
                 }
-                if(this.add_board.board_url) {
-                    dataSend['url'] = this.add_board.board_url
+                // if(this.add_board.board_url) {
+                //     dataSend['url'] = this.add_board.board_url
+                // }
+                if(this.board_platform) {
+                    if(this.board_platform == 'Web' && this.add_board.board_url) {
+                        dataSend['url'] = this.add_board.board_url
+                    }
+                    else if(this.board_platform != 'Web') {
+                        dataSend['url'] = this.board_platform
+                    }
                 }
                 if(this.add_board.board_project_owner) {
                     dataSend['project_owner'] = this.add_board.board_project_owner
@@ -508,7 +529,8 @@
                             _id: data._id,
                             name: this.add_board.board_name,
                             description: this.add_board.board_description,
-                            url: this.add_board.board_url,
+                            // url: this.add_board.board_url,
+                            url: this.board_platform == 'Web' ? this.add_board.board_url : this.board_platform,
                             project_owner: this.add_board.board_project_owner,
                             workspace_id: this.add_board.workspace_id,
                             lists: [],
@@ -518,6 +540,7 @@
                             workspaces: workspaces,
                             boards: boards
                         }
+                        this.board_platform = ''
                         this.$store.commit('sidebar/setSidebarData', sidebar_data)
                         this.$bvModal.hide('create_new_board')
                     }
