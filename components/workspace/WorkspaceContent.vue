@@ -131,8 +131,8 @@
                 if(this.board_project_owner) {
                     dataSend['project_owner'] = this.board_project_owner
                 }
-                if(this.description) {
-                    dataSend['description'] = this.description
+                if(this.board_description) {
+                    dataSend['description'] = this.board_description
                 }
                 this.$axios.$post(`/api/board`, new URLSearchParams(dataSend), config)
                 .then((response) => {
@@ -176,13 +176,8 @@
                 this.$bvModal.show('create_new_board2')
             },
             isValidUrl(urlString) {
-                var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-                    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-                    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-                    '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
-                return !!pattern.test(urlString);
+                var pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+                return !!pattern.test(urlString.toLowerCase());
             }
         },
         props: {

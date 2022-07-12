@@ -210,7 +210,6 @@
         },
         methods: {
             saveBoard() {
-
                 if(this.board_title.trim() == '') return
                 let config = {
                     headers: {
@@ -227,8 +226,8 @@
                 if(this.board_project_owner) {
                     dataSend['project_owner'] = this.board_project_owner
                 }
-                if(this.description) {
-                    dataSend['description'] = this.description
+                if(this.board_description) {
+                    dataSend['description'] = this.board_description
                 }
                 this.$axios.$put(`/api/board`, new URLSearchParams(dataSend), config)
                 .then((response) => {
