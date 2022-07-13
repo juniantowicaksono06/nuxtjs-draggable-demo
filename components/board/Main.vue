@@ -463,8 +463,8 @@
                                     })
                                 }
                             }
-                            this.board_project_owner = this.board.project_owner
-                            this.board_description = this.board.description
+                            this.board_project_owner = this.board.project_owner ? this.board.project_owner : ''
+                            this.board_description = this.board.description ? this.board.description : ''
                         })
                     }
                 })
