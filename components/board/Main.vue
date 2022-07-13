@@ -93,18 +93,32 @@
                         </label>
                         <input type="text" class="form-control" placeholder="Board Title" v-model="board_title" v-on:keypress.enter="saveBoard" />
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-0">
                         <label class="kanban-text">
                             Project Platform
                         </label>
-                        <select class="form-control" v-model="board_platform">
-                            <option value="">Select Platform</option>
-                            <option value="Aplikasi Mobile">Aplikasi Mobile</option>
-                            <option value="Bot Telegram">Bot Telegram</option>
-                            <option value="Web">Web</option>
-                        </select>
                     </div>
-                    <div class="form-group" v-if="board_platform == 'Web'">
+                    <div class="row">
+                        <div class="col-12 col-md-4 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" value="Aplikasi Mobile" v-model="board_platform_list['Aplikasi Mobile']" :checked="board_platform_list['Aplikasi Mobile']">
+                                <label for="aplikasiMobile" class="form-check-label"> Aplikasi Mobile</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" value="Bot Telegram" v-model="board_platform_list['Bot Telegram']" :checked="board_platform_list['Bot Telegram']">
+                                <label for="botTelegram" class="form-check-label"> Bot Telegram</label>
+                            </div>
+                        </div>
+                       <div class="col-12 col-md-4 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" value="Web" v-model="board_platform_list['Web']" :checked="board_platform_list['Web']">
+                                <label for="web" class="form-check-label"> Web</label>
+                            </div>
+                       </div> 
+                    </div>
+                    <div class="form-group" v-if="board_platform_list['Web']">
                         <label for="access_url" class="kanban-text">
                             Access URL
                         </label>
@@ -224,31 +238,30 @@
                 if(this.board_title.trim() == '') return
                 let config = {
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/json'
                     }
                 }
                 let dataSend = {
                     id: this.board._id,
                     name: this.board_title,
+                    platform: []
                 }
-                // if(this.board_url) {
-                //     dataSend['url'] = this.board_url
-                // }
-                if(this.board_platform) {
-                    if(this.board_platform == 'Web' && this.board_url) {
-                        dataSend['url'] = this.board_url
+                for(const key in this.board_platform_list) {
+                    if(key == 'Web') {
+                        if(this.board_platform_list[key] == true) {
+                            dataSend['url'] = this.board_url
+                        }
+                        else {
+                            dataSend['url'] = ''
+                        }
                     }
-                    else if(this.board_platform != 'Web') {
-                        dataSend['url'] = this.board_platform
-                    }
+                    if(this.board_platform_list[key] == true) {
+                        dataSend['platform'].push(key)
+                    } 
                 }
-                if(this.board_project_owner) {
-                    dataSend['project_owner'] = this.board_project_owner
-                }
-                if(this.board_description) {
-                    dataSend['description'] = this.board_description
-                }
-                this.$axios.$put(`/api/board`, new URLSearchParams(dataSend), config)
+                dataSend['project_owner'] = this.board_project_owner
+                dataSend['description'] = this.board_description
+                this.$axios.$put(`/api/board`, dataSend, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         Swal.fire({
@@ -272,7 +285,8 @@
                                 boards[index].description = this.board_description
 
                                 this.board.name = this.board_title
-                                this.board.url = this.board_platform != 'Web' ? this.board_platform : this.board_url
+                                this.board.url = dataSend['url']
+                                this.board_url = dataSend['url']
                                 this.board.project_owner = this.board_project_owner
                                 this.board.description = this.board_description
                                 let sidebar_data = {
@@ -423,6 +437,11 @@
                     this.$router.push('/')
                     return
                 }
+                this.board_platform_list = {
+                    "Aplikasi Mobile": false,
+                    "Bot Telegram": false,
+                    "Web": false
+                },
 
                 this.$axios.$get(`/api/board?id=${id}`)
                 .then((response) => {
@@ -437,12 +456,12 @@
                             document.title = `${this.board.name} Board`
                             this.board_title = this.board.name
                             this.board_url = this.board.url
-                            if(this.$isValidUrl(this.board_url)) {
-                                this.board_platform = 'Web'
-                            }
-                            else {
-                                this.board_platform = this.board_url
-                                this.board_url = ''
+                            if(this.board.platform) {
+                                if(this.board.platform.length > 0) {
+                                    this.board.platform.forEach((value) => {
+                                        this.board_platform_list[value] = true
+                                    })
+                                }
                             }
                             this.board_project_owner = this.board.project_owner
                             this.board_description = this.board.description
@@ -669,7 +688,11 @@
                 popup_trigger: null,
                 board_id: null,
                 board_title: '',
-                board_platform: '',
+                board_platform_list: {
+                    "Aplikasi Mobile": false,
+                    "Bot Telegram": false,
+                    "Web": false
+                },
                 board_url: '',
                 board_description: '',
                 board_project_owner: '',

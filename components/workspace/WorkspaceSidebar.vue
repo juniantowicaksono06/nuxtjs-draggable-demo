@@ -350,19 +350,33 @@
                         </label>
                         <input type="text" class="form-control" placeholder="Board Title" v-model="add_board.board_name" v-on:keypress.enter="saveBoard()" />
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-0">
                         <label class="kanban-text">
                             Project Platform
                         </label>
-                        <select class="form-control" v-model="board_platform">
-                            <option value="">Select Platform</option>
-                            <option value="Aplikasi Mobile">Aplikasi Mobile</option>
-                            <option value="Bot Telegram">Bot Telegram</option>
-                            <option value="Web">Web</option>
-                        </select>
                     </div>
-                    <div class="form-group" v-if="board_platform == 'Web'">
-                        <label class="kanban-text">
+                    <div class="row">
+                        <div class="col-12 col-md-4 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" value="Aplikasi Mobile" v-model="add_board.board_platform_list['Aplikasi Mobile']" :checked="add_board.board_platform_list['Aplikasi Mobile']">
+                                <label for="aplikasiMobile" class="form-check-label"> Aplikasi Mobile</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" value="Bot Telegram" v-model="add_board.board_platform_list['Bot Telegram']" :checked="add_board.board_platform_list['Bot Telegram']">
+                                <label for="botTelegram" class="form-check-label"> Bot Telegram</label>
+                            </div>
+                        </div>
+                       <div class="col-12 col-md-4 col-lg-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" value="Web" v-model="add_board.board_platform_list['Web']" :checked="add_board.board_platform_list['Web']">
+                                <label for="web" class="form-check-label"> Web</label>
+                            </div>
+                       </div> 
+                    </div>
+                    <div class="form-group" v-if="add_board.board_platform_list['Web']">
+                        <label for="access_url" class="kanban-text">
                             Access URL
                         </label>
                         <input type="text" class="form-control" placeholder="Access URL" v-model="add_board.board_url" v-on:keypress.enter="saveBoard()" />
@@ -410,7 +424,12 @@
                     board_url: '',
                     board_project_owner: '',
                     board_description: '',
-                }
+                    board_platform_list: {
+                        "Aplikasi Mobile": false,
+                        "Bot Telegram": false,
+                        "Web": false
+                    },
+                },
             }    
         },
         props: {
@@ -480,36 +499,40 @@
                     board_url: '',
                     board_project_owner: '',
                     board_description: '',
+                    board_platform_list: {
+                        "Aplikasi Mobile": false,
+                        "Bot Telegram": false,
+                        "Web": false
+                    },
                 }
             },
             saveBoard() {
                 let config = {
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/json'
                     }
                 }
                 let dataSend = {
                     name: this.add_board.board_name,
-                    workspace_id: this.add_board.workspace_id
+                    workspace_id: this.add_board.workspace_id,
+                    platform: []
                 }
-                // if(this.add_board.board_url) {
-                //     dataSend['url'] = this.add_board.board_url
-                // }
-                if(this.board_platform) {
-                    if(this.board_platform == 'Web' && this.add_board.board_url) {
-                        dataSend['url'] = this.add_board.board_url
+                for(const key in this.add_board.board_platform_list) {
+                    if(key == 'Web') {
+                        if(this.add_board.board_platform_list[key] == true) {
+                            dataSend['url'] = this.add_board.board_url
+                        }
+                        else {
+                            dataSend['url'] = ''
+                        }
                     }
-                    else if(this.board_platform != 'Web') {
-                        dataSend['url'] = this.board_platform
-                    }
+                    if(this.add_board.board_platform_list[key] == true) {
+                        dataSend['platform'].push(key)
+                    } 
                 }
-                if(this.add_board.board_project_owner) {
-                    dataSend['project_owner'] = this.add_board.board_project_owner
-                }
-                if(this.add_board.description) {
-                    dataSend['description'] = this.add_board.description
-                }
-                this.$axios.$post(`/api/board`, new URLSearchParams(dataSend), config)
+                dataSend['project_owner'] = this.add_board.board_project_owner
+                dataSend['description'] = this.add_board.board_description
+                this.$axios.$post(`/api/board`, dataSend, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         Swal.fire({
@@ -530,7 +553,7 @@
                             name: this.add_board.board_name,
                             description: this.add_board.board_description,
                             // url: this.add_board.board_url,
-                            url: this.board_platform == 'Web' ? this.add_board.board_url : this.board_platform,
+                            url: dataSend['url'],
                             project_owner: this.add_board.board_project_owner,
                             workspace_id: this.add_board.workspace_id,
                             lists: [],

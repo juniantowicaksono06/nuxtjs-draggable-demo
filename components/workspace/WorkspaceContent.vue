@@ -16,6 +16,9 @@
 <template>
     <div class="px-3 py-3 container-fluid" style="overflow: auto;">
         <div class="card card-background">
+            <div class="card-header">
+                <h5 class="mb-0">Hello {{ $store.state.auth.identity.name }}</h5>
+            </div>
             <div class="card-body">
                 <div class="px-2">
                     <h5 class="mb-2">Boards</h5>
@@ -27,44 +30,43 @@
                     <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="board.workspace_id == $store.state.auth.identity.workspace_id._id || board.members.includes($store.state.auth.identity._id)" :key="board._id">
                         <nuxt-link :to="`/board/?board_id=${board._id}`">
                             <div class="card rounded workspace-card hover-pointer" style="border: none;">
-                                <div class="card-body rounded px-2 py-2 bg-primary text-white">
-                                    <h6 class="mb-0 no-select">{{ board.name }}</h6>
-                                    <div class="mt-4">
-                                        <h6 class="kanban-text"><i class="fa fa-check" :key="board._id"></i><span class="ml-2">Task Completed: </span> <span v-if="board.lists.task_total > 0">{{ board.lists.task_finish }} / {{ board.lists.task_total }} ({{ Math.round(100 * (board.lists.task_finish / board.lists.task_total)) }}%)</span><span v-else>0 / 0</span></h6>
-                                    </div>
-                                    <div v-if="$isValidUrl(board.url)">
-                                        <h6 class="kanban-text"><i class="fa fa-globe"></i><span class="ml-2">Platform: Web</span></h6>
-                                        <h6 class="kanban-text"><i class="fa fa-link"></i><span class="ml-2">URL: <a :href="board.url" v-on:click.stop="" class="text-white" v-if="$isValidUrl(board.url)">{{ board.url }}</a><span v-else>{{ board.url }}</span></span></h6>
-                                    </div>
-                                    <div v-else-if="board.url">
-                                        <h6 class="kanban-text">
-                                            <i class="fa fa-mobile ml-1 position-absolute" v-if="board.url == 'Aplikasi Mobile'"></i>
-                                            <i class="fa fa-robot position-absolute" v-if="board.url.includes('Bot')"></i>
-                                            <span class="pl-3 ml-1">Platform: {{ board.url }}</span>
-                                        </h6>
-                                    </div>
-                                    <div v-if="board.project_owner">
-                                        <div v-if="board.project_owner.trim() != '' && board.project_owner != null">
-                                            <h6 class="kanban-text"><i class="fa fa-user"></i><span class="ml-2">Owner: {{ board.project_owner }}</span></h6>
+                                <div class="card-header bg-primary">
+                                    <div class="row">
+                                        <div :class="board.platform  ? 'col-12 col-md-6' : 'col-12'">
+                                            <h6 class="mb-0 no-select text-white">{{ board.name }}</h6>
+                                        </div>
+                                        <div v-if="board.platform" class="col-12 col-md-6 text-right mt-3 mt-md-0">
+                                            <div class="d-inline-block text-white" v-for="platform in board.platform">
+                                                <span v-if="platform == 'Aplikasi Mobile'" class="ml-3" v-b-tooltip.hover :title="platform"><i class="fa fa-mobile" v-on:click.stop=""></i></span>
+                                                <span v-else-if="platform == 'Bot Telegram'" class="ml-3" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-robot"></i></span>
+                                                <a :href="board.url" v-else-if="platform == 'Web'" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-globe"></i></a>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div v-if="board.description">
-                                        <div v-if="board.description.trim() != '' && board.description != null">
-                                            <h6 class="kanban-text"><i class="fa fa-info-circle"></i><span class="ml-2">Description: {{ board.description }}</span></h6>
+                                </div>
+                                <div class="card-body rounded px-2 py-2 text-dark">
+                                    <div class="row">
+                                        <div class="col-12 col-md-4">
+                                            <h3 class="text-center">{{ board.lists.task_done ? board.lists.task_done : 0 }}</h3>
+                                            <h6 class="text-center kanban-text">Task Completed</h6>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <h3 class="text-center">{{ board.lists.task_total ? board.lists.task_total : 0 }}</h3>
+                                            <h6 class="text-center kanban-text">Task Total</h6>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <h3 class="text-center">{{ board.lists.task_overdue ? board.lists.task_overdue : 0 }}</h3>
+                                            <h6 class="text-center kanban-text">Task Overdue</h6>
+                                        </div>
+                                        <div class="col-12 mt-3" v-if="board.project_owner">
+                                            <h3 class="text-center"><i class="fa fa-user"></i></h3>
+                                            <h6 class="text-center kanban-text">{{ board.project_owner }}</h6>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </nuxt-link>
                     </div>
-                    <!-- <div class="col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 mb-2">
-                        <div class="card workspace-card hover-pointer bg-secondary" v-on:click="openCreateBoard">
-                            <div class="card-body">
-                                <h6 class="mb-0 mt-2 text-center text-white"><i class="fa fa-plus"></i></h6>
-                                <h6 class="mb-0 text-center no-select text-white" style="margin: auto;">Create new board</h6>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
                 <div>
                     <b-modal id="create_new_board2" size="md" title="Add new board" hide-footer>
@@ -75,22 +77,36 @@
                                 </label>
                                 <input type="text" class="form-control" placeholder="Board Title" v-model="board_title" v-on:keypress.enter="saveBoard" />
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-0">
                                 <label class="kanban-text">
                                     Project Platform
                                 </label>
-                                <select class="form-control" v-model="board_platform">
-                                    <option value="">Select Platform</option>
-                                    <option value="Aplikasi Mobile">Aplikasi Mobile</option>
-                                    <option value="Bot Telegram">Bot Telegram</option>
-                                    <option value="Web">Web</option>
-                                </select>
                             </div>
-                            <div class="form-group" v-if="board_platform == 'Web'">
+                            <div class="row">
+                                <div class="col-12 col-md-4 col-lg-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" value="Aplikasi Mobile" v-model="board_platform_list['Aplikasi Mobile']" :checked="board_platform_list['Aplikasi Mobile']">
+                                        <label for="aplikasiMobile" class="form-check-label"> Aplikasi Mobile</label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4 col-lg-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" value="Bot Telegram" v-model="board_platform_list['Bot Telegram']" :checked="board_platform_list['Bot Telegram']">
+                                        <label for="botTelegram" class="form-check-label"> Bot Telegram</label>
+                                    </div>
+                                </div>
+                            <div class="col-12 col-md-4 col-lg-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" value="Web" v-model="board_platform_list['Web']" :checked="board_platform_list['Web']">
+                                        <label for="web" class="form-check-label"> Web</label>
+                                    </div>
+                            </div> 
+                            </div>
+                            <div class="form-group" v-if="board_platform_list['Web']">
                                 <label for="access_url" class="kanban-text">
                                     Access URL
                                 </label>
-                                <input type="text" class="form-control" placeholder="Access URL" v-model="board_url" v-on:keypress.enter="saveBoard" />
+                                <input type="text" class="form-control" placeholder="Access URL" v-model="board_url" v-on:keypress.enter="saveBoard()" />
                             </div>
                             <div class="form-group">
                                 <label for="project_owner" class="kanban-text">
@@ -131,6 +147,11 @@
                 board_platform: '',
                 board_description: '',
                 board_project_owner: '',
+                board_platform_list: {
+                    "Aplikasi Mobile": false,
+                    "Bot Telegram": false,
+                    "Web": false
+                },
             }
         },
         methods: {
@@ -138,31 +159,30 @@
                 if(this.board_title.trim() == '') return
                 let config = {
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/json'
                     }
                 }
                 let dataSend = {
                     name: this.board_title,
-                    workspace_id: this.$store.state.auth.identity.workspace_id._id
+                    workspace_id: this.$store.state.auth.identity.workspace_id._id,
+                    platform: []
                 }
-                // if(this.board_url) {
-                //     dataSend['url'] = this.board_url
-                // }
-                if(this.board_platform) {
-                    if(this.board_platform == 'Web' && this.board_url) {
-                        dataSend['url'] = this.board_url
+                for(const key in this.board_platform_list) {
+                    if(key == 'Web') {
+                        if(this.board_platform_list[key] == true) {
+                            dataSend['url'] = this.board_url
+                        }
+                        else {
+                            dataSend['url'] = ''
+                        }
                     }
-                    else if(this.board_platform != 'Web') {
-                        dataSend['url'] = this.board_platform
-                    }
+                    if(this.board_platform_list[key] == true) {
+                        dataSend['platform'].push(key)
+                    } 
                 }
-                if(this.board_project_owner) {
-                    dataSend['project_owner'] = this.board_project_owner
-                }
-                if(this.board_description) {
-                    dataSend['description'] = this.board_description
-                }
-                this.$axios.$post(`/api/board`, new URLSearchParams(dataSend), config)
+                dataSend['project_owner'] = this.board_project_owner
+                dataSend['description'] = this.board_description
+                this.$axios.$post(`/api/board`, dataSend, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         Swal.fire({
@@ -182,7 +202,7 @@
                             _id: data._id,
                             name: this.board_title,
                             description: this.board_description,
-                            url: this.board_platform == 'Web' ? this.board_url : this.board_platform,
+                            url: this.board_url,
                             project_owner: this.board_project_owner,
                             workspace_id: this.$store.state.auth.identity.workspace_id._id,
                             lists: [],
@@ -200,8 +220,16 @@
                     alert("Error: Telah terjadi kesalahan")
                 })
             },
+            openDetailBoard() {
+                this.$bvModal.show('create_new_board2')
+            },
             openCreateBoard() {
                 this.$bvModal.show('create_new_board2')
+                this.board_platform_list = {
+                    "Aplikasi Mobile": false,
+                    "Bot Telegram": false,
+                    "Web": false
+                }
             },
         },
         props: {
