@@ -3,6 +3,30 @@
         max-height: 600px;
         overflow: auto;
     }
+    .log-user {
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+    .log-date {
+        display: inline-block;
+        font-size: 12px;
+    }
+    .log-user {
+        font-weight: 500;
+    }
+    .log-text {
+        font-size: 14px;
+        white-space: pre-wrap;
+    }
+    .log-separator {
+        border-left: 1px solid gray;
+        margin-left: 16px;
+        height: 100%;
+    }
+    .border-log-profile-pic-thumbs {
+        border: 2px solid gray;
+        border-radius: 50%;
+    }
 </style>
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
@@ -13,7 +37,7 @@
             <div class="float-left px-2 mb-2">
                 <div class="d-flex">
                     <span :class="(countChecklistChild.done && countChecklistChild.checklist_done != 0 ? 'badge badge-success kanban-text mr-2': 'kanban-text mr-2')" v-if="item.checklists.length > 0">
-                        <i class="fa fa-check"></i>
+                        <i class="fas fa-list-check"></i>
                         <span class="pl-1 pr-1 kanban-text">{{ countChecklistChild.checklist_done }}/{{ countChecklistChild.total_checklist }}</span>
                     </span>
                     <span class="kanban-text mr-2" v-if="item.comments.length > 0">
@@ -22,7 +46,7 @@
                     </span>
                     <span :class="(item.deadline.done ? 'badge badge-success kanban-text mr-2 deadline-badge' : isDeadline(item.deadline.date) ? 'badge badge-danger kanban-text mr-2 deadline-badge' : 'kanban-text mr-2 deadline-badge')" v-if="item.deadline.date != null">
                         <i class="fa fa-clock mr-1 kanban-text"></i>
-                        <input type="checkbox" class="d-inline-block" v-model="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" v-if="!data.archive" />
+                        <input type="checkbox" class="d-inline-block" :value="item.deadline.done" @click.stop="" v-on:click="toggleDeadline" v-if="!data.archive" :checked="item.deadline.done" />
                         <span>{{ convertDate(item.deadline.date) }}</span>
                     </span>
                 </div>
@@ -77,7 +101,7 @@
                                 <div v-if="item.deadline.date != null">
                                     <h6 class="kanban-text">Due date</h6>
                                     <div style="margin: auto;">
-                                        <input type="checkbox" class="d-inline-block mt-2 mr-1" v-model="item.deadline.done" v-on:click="toggleDeadline" :disabled="!data.archive ? false : true" />
+                                        <input type="checkbox" class="d-inline-block mt-2 mr-1" :value="item.deadline.done" v-on:click="toggleDeadline" :disabled="!data.archive ? false : true" :checked="item.deadline.done" />
                                         <div :class="(item.deadline.done ? 'd-inline-block btn bg-success text-white' : isDeadline(item.deadline.date) ? 'd-inline-block btn bg-danger text-white' : 'd-inline-block btn bg-gray')" v-on:click="showCardPopUp($event, 'dates')" @click.stop="" v-if="!data.archive">
                                             <h6 class="kanban-text mb-0">{{ convertDate(item.deadline.date, true) }}</h6>
                                         </div>
@@ -126,7 +150,7 @@
                                 <!-- CHECKLIST CHILD -->
                                 <div v-for="(child, child_index) in checklist.childs" :key="child._id" class="row mt-2">
                                     <div class="col-1 py-1 pr-0 mr-0">
-                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-on:change="checklistChildHandle(child, checklist._id)" v-if="!data.archive" />
+                                        <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" :value="child.done" v-on:change="checklistChildHandle(child, checklist._id)" v-if="!data.archive" />
                                         <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-else disabled="true" />
                                     </div>
                                     <div class="col-10 mt-0 px-0">
@@ -201,30 +225,72 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- COMMENTS -->
-                        <div :class="data.archive ? 'col-12 col-sm-12 col-md-12 col-lg-12 mt-3 pl-0' : 'col-12 col-sm-12 col-md-12 col-lg-9 mt-3 pl-0'" id="comments">
-                            <div class="form-group">
-                                <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Comments</h5>
-                            </div>
-                            <div class="row mt-3 mb-3" id="comment_list" ref="comment_list_ref" v-if="item.comments" :key="load_comment">
-                                <div class="col-12">
-                                    <div v-for="(comment, comment_index) in item.comments" :key="comment._id">
-                                        <Comment :data="{...comment, initialName: generateProfileName(comment.by), index: comment_index}" @editComment="editComment" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group pl-0 ml-0">
-                                <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-on:focus="showEditButton('comments')" v-model="comment" v-if="!data.archive"></textarea>
-                                <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-model="comment" disabled="true" v-else></textarea>
-                            </div>
-                            <div :class="(show_edit_button['comments'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
-                                <button class="btn btn-primary" v-on:click="sendComment">
-                                    Send
-                                </button>
-                                <button class="btn btn-default" v-on:click="hideEditButton('comments')">
-                                    <span><i class="fa fa-times"></i></span>
-                                </button>
-                            </div>
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 pl-0">
+                            <b-card no-body>
+                                <b-tabs card content>
+                                    <!-- COMMENTS -->
+                                    <b-tab title="Comments" id="comments" class="py-2 px-2">
+                                        <div class="form-group">
+                                            <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Comments</h5>
+                                        </div>
+                                        <div class="row mt-3 mb-3" id="comment_list" ref="comment_list_ref" v-if="item.comments" :key="load_comment">
+                                            <div class="col-12">
+                                                <div v-for="(comment, comment_index) in item.comments" :key="comment._id">
+                                                    <Comment :data="{...comment, initialName: generateProfileName(comment.by), index: comment_index}" @editComment="editComment" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group pl-0 ml-0">
+                                            <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-on:focus="showEditButton('comments')" v-model="comment" v-if="!data.archive"></textarea>
+                                            <textarea id="comment_text" class="form-control w-100" rows="5" style="resize:none" placeholder="Add a comment" v-model="comment" disabled="true" v-else></textarea>
+                                        </div>
+                                        <div :class="(show_edit_button['comments'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')">
+                                            <button class="btn btn-primary" v-on:click="sendComment">
+                                                Send
+                                            </button>
+                                            <button class="btn btn-default" v-on:click="hideEditButton('comments')">
+                                                <span><i class="fa fa-times"></i></span>
+                                            </button>
+                                        </div>
+                                    </b-tab>
+                                    <!-- LOG ACTIVITY -->
+                                    <b-tab title="Log Activity" id="log_activity" class="py-2 px-2" v-if="log_activity.length > 0">
+                                        <div class="form-group">
+                                            <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Log Activity</h5>
+                                            <div v-for="(log, log_index) in log_activity" :key="log._id">
+                                                <div>
+                                                    <div class="row mt-2">
+                                                        <div class="col-2 col-sm-2 col-lg-1">
+                                                            <div v-if="typeof data.profile_pic != 'undefined' && data.profile_pic != ''" class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle">
+                                                            </div>
+                                                            <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
+                                                                {{ generateProfileName(log.user) }}
+                                                            </div>
+                                                            <div class="log-separator" v-if="log_index != log_activity.length - 1">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-10 col-sm-10 col-lg-11">
+                                                            <div>
+                                                                <p class="log-user">{{ log.user }}</p>
+                                                            </div>
+                                                            <div>
+                                                                <p class="log-date mb-0">{{ convertLogDate(log.createdAt) }}</p>
+                                                            </div>
+                                                            <div>
+                                                                <div class="card">
+                                                                    <div class="card-body py-2 px-2">
+                                                                        <p class="log-text mb-0">{{ log.remark }}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </b-tab>
+                                </b-tabs>
+                            </b-card>
                         </div>
                     </div>
                     <div id="card_pop_up" ref="card_pop_up_ref" :class="(show_popup ? 'd-block' : 'd-none')" @click.stop="" v-if="!data.archive">
@@ -264,6 +330,8 @@
                     description: false
                 },
                 comment: '',
+                // LOG ACTIVITY
+                log_activity: [],
                 // To Show Pop Up
                 show_popup: false,
                 // To Show Profile
@@ -307,42 +375,6 @@
                     }
                     total_checklist += this.item.checklists[i].childs.length
                 }
-                // let update_date = false
-                // if(checklist_done >= total_checklist && this.item.deadline.date != null) {
-                //     if(this.item.deadline.done != true) {
-                //         this.item.deadline.done = true
-                //         update_date = true
-                //     }
-                // }
-                // else {
-                //     if(this.item.deadline.done) {
-                //         this.item.deadline.done = false
-                //         update_date = true
-                //     }
-                // }
-                
-                // if(update_date) {
-                //     let config = {
-                //         headers: {
-                //             'Content-Type': 'application/json'
-                //         }
-                //     }
-                //     this.$axios.$put(`/api/card`, {
-                //         id: this.item._id,
-                //         deadline: {
-                //             date: this.item.deadline.date,
-                //             done: this.item.deadline.done
-                //         }
-                //     }, config)
-                //     .then((response) => {
-                //         if(response.status == 'OK') {
-                //             // Do Something
-                //         }
-                //     })
-                //     .catch((error) => {
-                //         alert("Error: Telah terjadi kesalahan")
-                //     })
-                // }
                 return {
                     done: checklist_done >= total_checklist,
                     total_checklist: total_checklist,
@@ -351,6 +383,14 @@
             },
         },
         watch: {
+            'item': {
+                handler: function(value) {
+                    if(this.load_comment) {
+                        this.loadLog()
+                    }
+                },
+                deep: true
+            },
             'item.checklists': {
                 handler: function(checklist) {
                     if(checklist.length == 0 || this.item.deadline.date == '' || this.item.deadline.date == null) return
@@ -379,6 +419,7 @@
         },
         methods: {
             initModal() {
+                // this.loadLog()
                 if(this.data.archive === true) return
                 this.$axios.$get(`/api/card/${this.item._id}`)
                 .then((response) => {
@@ -392,6 +433,18 @@
                     }
                 })
                 .catch(error => alert("Error: Telah terjadi kesalahan"))
+            },
+            loadLog() {
+                this.$axios.$get(`/api/log/${this.item._id}`)
+                .then((response) => {
+                    let { status } = response
+                    if(status == 'OK') {
+                        let { data } = response
+                        if(data) {
+                            this.log_activity = data
+                        }
+                    }
+                })
             },
             restoreArchive() {
                 this.hideModalItem()
@@ -418,6 +471,13 @@
                     })
                 }
                 this.comment = ''
+            },
+            convertLogDate(log_date) {
+                let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
+                let date = new Date(log_date).toLocaleString('en-US', {
+                    timeZone: currentTimezone
+                })
+                return `${moment(date).format('D MMMM YYYY H:mm:ss')}`
             },
             sendComment() {
                 let profile = this.$store.state.auth.identity.name
@@ -575,17 +635,19 @@
                         'Content-Type': 'application/json'
                     }
                 }
+                let done = !this.item.deadline.done
                 this.$axios.$put(`/api/card`, {
                     id: this.item._id,
                     deadline: {
                         date: this.item.deadline.date,
-                        done: !this.item.deadline.done
+                        done: done
                     }
                 }, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         // Do Something
                         this.edit_date = true
+                        this.item.deadline.done = done
                     }
                 })
                 .catch((error) => {
@@ -882,9 +944,10 @@
                     }
                 }
                 let data = {}
+                let done = !checklist_child.done
                 if(type == 'status') {
                     data = {
-                        done: checklist_child.done,
+                        done: done,
                         checklist_id: parent_id,
                         id: checklist_child._id,
                         card_id: this.item._id
@@ -906,6 +969,7 @@
                 this.$axios.$put(`/api/card/checklist/child`, new URLSearchParams(data), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        checklist_child.done = done
                     }
                 }) 
                 .catch((error) => {

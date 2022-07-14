@@ -230,12 +230,10 @@
                 }
                 // ADD MEMBER
                 if(!member_exist) {
-                    this.selected_members.push(member)
                     members_id.push(member._id)
                 }
                 // DELETE MEMBER
                 else {
-                    this.selected_members.splice(index, 1)
                     members_id.splice(index, 1)
                 }
                 let config = {
@@ -250,6 +248,12 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         // Do Something
+                        if(!member_exist) {
+                            this.selected_members.push(member)
+                        }
+                        else {
+                            this.selected_members.splice(index, 1)
+                        }
                     }
                 })
                 .catch((error) => {

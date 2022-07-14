@@ -254,3 +254,9 @@ body, html {
 .deadline-badge:hover > input[type="checkbox"] {
     display: inline-block !important;
 }
+
+/* FONT AWESOME ICON NOT INCLUDED IN FORT AWESOME PACKAGE */
+
+.fa-list-check:before {
+  content: "\f0ae"; 
+}

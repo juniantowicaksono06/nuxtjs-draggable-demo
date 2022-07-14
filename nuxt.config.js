@@ -33,6 +33,8 @@ export default {
 
   css: [
     '@fortawesome/fontawesome-free/css/all.min.css',
+    '@fortawesome/fontawesome-free/css/solid.min.css',
+    '@fortawesome/fontawesome-free/css/brands.min.css',
     '@/static/css/login.css',
     '@/static/css/kanban.css',
     '@/static/css/popup-card.css',
