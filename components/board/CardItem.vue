@@ -1,6 +1,6 @@
 <style scoped>
     #comment_list {
-        max-height: 600px;
+        max-height: 500px;
         overflow: auto;
     }
     .log-user {
@@ -26,6 +26,10 @@
     .border-log-profile-pic-thumbs {
         border: 2px solid gray;
         border-radius: 50%;
+    }
+    #log_activity > .body {
+        max-height: 500px;
+        overflow-y: auto;
     }
 </style>
 <template>
@@ -229,7 +233,7 @@
                             <b-card no-body>
                                 <b-tabs card content>
                                     <!-- COMMENTS -->
-                                    <b-tab title="Comments" id="comments" class="py-2 px-2">
+                                    <b-tab title="Comments" id="comments" class="py-3 px-3">
                                         <div class="form-group">
                                             <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Comments</h5>
                                         </div>
@@ -254,9 +258,9 @@
                                         </div>
                                     </b-tab>
                                     <!-- LOG ACTIVITY -->
-                                    <b-tab title="Log Activity" id="log_activity" class="py-2 px-2" v-if="log_activity.length > 0">
-                                        <div class="form-group">
-                                            <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Log Activity</h5>
+                                    <b-tab title="Log Activity" id="log_activity" class="pt-3 pb-1 px-3" v-if="log_activity.length > 0">
+                                        <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Log Activity</h5>
+                                        <div class="form-group body pr-3 pb-2">
                                             <div v-for="(log, log_index) in log_activity" :key="log._id">
                                                 <div>
                                                     <div class="row mt-2">
