@@ -35,10 +35,7 @@ export default {
     '@fortawesome/fontawesome-free/css/all.min.css',
     '@fortawesome/fontawesome-free/css/solid.min.css',
     '@fortawesome/fontawesome-free/css/brands.min.css',
-    '@/static/css/login.css',
-    '@/static/css/kanban.css',
-    '@/static/css/popup-card.css',
-    '@/static/css/kanban-profile-card.css',
+    '@/static/css/global.css',
   ],
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [

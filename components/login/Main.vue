@@ -1,6 +1,26 @@
+<style scoped>
+    #login_panel {
+        position: absolute;
+        top: 50%;
+        left: 1%;
+        transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+        width: 100%;
+    }
+    .login-text {
+        font-size: 0.85em;
+    }
+    .login-normal-cursor:hover {
+        cursor: default !important;
+    }
+</style>
 <template>
     <div class="container-fluid h-100 w-100" id="content_wrap">
         <div class="position-relative h-100 w-100">
+            <div v-if="isLoading">
+                <Loading/>
+            </div>
             <div id="login_panel">
                 <form method="POST" action="#">
                     <div class="row w-100 h-100" style="">
@@ -58,15 +78,20 @@
 </template>
 
 <script>
+    import Loading from "../global/Loading.vue";
     const CryptoJS = require("crypto-js");
     export default {
+        components: {
+            Loading
+        },
         data() {
             return {
                 username_error: '',
                 username_input: '',
                 password_input: '',
                 password_error: '',
-                remember_me_input: false
+                remember_me_input: false,
+                isLoading: false
             }
         },
         methods: {
@@ -83,6 +108,7 @@
                 }
             },
             actionLogin() {
+                this.isLoading = true
                 if(this.username_input.trim() == '' || this.password_input.trim() == '') {
                     this.triggerWarning('empty'); 
                     return
@@ -109,6 +135,7 @@
                             path: "/",
                         });
                         // window.location.href = '/'
+                        this.isLoading = false
                         this.$router.push('/')
                     }
                 })
