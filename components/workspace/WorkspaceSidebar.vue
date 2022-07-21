@@ -388,10 +388,18 @@
                         <input type="text" class="form-control" placeholder="Project Owner" v-model="add_board.board_project_owner" v-on:keypress.enter="saveBoard()" />
                     </div>
                     <div class="form-group">
+                        <label for="sub_department" class="kanban-text">
+                            Sub Departement
+                        </label>
+                        <select class="form-control" v-model="board_sub_dept">
+                            <option value="">Select Sub Departement</option>
+                            <option :value="subdept" v-for="subdept in $store.state.auth.identity.workspace_id.subdept">{{ subdept }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="kanban-text">
                             Description
                         </label>
-                        <!-- <input type="text" class="form-control" placeholder="Description" v-model="add_board.board_name" v-on:keypress.enter="saveBoard()" /> -->
                         <textarea rows="3" class="form-control" placeholder="Add a Description" v-model="add_board.board_description" style="resize: none;"></textarea>
                     </div>
                 </div>
@@ -416,6 +424,7 @@
                     workspace_visibility: 'public'
                 },
                 board_platform: '',
+                board_sub_dept: '',
                 add_board: {
                     workspace_id: null,
                     workspace_index: null,
@@ -532,6 +541,7 @@
                 }
                 dataSend['project_owner'] = this.add_board.board_project_owner
                 dataSend['description'] = this.add_board.board_description
+                dataSend['subdept'] = this.board_sub_dept
                 this.$axios.$post(`/api/board`, dataSend, config)
                 .then((response) => {
                     if(response.status == 'OK') {
@@ -548,6 +558,7 @@
                         let {data} = response
                         let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                        this.board_sub_dept = ''
                         boards.push({
                             _id: data._id,
                             name: this.add_board.board_name,

@@ -115,6 +115,15 @@
                                 <input type="text" class="form-control" placeholder="Project Owner" v-model="board_project_owner" v-on:keypress.enter="saveBoard" />
                             </div>
                             <div class="form-group">
+                                <label for="sub_department" class="kanban-text">
+                                    Sub Departement
+                                </label>
+                                <select class="form-control" v-model="board_sub_dept">
+                                    <option value="">Select Sub Departement</option>
+                                    <option :value="subdept" v-for="subdept in $store.state.auth.identity.workspace_id.subdept">{{ subdept }}</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="description" class="kanban-text">
                                     Description
                                 </label>
@@ -147,6 +156,7 @@
                 board_platform: '',
                 board_description: '',
                 board_project_owner: '',
+                board_sub_dept: '',
                 board_platform_list: {
                     "Aplikasi Mobile": false,
                     "Bot Telegram": false,
@@ -182,6 +192,7 @@
                 }
                 dataSend['project_owner'] = this.board_project_owner
                 dataSend['description'] = this.board_description
+                dataSend['subdept'] = this.board_sub_dept
                 this.$axios.$post(`/api/board`, dataSend, config)
                 .then((response) => {
                     if(response.status == 'OK') {
@@ -198,6 +209,7 @@
                         let {data} = response
                         let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                        this.board_sub_dept = ''
                         boards.push({
                             _id: data._id,
                             name: this.board_title,

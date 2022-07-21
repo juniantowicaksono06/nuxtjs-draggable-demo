@@ -134,12 +134,13 @@
                         this.$cookies.set("credentials", ciphertext, {
                             path: "/",
                         });
-                        // window.location.href = '/'
                         this.isLoading = false
                         this.$router.push('/')
                     }
                 })
-                .catch()
+                .catch(error => {
+                    this.isLoading = false
+                })
             }
         }
     }

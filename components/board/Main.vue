@@ -131,6 +131,15 @@
                         <input type="text" class="form-control" placeholder="Project Owner" v-model="board_project_owner" v-on:keypress.enter="saveBoard" />
                     </div>
                     <div class="form-group">
+                        <label for="sub_department" class="kanban-text">
+                            Sub Departement
+                        </label>
+                        <select class="form-control" v-model="board_sub_dept">
+                            <option value="" selected>Select Sub Departement</option>
+                            <option :value="subdept" v-for="subdept in $store.state.auth.identity.workspace_id.subdept">{{ subdept }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="description" class="kanban-text">
                             Description
                         </label>
@@ -261,6 +270,7 @@
                 }
                 dataSend['project_owner'] = this.board_project_owner
                 dataSend['description'] = this.board_description
+                dataSend['subdept'] = this.board_sub_dept
                 this.$axios.$put(`/api/board`, dataSend, config)
                 .then((response) => {
                     if(response.status == 'OK') {
@@ -343,9 +353,7 @@
                     }
                     this.closeArchiveModal()
                 })
-                .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
-                })
+                .catch(error => {})
             },
             openEditBoardModal() {
                 this.$bvModal.show('edit_board_modal')
@@ -361,9 +369,7 @@
                         })
                     }
                 }) 
-                .catch((error) => {
-                    alert('Error: Telah terjadi kesalahan')
-                })
+                .catch((error) => {})
             },
             closeArchiveModal() {
                 this.$bvModal.hide('card_archive_list')
@@ -382,9 +388,7 @@
                         this.drag_data = {}
                     }
                 }) 
-                .catch((error) => {
-                    alert('Error: Telah terjadi kesalahan')
-                })
+                .catch((error) => {})
             },
             dragCard(card_id, index){
                 this.drag_data['board_id'] = this.board_id
@@ -425,7 +429,6 @@
                     }
                 })
                 .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
                 })
             },
             closePopUp() {
@@ -456,6 +459,8 @@
                             document.title = `${this.board.name} Board`
                             this.board_title = this.board.name
                             this.board_url = this.board.url
+                            
+                            this.board_sub_dept = this.board.subdept ? this.board.subdept : ''
                             if(this.board.platform) {
                                 if(this.board.platform.length > 0) {
                                     this.board.platform.forEach((value) => {
@@ -666,12 +671,9 @@
                             title: 'Success'
                         })
                         this.disableAddList()
-                        return 
                     }
-                    alert("Telah terjadi kesalahan")
                 })
                 .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
                 })
             },
             resizeBoard() {
@@ -696,6 +698,7 @@
                 board_url: '',
                 board_description: '',
                 board_project_owner: '',
+                board_sub_dept: '',
                 all_members: [],
                 member_multiselect: [],
                 board_members: this.$store.state.members.all_members,
