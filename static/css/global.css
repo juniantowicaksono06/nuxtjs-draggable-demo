@@ -6,6 +6,7 @@
     width: 100%;
     align-items: flex-start;
     min-height: 88vh;
+    max-height: 88vh;
     overflow-y: hidden;
 }
 a:hover {
@@ -33,12 +34,13 @@ body, html {
     margin-right: 10px;
     cursor: pointer;
 }
-.kanban-card > .card-body {
-    max-height: 70vh;
+.kanban-card > .kanban-body {
+    max-height: 60vh;
     overflow-y: auto;
     overflow-x: hidden;
     cursor: default;
 }
+
 .add-list, .add-list2 {
     min-width: 264px;
     user-select: none;
@@ -119,10 +121,9 @@ body, html {
     cursor: pointer;
 }
 .kanban-header {
-    background-color: rgb(235,236,240) !important;
     padding: 5px 10px !important;
 }
-.kanban-body {
+.kanban-body, .kanban-footer, .kanban-header {
     background-color: rgb(235,236,240) !important;
 }
 .kanban-chosen-class {
@@ -364,6 +365,9 @@ body, html {
 }
 .deadline-badge:hover > input[type="checkbox"] {
     display: inline-block !important;
+}
+.cursor-default {
+    cursor: default;
 }
 
 /* FONT AWESOME ICON NOT INCLUDED IN FORT AWESOME PACKAGE */

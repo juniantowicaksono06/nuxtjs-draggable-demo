@@ -28,47 +28,66 @@
                 </div>
                 <div class="row">
                     <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="board.workspace_id == $store.state.auth.identity.workspace_id._id || board.members.includes($store.state.auth.identity._id)" :key="board._id">
-                        <nuxt-link :to="`/board/?board_id=${board._id}`">
-                            <div class="card rounded workspace-card hover-pointer" style="border: none;">
-                                <div class="card-header bg-primary">
-                                    <div class="row">
-                                        <div :class="board.platform  ? 'col-12 col-md-6' : 'col-12'">
-                                            <h6 class="mb-0 no-select text-white">{{ board.name }}</h6>
+                        <div class="card rounded workspace-card hover-pointer" style="border: none;">
+                            <div class="card-header bg-primary">
+                                <div class="row">
+                                    <nuxt-link :to="`/board/?board_id=${board._id}`" :class="board.platform  ? 'col-12 col-md-6' : 'col-12'">
+                                        <h6 class="mb-0 no-select text-white">{{ board.name }}</h6>
+                                    </nuxt-link>
+                                    <div v-if="board.platform" class="col-12 col-md-6 text-right mt-3 mt-md-0 cursor-default">
+                                        <div class="d-inline-block text-white" v-for="platform in board.platform">
+                                            <span v-if="platform == 'Aplikasi Mobile'" class="ml-3" v-b-tooltip.hover :title="platform"><i class="fa fa-mobile hover-pointer" v-on:click.stop=""></i></span>
+                                            <span v-else-if="platform == 'Bot Telegram'" class="ml-3" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-robot hover-pointer"></i></span>
+                                            <a :href="board.url" v-else-if="platform == 'Web'" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-globe hover-pointer"></i></a>
                                         </div>
-                                        <div v-if="board.platform" class="col-12 col-md-6 text-right mt-3 mt-md-0">
-                                            <div class="d-inline-block text-white" v-for="platform in board.platform">
-                                                <span v-if="platform == 'Aplikasi Mobile'" class="ml-3" v-b-tooltip.hover :title="platform"><i class="fa fa-mobile" v-on:click.stop=""></i></span>
-                                                <span v-else-if="platform == 'Bot Telegram'" class="ml-3" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-robot"></i></span>
-                                                <a :href="board.url" v-else-if="platform == 'Web'" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-globe"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body rounded px-2 py-2 text-dark">
-                                    <div class="row">
-                                        <div class="col-12 col-md-4">
-                                            <h3 class="text-center">{{ board.lists.task_done ? board.lists.task_done : 0 }}</h3>
-                                            <h6 class="text-center kanban-text">Task Completed</h6>
-                                        </div>
-                                        <div class="col-12 col-md-4">
-                                            <h3 class="text-center">{{ board.lists.task_total ? board.lists.task_total : 0 }}</h3>
-                                            <h6 class="text-center kanban-text">Task Total</h6>
-                                        </div>
-                                        <div class="col-12 col-md-4">
-                                            <h3 class="text-center">{{ board.lists.task_overdue ? board.lists.task_overdue : 0 }}</h3>
-                                            <h6 class="text-center kanban-text">Task Overdue</h6>
-                                        </div>
-                                        <div class="col-12 mt-3" v-if="board.project_owner">
-                                            <h3 class="text-center"><i class="fa fa-user"></i></h3>
-                                            <h6 class="text-center kanban-text">{{ board.project_owner }}</h6>
+                                        <div class="d-inline-block text-white hover-pointer" v-if="board.project_owner || board.description">
+                                            <span v-on:click="openBoardInfo(board)" class="ml-2 text-white" v-b-tooltip.hover title="Board Info" v-on:click.stop=""><i class="fa fa-info-circle"></i></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </nuxt-link>
+                            <div class="card-body rounded px-2 py-2 text-dark cursor-default">
+                                <div class="row">
+                                    <div class="col-12 col-md-4">
+                                        <h4 class="text-center text-info">
+                                            {{ board.lists.task_total - board.lists.task_done ? board.lists.task_total - board.lists.task_done : 0}}
+                                        </h4>
+                                        <h6 class="text-center kanban-text text-info">Progress</h6>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <h4 class="text-center text-success">{{ board.lists.task_total ? board.lists.task_total : 0 }}</h4>
+                                        <h6 class="text-center kanban-text text-success">Total</h6>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <h4 class="text-center text-danger">{{ board.lists.task_overdue ? board.lists.task_overdue : 0 }}</h4>
+                                        <h6 class="text-center kanban-text text-danger">Overdue</h6>
+                                    </div>
+                                    <!-- <div class="col-12 mt-3" v-if="board.project_owner">
+                                        <h3 class="text-center"><i class="fa fa-user"></i></h3>
+                                        <h6 class="text-center kanban-text">{{ board.project_owner }}</h6>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div>
+                    <b-modal id="board_info" size="md" :title="board_info.name" hide-footer>
+                        <div class="row">
+                            <div class="col-12" v-if="board_info.project_owner">
+                                <div>
+                                    <h5>Owner</h5>
+                                    <h5 class="kanban-text">{{ board_info.project_owner }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div v-if="board_info.description">
+                                    <h5>Description</h5>
+                                    <h5 class="kanban-text">{{ board_info.description }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </b-modal>
                     <b-modal id="create_new_board2" size="md" title="Add new board" hide-footer>
                         <div class="w-100">
                             <div class="form-group">
@@ -157,6 +176,7 @@
                 board_description: '',
                 board_project_owner: '',
                 board_sub_dept: '',
+                board_info: {},
                 board_platform_list: {
                     "Aplikasi Mobile": false,
                     "Bot Telegram": false,
@@ -165,6 +185,7 @@
             }
         },
         methods: {
+            
             saveBoard() {
                 if(this.board_title.trim() == '') return
                 let config = {
@@ -232,8 +253,9 @@
                     alert("Error: Telah terjadi kesalahan")
                 })
             },
-            openDetailBoard() {
-                this.$bvModal.show('create_new_board2')
+            openBoardInfo(board) {
+                this.board_info = board
+                this.$bvModal.show('board_info')
             },
             openCreateBoard() {
                 this.$bvModal.show('create_new_board2')

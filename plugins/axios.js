@@ -19,7 +19,16 @@ export default function ({ $axios, $toast, redirect, store, app }) {
     $axios.onError(error => {
       const code = parseInt(error.response && error.response.status)
         if (code == 500) {
-            alert('Oops...Something went wrong')
+            Swal.fire({
+                text: 'Oops...Something went wrong',
+                toast: true,
+                timer: 5000,
+                position: 'bottom-right',
+                showConfirmButton: false,
+                showCancelButton: false,
+                icon: 'error',
+                title: 'Login Failed'
+            })
         } else if (code == 401) {
             if(app.router.currentRoute.path.startsWith('/login')) {
                 Swal.fire({
@@ -29,7 +38,7 @@ export default function ({ $axios, $toast, redirect, store, app }) {
                     position: 'bottom-right',
                     showConfirmButton: false,
                     showCancelButton: false,
-                    icon: 'error',
+                    icon: 'warning',
                     title: 'Login Failed'
                 })
             }
