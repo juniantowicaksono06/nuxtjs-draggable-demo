@@ -76,7 +76,7 @@ export default {
                 vShowEndDate: 0,
             });
             // this.$preloaders.open();
-            axios.get(this.kanbanURL + '/report/gantt', {
+            axios.get(this.kanbanURL + 'report/gantt', {
                 headers: {
                    'Content-type': 'application/json'
                 }
