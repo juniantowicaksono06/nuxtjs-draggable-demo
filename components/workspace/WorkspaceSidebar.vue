@@ -258,6 +258,11 @@
         </div>
         <div class="px-2" id="sidebar_content" ref="sidebar_content_ref">
             <div id="menu" ref="menu_ref" class="mb-2">
+                <div :class="($route.path == '/gantt/' ? 'sidebar-item-active sidebar-item' : 'sidebar-item sidebar-item')">
+                    <nuxt-link to="/gantt/" class="text-white btn btn-transparent text-left">
+                        Gantt
+                    </nuxt-link>
+                </div>
                 <div :class="($route.path == '/' ? 'd-flex justify-content-between sidebar-item-active sidebar-item' : 'd-flex justify-content-between sidebar-item')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace_id">
                     <span v-if="$route.path != '/'" v-on:click="changeWorkspace">Workspace</span>
                     <span v-else>Workspace</span>
@@ -272,7 +277,7 @@
                                     <i class="fa fa-users"></i>
                                 </span>
                             </div>
-                            <div class="d-flex justify-content-between w-100" v-on:click="toggleWorkspaceItem($event, index)">
+                            <div class="d-flex justify-content-between w-100 pl-2" v-on:click="toggleWorkspaceItem($event, index)">
                                 <span class="">{{ work.name }}</span>
                                 <i class="fa fa-chevron-up d-inline-block mr-1 pt-1" ref="chevron_ref"></i>
                             </div>
