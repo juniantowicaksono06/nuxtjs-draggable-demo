@@ -81,6 +81,12 @@
                                 </div>
                             </div>
                             <div class="col-12">
+                                <div v-if="board_info.subdept">
+                                    <h5>Sub Departement</h5>
+                                    <h5 class="kanban-text">{{ board_info.subdept }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-12">
                                 <div v-if="board_info.description">
                                     <h5>Description</h5>
                                     <h5 class="kanban-text">{{ board_info.description }}</h5>
