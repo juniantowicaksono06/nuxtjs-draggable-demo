@@ -4,6 +4,11 @@
         max-width: 80vw;
         overflow: hidden;
     }
+    #archive_content {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 </style>
 <template>
     <div class="w-100 h-100" v-on:click="closePopUp">
@@ -153,7 +158,7 @@
             </div>
         </b-modal>
         <b-modal id="card_archive_list" hide-footer size="md" title="Card Archive List">
-            <div class="row">
+            <div class="row" id="archive_content">
                 <div class="col-12" v-if="archive_card.length">
                     <div v-for="archive in archive_card" :key="archive._id">
                         <CardItem :data="{
