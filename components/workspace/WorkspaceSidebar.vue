@@ -241,6 +241,10 @@
         animation-duration: 1s;
         animation-fill-mode: forwards;
     }
+    .sidebar-item .btn:focus, .sidebar-item .btn:active {
+        outline: none !important;
+        box-shadow: none;
+    }
 </style>
 <template>
     <div id="sidebar" class="h-100 px-2 sidebar-close" ref="sidebar_ref">

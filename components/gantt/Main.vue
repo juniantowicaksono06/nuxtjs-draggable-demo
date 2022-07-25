@@ -11,6 +11,9 @@
 </style>
 <template>
     <div class="container-fluid py-3" style="overflow: auto;">
+        <div v-if="isLoading">
+            <Loading/>
+        </div>
         <div data-app>
             <div class="card card-background">
                 <div class="card-header">
@@ -29,6 +32,7 @@ import * as JSGantt from 'jsgantt-improved';
 import 'jsgantt-improved/dist/jsgantt.css';
 import 'vue-select/dist/vue-select.css';
 import Swal from 'sweetalert2'
+import Loading from "../global/Loading.vue";
 
 const axios = require('axios')
 
@@ -40,8 +44,12 @@ export default {
                 subdept: [],
                 user: []
             },
-            input: {}
+            input: {},
+            isLoading: false
         }
+    },
+    components: {
+        Loading
     },
     computed: {
         identity(){
@@ -59,6 +67,7 @@ export default {
     },
     methods: {
         loadGantt(){
+            this.isLoading = true
             this.gantt = new JSGantt.GanttChart(document.getElementById('GanttChartDIV'), 'day');
             let _this2 = this;
             this.gantt.setOptions({
@@ -86,6 +95,7 @@ export default {
                 });
                 // this.$preloaders.close();
                 this.gantt.Draw();
+                this.isLoading = false
             })
         },
         requestFail(){
