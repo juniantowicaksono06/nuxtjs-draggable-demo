@@ -123,6 +123,12 @@
                             </div>
                        </div> 
                     </div>
+                    <div class="form-group" v-if="board_platform_list['Bot Telegram']">
+                        <label for="bot_url" class="kanban-text">
+                            Bot URL
+                        </label>
+                        <input type="text" class="form-control" placeholder="Bot URL" v-model="board_bot_url" v-on:keypress.enter="saveBoard" />
+                    </div>
                     <div class="form-group" v-if="board_platform_list['Web']">
                         <label for="access_url" class="kanban-text">
                             Access URL
@@ -267,6 +273,14 @@
                         }
                         else {
                             dataSend['url'] = ''
+                        }
+                    }
+                    if(key == 'Bot Telegram') {
+                        if(this.board_platform_list[key] == true) {
+                            dataSend['bot_url'] = this.board_bot_url
+                        }
+                        else {
+                            dataSend['bot_url'] = ''
                         }
                     }
                     if(this.board_platform_list[key] == true) {
@@ -464,6 +478,7 @@
                             document.title = `${this.board.name} Board`
                             this.board_title = this.board.name
                             this.board_url = this.board.url
+                            this.board_bot_url = this.board.bot_url
                             
                             this.board_sub_dept = this.board.subdept ? this.board.subdept : ''
                             if(this.board.platform) {
@@ -700,6 +715,7 @@
                     "Bot Telegram": false,
                     "Web": false
                 },
+                board_bot_url: '',
                 board_url: '',
                 board_description: '',
                 board_project_owner: '',

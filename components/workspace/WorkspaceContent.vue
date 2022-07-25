@@ -37,8 +37,8 @@
                                     <div v-if="board.platform" class="col-12 col-md-6 text-right mt-3 mt-md-0 cursor-default">
                                         <div class="d-inline-block text-white" v-for="platform in board.platform">
                                             <span v-if="platform == 'Aplikasi Mobile'" class="ml-3" v-b-tooltip.hover :title="platform"><i class="fa fa-mobile hover-pointer" v-on:click.stop=""></i></span>
-                                            <span v-else-if="platform == 'Bot Telegram'" class="ml-3" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-robot hover-pointer"></i></span>
-                                            <a :href="board.url" v-else-if="platform == 'Web'" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-globe hover-pointer"></i></a>
+                                            <a target="_blank" :href="board.bot_url" v-else-if="platform == 'Bot Telegram' && board.bot_url" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-robot hover-pointer"></i></a>
+                                            <a target="_blank" :href="board.url" v-else-if="platform == 'Web' && board.url" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-globe hover-pointer"></i></a>
                                         </div>
                                         <div class="d-inline-block text-white hover-pointer" v-if="board.project_owner || board.description">
                                             <span v-on:click="openBoardInfo(board)" class="ml-2 text-white" v-b-tooltip.hover title="Board Info" v-on:click.stop=""><i class="fa fa-info-circle"></i></span>
@@ -120,12 +120,18 @@
                                         <label for="botTelegram" class="form-check-label"> Bot Telegram</label>
                                     </div>
                                 </div>
-                            <div class="col-12 col-md-4 col-lg-4">
+                                <div class="col-12 col-md-4 col-lg-4">
                                     <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" value="Web" v-model="board_platform_list['Web']" :checked="board_platform_list['Web']">
+                                        <input type="checkbox" class="form-check-input" value="Web" v-model="board_platform_list['Web']" :checked="board_platform_list['Web']" v-on:keypress.enter="saveBoard()">
                                         <label for="web" class="form-check-label"> Web</label>
                                     </div>
-                            </div> 
+                                </div> 
+                            </div>
+                            <div class="form-group" v-if="board_platform_list['Bot Telegram']">
+                                <label for="bot_url" class="kanban-text">
+                                    Bot URL
+                                </label>
+                                <input type="text" class="form-control" placeholder="Bot URL" v-model="board_bot_url" v-on:keypress.enter="saveBoard" />
                             </div>
                             <div class="form-group" v-if="board_platform_list['Web']">
                                 <label for="access_url" class="kanban-text">
@@ -178,6 +184,7 @@
                 selected_workspace: '',
                 board_title: '',
                 board_url: '',
+                board_bot_url: '',
                 board_platform: '',
                 board_description: '',
                 board_project_owner: '',
@@ -211,6 +218,14 @@
                         }
                         else {
                             dataSend['url'] = ''
+                        }
+                    }
+                    if(key == 'Bot Telegram') {
+                        if(this.board_platform_list[key] == true) {
+                            dataSend['bot_url'] = this.board_bot_url
+                        }
+                        else {
+                            dataSend['bot_url'] = ''
                         }
                     }
                     if(this.board_platform_list[key] == true) {

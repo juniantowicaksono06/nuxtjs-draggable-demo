@@ -948,8 +948,9 @@
                     }
                 }
                 let data = {}
-                let done = !checklist_child.done
+                let done = checklist_child.done
                 if(type == 'status') {
+                    done = !done
                     data = {
                         done: done,
                         checklist_id: parent_id,
