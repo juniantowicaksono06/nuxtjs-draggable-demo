@@ -503,7 +503,7 @@
             },
             actionLogout() {
                 this.$cookies.remove('credentials');
-                this.$router.push('/login');
+                this.$router.push('/login/');
                 // this.$store.commit('auth/destroy')
             },
             calculateSidebarContainerHeight() {

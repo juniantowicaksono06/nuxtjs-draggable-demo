@@ -27,7 +27,7 @@ export default function ({ $axios, $toast, redirect, store, app }) {
                 showConfirmButton: false,
                 showCancelButton: false,
                 icon: 'error',
-                title: 'Login Failed'
+                title: 'Error'
             })
         } else if (code == 401) {
             if(app.router.currentRoute.path.startsWith('/login')) {

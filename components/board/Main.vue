@@ -14,8 +14,8 @@
     <div class="w-100 h-100" v-on:click="closePopUp">
         <div class="d-flex w-100 h-100">
             <div class="container-fluid">
-                <div class="row" id="toolbar_section">
-                    <div class="d-flex">
+                <div class="row w-100" id="toolbar_section">
+                    <div class="d-flex w-100">
                         <span>
                             <div>
                                 <p ref="board_input_ref" id="board_input_ref">{{ board.name }}</p>
@@ -29,7 +29,7 @@
                             <div v-for="(member, member_index) in $store.state.members.all_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
                                 marginLeft: '-20px !important'
                             } : {})">
-                                <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
+                                <img :src="member.picture" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.picture != 'undefined' && member.picture != '')" />
                                 <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
                                     {{ generateProfileName(member.name) }}
                                 </div>
@@ -59,6 +59,9 @@
                                 </div>
                             </template>
                         </PopUp>
+                        <div style="margin-left: auto; margin-right: 20px;">
+                            <UserMenu />
+                        </div>
                     </div>
                 </div>
                 <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
@@ -215,6 +218,9 @@
     import Multiselect from 'vue-multiselect'
     import CardItem from './CardItem.vue'
     import Swal from 'sweetalert2'
+    import UserMenu from '../global/UserMenu.vue'
+    // import { StencilPreview, BoundingBox, DraggableArea } from 'vue-advanced-cropper';
+    import "vue-advanced-cropper/dist/style.css";
 
     export default {
         async mounted() {
@@ -328,16 +334,6 @@
                         })
                     }
                 }).catch((error) => {
-                    Swal.fire({
-                        text: 'Telah terjadi kesalahan',
-                        toast: true,
-                        timer: 3000,
-                        position: 'bottom-right',
-                        showConfirmButton: false,
-                        showCancelButton: false,
-                        icon: 'error',
-                        title: 'Error'
-                    })
                 })
             },
             restoreArchive(item) {
@@ -758,7 +754,8 @@
             Topbar,
             CardProfileMember,
             PopUp,
-            Multiselect
+            Multiselect,
+            UserMenu
         }
     }
 </script>
