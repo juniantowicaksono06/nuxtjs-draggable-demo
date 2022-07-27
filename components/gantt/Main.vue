@@ -1,7 +1,5 @@
 <style scoped>
     .card-background {
-        background-color: rgba(228, 228, 228, 0.9);
-        backdrop-filter: blur(5px);
         border-radius: 10px;
         /* overflow: hidden; */
     }
@@ -10,11 +8,11 @@
     }
 </style>
 <template>
-    <div class="container-fluid py-3" style="overflow: auto;">
+    <div class="container-fluid py-3 mb-4 w-100 h-100" style="overflow: auto;">
         <div v-if="isLoading">
             <Loading/>
         </div>
-        <div data-app>
+        <div data-app class="pb-3">
             <div class="card card-background">
                 <div class="card-header">
                     <h5 class="mb-0">Gantt Chart</h5>

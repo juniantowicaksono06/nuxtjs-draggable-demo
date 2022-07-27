@@ -1,7 +1,5 @@
 <style @scoped>
     .card-background {
-        background-color: rgba(228, 228, 228, 0.9);
-        backdrop-filter: blur(5px);
         border-radius: 10px;
         /* overflow: hidden; */
     }
@@ -31,7 +29,7 @@
     }
 </style>
 <template>
-    <div class="container-fluid py-3" style="overflow: auto;">
+    <div class="container-fluid py-3 h-100" style="overflow: auto;">
         <div class="row">
             <div class="col-12">
                 <div class="card card-background">

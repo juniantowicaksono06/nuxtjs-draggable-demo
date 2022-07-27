@@ -4,8 +4,6 @@
     }
 
     .card-background {
-        background-color: rgba(228, 228, 228, 0.9);
-        backdrop-filter: blur(5px);
         border-radius: 10px;
         /* overflow: hidden; */
     }

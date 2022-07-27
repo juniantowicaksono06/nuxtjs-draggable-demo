@@ -18,7 +18,7 @@
                 <div id="user_menu_section" v-if="!$route.path.startsWith('/board')">
                     <UserMenu />
                 </div>
-                <div class="mt-5 w-100" v-if="!$route.path.startsWith('/board')">
+                <div class="mt-5 w-100 h-100 pb-5" v-if="!$route.path.startsWith('/board')">
                     <Nuxt />
                 </div>
                 <Nuxt v-else />
