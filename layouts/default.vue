@@ -1,3 +1,12 @@
+<style>
+    #user_menu_section {
+        margin-left: auto;
+        margin-right: 20px;
+        position: absolute;
+        right: 29px;
+        top: 10px;
+    }
+</style>
 <template>
     <div class="w-100 h-100" id="content_wrap">
         <div class="w-100 h-100" v-if="!loading">
@@ -6,7 +15,13 @@
                     <WorkspaceSidebar 
                     :key="sidebarKey" @loadWorkspaceContent="loadDataWorkspaceAndMember" />
                 </div>
-                <Nuxt />
+                <div id="user_menu_section" v-if="!$route.path.startsWith('/board')">
+                    <UserMenu />
+                </div>
+                <div class="mt-5 w-100" v-if="!$route.path.startsWith('/board')">
+                    <Nuxt />
+                </div>
+                <Nuxt v-else />
             </div>
         </div>
     </div>
@@ -15,10 +30,12 @@
 <script>
     const CryptoJS = require("crypto-js");
     import WorkspaceSidebar from "../components/workspace/WorkspaceSidebar.vue";
+    import UserMenu from "../components/global/UserMenu.vue";
     export default {
         middleware: ['auth'],
         components: {
-            WorkspaceSidebar
+            WorkspaceSidebar,
+            UserMenu
         },
         mounted() {
             this.loadDataWorkspaceAndMember()
@@ -58,6 +75,6 @@
                 sidebarKey: 0,
                 loading: true,
             }
-        }
+        },
     }
 </script>

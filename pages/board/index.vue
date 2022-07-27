@@ -6,7 +6,7 @@
 import Kanban from "../../components/board/Main.vue";
 export default {
     middleware: ['hasworkspace'],
-    name: "KanbanPage",
+    name: "BoardPage",
     components: { Kanban },
     head() {
         return {

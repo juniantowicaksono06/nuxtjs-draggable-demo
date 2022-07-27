@@ -26,7 +26,7 @@
                             <span class="text-white transparent-button font-sm btn">{{ board.workspace_id ? board.workspace_id.name : '' }} <span class="ml-1"></span></span>
                         </span>
                         <div id="guest_member_list">
-                            <div v-for="(member, member_index) in $store.state.members.all_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name" :style="(member_index > 0 ? {
+                            <div v-for="(member, member_index) in $store.state.members.all_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member d-inline-block" ref="card_info_ref" @click.stop="" v-b-tooltip.hover data-placement="top" :title="member.name" :style="(member_index > 0 ? {
                                 marginLeft: '-20px !important'
                             } : {})">
                                 <img :src="member.picture" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.picture != 'undefined' && member.picture != '')" />

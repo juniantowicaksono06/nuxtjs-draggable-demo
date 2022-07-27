@@ -56,10 +56,10 @@
         </div>
         <div class="position-relative">
             <div class="position-absolute" id="user_section">
-                <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-on:click="openUserMenu" v-if="!$store.state.auth.identity.picture">
+                <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-on:click="toggleUserMenu" v-if="!$store.state.auth.identity.picture" ref="toggle_user_menu_ref">
                     {{ $generateInitialName(this.$store.state.auth.identity.name) }}
                 </div>
-                <div class="profile-pic-thumbs text-white py-1 text-center rounded-circle" v-on:click="openUserMenu" v-else>
+                <div class="profile-pic-thumbs text-white py-1 text-center rounded-circle" v-on:click="toggleUserMenu" v-else ref="toggle_user_menu_ref">
                     <img :src="$store.state.auth.identity.picture" width="34" alt="" class="rounded-circle">
                 </div>
                 <div class="position-relative">
@@ -81,7 +81,7 @@
                                 <div v-else>
                                     <img :src="$store.state.auth.identity.picture" width="64" alt="" class="rounded-circle">
                                     <div class="position-relative">
-                                        <input type="file" id="input_file" ref="input_file_ref" v-on:change="openUploadPhotoModal" accept=".png,.jpg,.jpeg">
+                                        <input type="file" id="input_file" ref="input_file_ref" v-on:change="openUploadPhotoModal" accept=".png,.jpg,.jpeg" v-on:click="checkFile">
                                         <button class="btn btn-default" id="upload_file_exist" v-on:click="selectImage">
                                             <span><i class="fa fa-camera"></i></span>
                                         </button>
@@ -101,7 +101,7 @@
                 </div>
             </div>
         </div>
-        <b-modal id="upload_photo_modal" hide-footer size="sm" title="Upload Photo">
+        <b-modal id="upload_photo_modal" hide-footer size="md" title="Upload Photo">
             <div v-if="cropped_image_url == null">
                 <Cropper 
                     ref="cropper_ref" 
@@ -137,8 +137,15 @@
                 is_user_menu_open: false,
                 cropped_image_url: null,
                 compress_image: null,
-                is_loading: false
+                is_loading: false,
+                file_dialog_open: false,
             }
+        },
+        mounted() {
+            document.addEventListener('click', this.onClickOutside)
+        },
+        beforeDestroy() {
+            document.removeEventListener('click', this.onClickOutside)
         },
         methods: {
             actionLogout() {
@@ -146,6 +153,7 @@
                 this.$router.push('/login/');
             },
             selectImage() {
+                this.file_dialog_open = true
                 this.$refs.input_file_ref.click()
             },
             updateImage() {
@@ -174,14 +182,16 @@
                         })
                         this.is_loading = false
                         let members = JSON.stringify(this.$store.state.members.all_members)
+                        let member = JSON.stringify(this.$store.state.auth.identity)
+                        member = JSON.parse(member)
                         members = JSON.parse(members)
                         for(let x = 0; x < members.length; x++) {
-                            members[x].picture = this.compress_image
+                            if(member._id == members[x]._id) {
+                                members[x].picture = this.compress_image
+                            }
                         }
                         this.$store.commit('members/loadMembers', members)
 
-                        let member = JSON.stringify(this.$store.state.auth.identity)
-                        member = JSON.parse(member)
                         member.picture = this.compress_image
 
                         this.$store.commit('auth/setProfile', member)
@@ -193,6 +203,12 @@
                     this.is_loading = false
                 })
             },
+            checkFile() {
+                document.body.onfocus = () => {
+                    document.body.onfocus = null
+                    this.file_dialog_open = false
+                }
+            },
             cropImage() {
                 const result = this.$refs.cropper_ref.getResult()
                 this.$compressImage(result.canvas.toDataURL(), (res) => {
@@ -200,11 +216,17 @@
                     this.compress_image = res.compress_image
                 })
             },
-            openUserMenu() {
+            toggleUserMenu() {
                 this.is_user_menu_open = !this.is_user_menu_open
+            },
+            onClickOutside(event) {
+                const { toggle_user_menu_ref } = this.$refs
+                if(!toggle_user_menu_ref || toggle_user_menu_ref.contains(event.target) || this.file_dialog_open) return
+                this.is_user_menu_open = false
             },
             openUploadPhotoModal() {
                 this.is_user_menu_open = false
+                this.file_dialog_open = false
                 this.cropped_image_url = null
                 const files = this.$refs.input_file_ref.files
                 var file_reader = this.$convertFileTob64(files[0])

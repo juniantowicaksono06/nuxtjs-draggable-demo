@@ -366,6 +366,10 @@
                 })
             })
             this.initOption()
+            document.addEventListener('click', this.onClickOutside)
+        },
+        beforeDestroy() {
+            document.removeEventListener('click', this.onClickOutside)
         },
         computed: {
             countChecklistChild() {
@@ -865,6 +869,23 @@
                     item: {}
                 }
                 this.target_element_profile = {}
+            },
+            onClickOutside(event) {
+                const { card_info_ref } = this.$refs
+                if(!card_info_ref) return
+                let exists = false
+
+                if(card_info_ref.length > 0) {
+                    card_info_ref.forEach((value, index) => {
+                        if(value.contains(event.target)) {
+                            exists = true
+                        }
+                    })
+                }
+
+                if(!exists) {
+                    this.closePopUp()
+                }
             },
             isDeadline(date) {
                 let d = new Date(date)
