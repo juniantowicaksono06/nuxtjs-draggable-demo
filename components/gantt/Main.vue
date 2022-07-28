@@ -6,9 +6,17 @@
     .rounded {
         border-radius: 5px !important;
     }
+    .container-fluid .card {
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+    .gchartcontainer {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+    }
 </style>
 <template>
-    <div class="container-fluid py-3 mb-4 w-100 h-100" style="overflow: auto;">
+    <div class="container-fluid py-3 mb-4 h-100" style="overflow: auto;">
         <div v-if="isLoading">
             <Loading/>
         </div>
@@ -18,7 +26,7 @@
                     <h5 class="mb-0">Gantt Chart</h5>
                 </div>
                 <div class="card-body">
-                    <div style="position:relative" class="gantt" id="GanttChartDIV"></div>
+                    <div style="" class="gantt" id="GanttChartDIV"></div>
                 </div>
             </div>
         </div>

@@ -56,8 +56,8 @@
                 </div>
             </div>
             <div class="float-right profile-pic-container justify-content-end">
-                <div v-for="(member, member_index) in item.members" :key="member._id" class="px-1 py-1 position-relative  member" v-on:click="!data.archive ? openProfileCard($event, member, item) : ''" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.name">
-                    <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
+                <div v-for="(member, member_index) in item.members" :key="member._id" class="px-1 py-1 position-relative  member" v-on:click="!data.archive ? openProfileCard($event, member, item) : ''" ref="card_info_ref" @click.stop="" v-b-tooltip.hover data-placement="top" :title="member.name">
+                    <img :src="member.picture" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.picture != 'undefined' && member.picture != '')" />
                     <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
                         {{ generateProfileName(member.name) }}
                     </div>
@@ -73,7 +73,7 @@
                             <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="item.name" v-on:blur="renameItem" v-on:focus="storeOldValue(item.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
                             <span class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-else>{{ item.name }}</span>
                             <h6 class="pr-0 no-select" v-if="!data.archive">in list <b>{{ kanban_name }}</b></h6>
-                            <h4 class="pr-0 no-select text-center text-danger" v-else><span><i class="fa fa-archive mr-2"></i></span> This card is archived</h4>
+                            <h4 class="pr-0 no-select text-center text-danger" v-else><span><i class="fa fa-archive mr-2 mt-3"></i></span> This card is archived</h4>
                             <div class="mt-2" v-if="data.archive" v-on:click="restoreArchive">
                                 <div class="btn btn-primary"><i class="fa fa-trash-restore"></i> Restore</div>
                             </div>
@@ -88,15 +88,15 @@
                     <div class="row">
                         <div class="col-12">
                             <div id="member_and_deadline_container">
-                                <div :key="show_modal">
-                                    <h6 class="kanban-text" v-if="item.members.length > 0" :key="show_modal">Members</h6>
-                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="openProfileCard($event, member, item)" :key="member._id" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" :title="member.full_name">
-                                        <img :src="member.profile_pic" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.profile_pic != 'undefined' && member.profile_pic != '')" />
+                                <div :key="show_modal" v-if="item.members.length > 0">
+                                    <h6 class="kanban-text" :key="show_modal">Members</h6>
+                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="openProfileCard($event, member, item)" :key="member._id" ref="card_info_ref" @click.stop="" data-placement="top" v-b-tooltip.hover :title="member.full_name">
+                                        <img :src="member.picture" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.picture != 'undefined' && member.picture != '')" />
                                         <div class="profile-pic-thumbs bg-primary text-white text-center py-1 rounded-circle" v-else>
                                             {{ generateProfileName(member.name) }}
                                         </div>
                                     </div>                               
-                                    <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: auto 0;" v-if="item.members.length > 0 && !data.archive" v-on:click="showCardPopUp($event, 'members')">
+                                    <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" v-b-tooltip.hover data-placement="top" title="Add member" style="margin: auto 0;" v-if="item.members.length > 0 && !data.archive" v-on:click="showCardPopUp($event, 'members')">
                                         <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
                                             <span><i class="fa fa-plus"></i></span>
                                         </p>
@@ -229,7 +229,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 pl-0">
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 pl-0 mt-2">
                             <b-card no-body>
                                 <b-tabs card content>
                                     <!-- COMMENTS -->
@@ -871,21 +871,7 @@
                 this.target_element_profile = {}
             },
             onClickOutside(event) {
-                const { card_info_ref } = this.$refs
-                if(!card_info_ref) return
-                let exists = false
-
-                if(card_info_ref.length > 0) {
-                    card_info_ref.forEach((value, index) => {
-                        if(value.contains(event.target)) {
-                            exists = true
-                        }
-                    })
-                }
-
-                if(!exists) {
-                    this.closePopUp()
-                }
+                this.closePopUp()
             },
             isDeadline(date) {
                 let d = new Date(date)

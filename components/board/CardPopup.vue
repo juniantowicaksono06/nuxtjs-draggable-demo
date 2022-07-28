@@ -23,8 +23,8 @@
                         <div id="member_list_container">
                             <div v-for="(member, member_index) in all_members" v-if="(member.name.toLowerCase().includes(search_member.toLowerCase()) || search_member.trim() == '' || member.email.toLowerCase().includes(search_member.toLowerCase()))" v-on:click="toggleMember($event, member)">
                                 <div class="d-flex member-list-item mb-2">
-                                    <div v-if="member.profile_pic">
-                                        <img :src="member.profile_pic" style="width: 32px;"  class="rounded-circle" />
+                                    <div v-if="member.picture">
+                                        <img :src="member.picture" style="width: 32px;"  class="rounded-circle" />
                                     </div>
                                     <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else style="width: 42px;">
                                         {{ generateProfileName(member.name) }}
