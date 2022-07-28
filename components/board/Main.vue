@@ -261,6 +261,7 @@
             },
         },
         methods: {
+            // Close All pop up
             onEscape(e) {
                 if(e.key == 'Escape') {
                     let board_input = document.getElementById('board_input')
