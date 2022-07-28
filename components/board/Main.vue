@@ -77,7 +77,7 @@
                             </div>
                         </draggable>
                         <div>
-                            <div :class="((!add_list_enabled && add_list_id == null) ? 'add-list transparent-button d-block' : 'add-list transparent-button d-none')" v-on:click="showAddListInput">
+                            <div :class="((!add_list_enabled && add_list_id == null) ? 'add-list transparent-button d-block' : 'add-list transparent-button d-none')" v-on:click="enableAddList">
                                 <span class="mb-0" style="font-size: 14px;"><strong>+</strong> Add another list</span>
                             </div>
                             <div :class="((!add_list_enabled && add_list_id == null) ? 'add-list2 card d-none' : 'add-list2 card d-block')">
@@ -233,6 +233,7 @@
             window.addEventListener('resize', () => {
                 this.resizeKanbanContainer()
             })
+            document.addEventListener('keyup', this.onEscape)
         },
         watch: {
             '$route.query': function() {
@@ -260,6 +261,15 @@
             },
         },
         methods: {
+            onEscape(e) {
+                if(e.key == 'Escape') {
+                    let board_input = document.getElementById('board_input')
+                    if(board_input) {
+                        board_input.blur()
+                    }
+                    this.disableAddList()
+                }
+            },
             saveBoard() {
                 if(this.board_title.trim() == '') return
                 let config = {
@@ -633,7 +643,7 @@
                 this.workspace_id_selected = this.board.workspace_id._id
                 this.$bvModal.show("modal_move_workspace")
             },
-            showAddListInput() {
+            enableAddList() {
                 this.add_list_enabled = true
                 this.add_list_id = Math.round(Math.random() * 10240)
                 this.add_list_value = ''
@@ -644,11 +654,6 @@
                         kanban_container_ref.scrollTo(kanban_container_ref.scrollWidth, kanban_container_ref.scrollHeight)
                     }
                 })
-            },
-            disableAddItem() {
-                this.add_item_enabled = false
-                this.add_item_id = null
-                this.add_item_value = ''
             },
             disableAddList() {
                 this.add_list_enabled = false

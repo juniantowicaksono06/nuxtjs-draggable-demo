@@ -16,7 +16,7 @@
             </draggable>
         </div>
         <div class="kanban-footer">
-            <div class="add-item kanban-item kanban-text w-100 px-3 py-3" v-on:click="showAddItemInput($event, kanban_card._id)" :class="((!add_item_enabled) || (add_item_enabled && kanban_card._id != add_item_id) ? 'd-block' : 'd-none')">
+            <div class="add-item kanban-item kanban-text w-100 px-3 py-3" v-on:click="enableAddItem($event, kanban_card._id)" :class="((!add_item_enabled) || (add_item_enabled && kanban_card._id != add_item_id) ? 'd-block' : 'd-none')">
                 <strong>+</strong> Add Item
             </div>
             <div class="add-item kanban-item w-100 px-2 py-2 kanban-text" :class="((add_item_enabled == true && kanban_card._id == add_item_id) ? 'd-block' : 'd-none')">
@@ -55,7 +55,17 @@
                 type: Object
             }
         },
+        // beforeDestroy() {
+        //     document.removeEventListener('keyup', this.onEscape)
+        // },
         mounted() {
+            document.addEventListener('keyup', this.onEscape)
+                // if(e.key == 'Escape') {
+                //     this.$refs.card_name_ref.style.display = 'block'
+                //     this.$refs.card_name_edit.style.display = 'none'
+                //     this.onEscape()
+                // }
+            
         },
         methods: {
             archiveItem(index, id) {
@@ -159,7 +169,14 @@
                 .catch((error) => {
                 })
             },
-            showAddItemInput(event, card_id) {
+            onEscape(event) {
+                if(event.key == 'Escape') {
+                    this.$refs.card_name_ref.style.display = 'block'
+                    this.$refs.card_name_edit.style.display = 'none'
+                    this.disableAddItem()   
+                }
+            },
+            enableAddItem(event, card_id) {
                 this.add_item_enabled = true
                 this.add_item_id = card_id
                 this.add_item_value = ''

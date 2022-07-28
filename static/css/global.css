@@ -369,6 +369,10 @@ body, html {
 .cursor-default {
     cursor: default;
 }
+.gchartcontainer {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr auto;
+}
 
 /* FONT AWESOME ICON NOT INCLUDED IN FORT AWESOME PACKAGE */
 

@@ -10,10 +10,6 @@
         width: 100% !important;
         overflow: hidden !important;
     }
-    .gchartcontainer {
-        display: grid;
-        grid-template-columns: 1fr 1fr auto;
-    }
 </style>
 <template>
     <div class="container-fluid py-3 mb-4 h-100" style="overflow: auto;">
