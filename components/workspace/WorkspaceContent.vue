@@ -10,6 +10,28 @@
     .rounded {
         border-radius: 5px !important;
     }
+    #upload_background {
+        min-height: 150px;
+        border: 1px dashed darkgray;
+    }
+    #background_file {
+        min-height: 150px;
+        /* visibility: hidden; */
+        opacity: 0;
+        position: relative;
+        z-index: 999;
+    }
+    #background_file:hover {
+        cursor: pointer;
+    }
+    #drag_and_drop_file:hover {
+        cursor: pointer;
+    }
+    #drag_and_drop_file {
+        position: absolute;
+        top: 30%;
+        left: 18%;
+    }
 </style>
 <template>
     <div class="px-3 py-3 container-fluid" style="overflow: auto;">
@@ -159,6 +181,23 @@
                                 <!-- <input type="text" class="form-control" placeholder="Description" v-model="board_title" v-on:keypress.enter="saveBoard" /> -->
                                 <textarea id="" rows="3" class="form-control" v-model="board_description" style="resize: none;" placeholder="Add a Description"></textarea>
                             </div>
+                            <div class="form-group">
+                                <label for="change_background" class="kanban-text">
+                                    Change Background
+                                </label>
+                                <div class="w-100 mb-3" v-if="bg_picture">
+                                    <img :src="bg_picture" alt="" class="w-100">
+                                </div>
+                                <div class="position-relative" id="upload_background">
+                                    <input type="file" id="background_file" ref="background_file_ref" v-on:change="fileChange" accept=".png,.jpg,.jpeg">
+                                    <div class="text-center" id="drag_and_drop_file">
+                                        <span><i class="fa fa-camera fa-3x"></i></span>
+                                        <div class="text-center">
+                                            <span>Drag or Click Here To Upload Background</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="w-100 mt-3">
                             <button class="btn btn-block btn-primary" v-on:click="saveBoard">
@@ -180,6 +219,7 @@
         data() {
             return {
                 selected_workspace: '',
+                bg_picture: '',
                 board_title: '',
                 board_url: '',
                 board_bot_url: '',
@@ -196,44 +236,105 @@
             }
         },
         methods: {
-            
+            fileChange() {
+                const files = this.$refs.background_file_ref.files
+                var file_reader = this.$convertFileTob64(files[0])
+                file_reader.onload = () => {
+                    this.bg_picture = file_reader.result
+                }
+                file_reader.onerror = (error) => {
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
+                }
+            },
             saveBoard() {
                 if(this.board_title.trim() == '') return
+                // let config = {
+                //     headers: {
+                //         'Content-Type': 'application/json'
+                //     }
+                // }
+                // let dataSend = {
+                //     name: this.board_title,
+                //     workspace_id: this.$store.state.auth.identity.workspace_id._id,
+                //     platform: []
+                // }
+                // for(const key in this.board_platform_list) {
+                //     if(key == 'Web') {
+                //         if(this.board_platform_list[key] == true) {
+                //             dataSend['url'] = this.board_url
+                //         }
+                //         else {
+                //             dataSend['url'] = ''
+                //         }
+                //     }
+                //     if(key == 'Bot Telegram') {
+                //         if(this.board_platform_list[key] == true) {
+                //             dataSend['bot_url'] = this.board_bot_url
+                //         }
+                //         else {
+                //             dataSend['bot_url'] = ''
+                //         }
+                //     }
+                //     if(this.board_platform_list[key] == true) {
+                //         dataSend['platform'].push(key)
+                //     } 
+                // }
+                // dataSend['project_owner'] = this.board_project_owner
+                // dataSend['description'] = this.board_description
+                // dataSend['subdept'] = this.board_sub_dept
+
                 let config = {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'multipart/form-data'
                     }
                 }
-                let dataSend = {
-                    name: this.board_title,
-                    workspace_id: this.$store.state.auth.identity.workspace_id._id,
-                    platform: []
-                }
-                for(const key in this.board_platform_list) {
-                    if(key == 'Web') {
+                let formData = new FormData()
+                formData.append('name', this.board_title)
+                formData.append('workspace_id', this.$store.state.auth.identity.workspace_id._id)
+                if(this.board_platform_list) {
+                    for(const key in this.board_platform_list) {
+                        if(key == 'Web') {
+                            if(this.board_platform_list[key] == true) {
+                                // dataSend['url'] = this.board_url
+                                formData.append('url', this.board_url)
+                            }
+                            else {
+                                formData.append('url', '')
+                            }
+                        }
+                        if(key == 'Bot Telegram') {
+                            if(this.board_platform_list[key] == true) {
+                               formData.append('bot_url', this.board_bot_url)
+                            }
+                            else {
+                               formData.append('bot_url', '')
+                            }
+                        }
                         if(this.board_platform_list[key] == true) {
-                            dataSend['url'] = this.board_url
-                        }
-                        else {
-                            dataSend['url'] = ''
-                        }
+                            // dataSend['platform'].push(key)
+                            formData.append('platform[]', key)
+                        } 
                     }
-                    if(key == 'Bot Telegram') {
-                        if(this.board_platform_list[key] == true) {
-                            dataSend['bot_url'] = this.board_bot_url
-                        }
-                        else {
-                            dataSend['bot_url'] = ''
-                        }
-                    }
-                    if(this.board_platform_list[key] == true) {
-                        dataSend['platform'].push(key)
-                    } 
                 }
-                dataSend['project_owner'] = this.board_project_owner
-                dataSend['description'] = this.board_description
-                dataSend['subdept'] = this.board_sub_dept
-                this.$axios.$post(`/api/board`, dataSend, config)
+                // dataSend['project_owner'] = this.board_project_owner
+                // dataSend['description'] = this.board_description
+                // dataSend['subdept'] = this.board_sub_dept
+                formData.append('project_owner', this.board_project_owner)
+                formData.append('description', this.board_description)
+                formData.append('subdept', this.board_sub_dept)
+                if(this.$refs.background_file_ref.files.length > 0) {
+                    formData.append('picture', this.$refs.background_file_ref.files[0])
+                }
+                this.$axios.$post(`/api/board`, formData, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         Swal.fire({

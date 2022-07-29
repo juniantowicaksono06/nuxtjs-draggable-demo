@@ -21,7 +21,13 @@
     <div class="row mb-3 mt-2">
         <div class="col-12" style="height: 48px;">
             <div class="">
-                <div v-if="typeof data.profile_pic != 'undefined' && data.profile_pic != ''" class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left">
+                <div v-if="data.member_id">
+                    <div class="profile-pic-thumbs text-white py-1 text-center float-left" v-if="data.member_id.picture">
+                        <img :src="data.member_id.picture" class="profile-pic-thumbs rounded-circle" />
+                    </div>
+                    <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left" v-else>
+                        {{ data.initialName }}
+                    </div>
                 </div>
                 <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left" v-else>
                     {{ data.initialName }}

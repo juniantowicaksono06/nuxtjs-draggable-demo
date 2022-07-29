@@ -9,6 +9,28 @@
         overflow-y: auto;
         overflow-x: hidden;
     }
+    #upload_background {
+        min-height: 150px;
+        border: 1px dashed darkgray;
+    }
+    #background_file {
+        min-height: 150px;
+        /* visibility: hidden; */
+        opacity: 0;
+        position: relative;
+        z-index: 999;
+    }
+    #background_file:hover {
+        cursor: pointer;
+    }
+    #drag_and_drop_file:hover {
+        cursor: pointer;
+    }
+    #drag_and_drop_file {
+        position: absolute;
+        top: 30%;
+        left: 18%;
+    }
 </style>
 <template>
     <div class="w-100 h-100" v-on:click="closePopUp">
@@ -161,6 +183,23 @@
                         <textarea id="" rows="3" class="form-control" v-model="board_description" style="resize: none;" placeholder="Add a Description"></textarea>
                     </div>
                     <div class="form-group">
+                        <label for="change_background" class="kanban-text">
+                            Change Background
+                        </label>
+                        <div class="w-100 mb-3" v-if="bg_picture">
+                            <img :src="bg_picture" alt="" class="w-100">
+                        </div>
+                        <div class="position-relative" id="upload_background">
+                            <input type="file" id="background_file" ref="background_file_ref" v-on:change="fileChange" accept=".png,.jpg,.jpeg">
+                            <div class="text-center" id="drag_and_drop_file">
+                                <span><i class="fa fa-camera fa-3x"></i></span>
+                                <div class="text-center">
+                                    <span>Drag or Click Here To Upload Background</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <button class="btn btn-primary btn-block" v-on:click="saveBoard">Save</button>
                     </div>
                 </div>
@@ -250,6 +289,9 @@
             }
         },
         computed: {
+            kanbanURL: function() {
+                return process.env.BACKEND_URL
+            },
             guestMember() {
                 return this.all_members.filter((value) => {
                     if(this.board.workspace_id){
@@ -260,8 +302,30 @@
                 })
             },
         },
+        beforeDestroy() {
+            let content_wrap = document.getElementById('content_wrap')
+            content_wrap.style = ''
+        },
         methods: {
-            // Close all pop up
+            fileChange() {
+                const files = this.$refs.background_file_ref.files
+                var file_reader = this.$convertFileTob64(files[0])
+                file_reader.onload = () => {
+                    this.bg_picture = file_reader.result
+                }
+                file_reader.onerror = (error) => {
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
+                }
+            },
             onEscape(e) {
                 if(e.key == 'Escape') {
                     let board_input = document.getElementById('board_input')
@@ -275,41 +339,64 @@
                 if(this.board_title.trim() == '') return
                 let config = {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'multipart/form-data'
                     }
                 }
-                let dataSend = {
-                    id: this.board._id,
-                    name: this.board_title,
-                    platform: []
-                }
-                for(const key in this.board_platform_list) {
-                    if(key == 'Web') {
+                let formData = new FormData()
+                formData.append('id', this.board._id)
+                formData.append('name', this.board_title)
+
+                if(this.board_platform_list) {
+                    for(const key in this.board_platform_list) {
+                        if(key == 'Web') {
+                            if(this.board_platform_list[key] == true) {
+                                // dataSend['url'] = this.board_url
+                                formData.append('url', this.board_url)
+                            }
+                            else {
+                                // dataSend['url'] = ''
+                                formData.append('url', '')
+                            }
+                        }
+                        if(key == 'Bot Telegram') {
+                            if(this.board_platform_list[key] == true) {
+                                // dataSend['bot_url'] = this.board_bot_url
+                                formData.append('bot_url', this.board_bot_url)
+                            }
+                            else {
+                                // dataSend['bot_url'] = ''
+                                formData.append('bot_url', '')
+                            }
+                        }
                         if(this.board_platform_list[key] == true) {
-                            dataSend['url'] = this.board_url
-                        }
-                        else {
-                            dataSend['url'] = ''
-                        }
+                            // dataSend['platform'].push(key)
+                            formData.append('platform[]', key)
+                        } 
                     }
-                    if(key == 'Bot Telegram') {
-                        if(this.board_platform_list[key] == true) {
-                            dataSend['bot_url'] = this.board_bot_url
-                        }
-                        else {
-                            dataSend['bot_url'] = ''
-                        }
-                    }
-                    if(this.board_platform_list[key] == true) {
-                        dataSend['platform'].push(key)
-                    } 
                 }
-                dataSend['project_owner'] = this.board_project_owner
-                dataSend['description'] = this.board_description
-                dataSend['subdept'] = this.board_sub_dept
-                this.$axios.$put(`/api/board`, dataSend, config)
+                else {
+                    formData.append('platform[]', null)
+                    formData.append('url', '')
+                    formData.append('bot_url', '')
+                }
+                formData.append('project_owner', this.board_project_owner)
+                formData.append('description', this.board_description)
+                formData.append('subdept', this.board_sub_dept)
+                if(this.$refs.background_file_ref.files.length > 0) {
+                    formData.append('picture', this.$refs.background_file_ref.files[0])
+                }
+                // dataSend['project_owner'] = this.board_project_owner
+                // dataSend['description'] = this.board_description
+                // dataSend['subdept'] = this.board_sub_dept
+            
+                this.$axios.$put(`/api/board`, formData, config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        const { data } = response
+                        if(data) {
+                            let content_wrap = document.getElementById('content_wrap')
+                            content_wrap.style.backgroundImage = `url(${this.kanbanURL}file_upload/board_background/${data.picture})`
+                        }
                         Swal.fire({
                             text: 'Board has been saved',
                             toast: true,
@@ -382,6 +469,7 @@
                 .catch(error => {})
             },
             openEditBoardModal() {
+                this.bg_picture = ''
                 this.$bvModal.show('edit_board_modal')
             },
             openArchiveModal() {
@@ -497,6 +585,14 @@
                             }
                             this.board_project_owner = this.board.project_owner ? this.board.project_owner : ''
                             this.board_description = this.board.description ? this.board.description : ''
+                            let picture = this.board.picture
+                            let content_wrap = document.getElementById('content_wrap')
+                            if(picture) {
+                                content_wrap.style.backgroundImage = `url(${this.kanbanURL}file_upload/board_background/${picture})`
+                            }
+                            else {
+                                content_wrap.style = ''
+                            }
                         })
                     }
                 })
@@ -708,6 +804,7 @@
         },
         data() {
             return {
+                bg_picture: '',
                 show_popup: false,
                 popup_trigger: null,
                 board_id: null,

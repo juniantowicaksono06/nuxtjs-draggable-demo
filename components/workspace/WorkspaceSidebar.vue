@@ -1,4 +1,26 @@
 <style @scoped>
+    #upload_background {
+        min-height: 150px;
+        border: 1px dashed darkgray;
+    }
+    #background_file {
+        min-height: 150px;
+        /* visibility: hidden; */
+        opacity: 0;
+        position: relative;
+        z-index: 999;
+    }
+    #background_file:hover {
+        cursor: pointer;
+    }
+    #drag_and_drop_file:hover {
+        cursor: pointer;
+    }
+    #drag_and_drop_file {
+        position: absolute;
+        top: 30%;
+        left: 18%;
+    }
     #workspace_label {
         font-size: .95em;
         /* padding: 10px 8px; */
@@ -417,6 +439,23 @@
                         </label>
                         <textarea rows="3" class="form-control" placeholder="Add a Description" v-model="add_board.board_description" style="resize: none;"></textarea>
                     </div>
+                    <div class="form-group">
+                        <label for="change_background" class="kanban-text">
+                            Change Background
+                        </label>
+                        <div class="w-100 mb-3" v-if="bg_picture">
+                            <img :src="bg_picture" alt="" class="w-100">
+                        </div>
+                        <div class="position-relative" id="upload_background">
+                            <input type="file" id="background_file" ref="background_file_ref" v-on:change="fileChange" accept=".png,.jpg,.jpeg">
+                            <div class="text-center" id="drag_and_drop_file">
+                                <span><i class="fa fa-camera fa-3x"></i></span>
+                                <div class="text-center">
+                                    <span>Drag or Click Here To Upload Background</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="w-100 mt-3">
                     <button class="btn btn-block btn-primary" v-on:click="saveBoard()">
@@ -433,6 +472,7 @@
         data() {
             return {
                 board_id: null,
+                bg_picture: '',
                 sidebar_open: false,
                 add_workspace: {
                     workspace_name: '',
@@ -489,6 +529,25 @@
             }
         },
         methods: {
+            fileChange() {
+                const files = this.$refs.background_file_ref.files
+                var file_reader = this.$convertFileTob64(files[0])
+                file_reader.onload = () => {
+                    this.bg_picture = file_reader.result
+                }
+                file_reader.onerror = (error) => {
+                    Swal.fire({
+                        text: 'Telah terjadi kesalahan',
+                        toast: true,
+                        timer: 3000,
+                        position: 'bottom-right',
+                        showConfirmButton: false,
+                        showCancelButton: false,
+                        icon: 'error',
+                        title: 'Error'
+                    })
+                }
+            },
             changeWorkspace() {
                 this.$emit('loadWorkspaceContent', false)
                 this.$router.push('/')
@@ -517,6 +576,7 @@
             },
             openCreateBoard(event, index, workspace_id) {
                 this.$bvModal.show('create_new_board')
+                this.bg_picture = ''
                 this.add_board= {
                     workspace_id: workspace_id,
                     workspace_index: index,
@@ -534,39 +594,47 @@
             saveBoard() {
                 let config = {
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'multipart/form-data'
                     }
                 }
-                let dataSend = {
-                    name: this.add_board.board_name,
-                    workspace_id: this.add_board.workspace_id,
-                    platform: []
-                }
-                for(const key in this.add_board.board_platform_list) {
-                    if(key == 'Web') {
+                let formData = new FormData()
+                formData.append('name', this.add_board.board_name)
+                formData.append('workspace_id', this.add_board.workspace_id)
+                if(this.add_board.board_platform_list) {
+                    for(const key in this.add_board.board_platform_list) {
+                        if(key == 'Web') {
+                            if(this.add_board.board_platform_list[key] == true) {
+                                // dataSend['url'] = this.add_board.board_url
+                                formData.append('url', this.add_board.board_url)
+                            }
+                            else {
+                                formData.append('url', '')
+                            }
+                        }
+                        if(key == 'Bot Telegram') {
+                            if(this.add_board.board_platform_list[key] == true) {
+                               formData.append('bot_url', this.add_board.board_bot_url)
+                            }
+                            else {
+                               formData.append('bot_url', '')
+                            }
+                        }
                         if(this.add_board.board_platform_list[key] == true) {
-                            dataSend['url'] = this.add_board.board_url
-                        }
-                        else {
-                            dataSend['url'] = ''
-                        }
+                            // dataSend['platform'].push(key)
+                            formData.append('platform[]', key)
+                        } 
                     }
-                    if(key == 'Bot Telegram') {
-                        if(this.add_board.board_platform_list[key] == true) {
-                            dataSend['bot_url'] = this.add_board.board_bot_url
-                        }
-                        else {
-                            dataSend['bot_url'] = ''
-                        }
-                    }
-                    if(this.add_board.board_platform_list[key] == true) {
-                        dataSend['platform'].push(key)
-                    } 
                 }
-                dataSend['project_owner'] = this.add_board.board_project_owner
-                dataSend['description'] = this.add_board.board_description
-                dataSend['subdept'] = this.board_sub_dept
-                this.$axios.$post(`/api/board`, dataSend, config)
+                // dataSend['project_owner'] = this.add_board.board_project_owner
+                // dataSend['description'] = this.add_board.board_description
+                // dataSend['subdept'] = this.board_sub_dept
+                formData.append('project_owner', this.add_board.board_project_owner)
+                formData.append('description', this.add_board.board_description)
+                formData.append('subdept', this.board_sub_dept)
+                if(this.$refs.background_file_ref.files.length > 0) {
+                    formData.append('picture', this.$refs.background_file_ref.files[0])
+                }
+                this.$axios.$post(`/api/board`, formData, config)
                 .then((response) => {
                     if(response.status == 'OK') {
                         Swal.fire({
@@ -588,7 +656,7 @@
                             name: this.add_board.board_name,
                             description: this.add_board.board_description,
                             // url: this.add_board.board_url,
-                            url: dataSend['url'],
+                            url: this.add_board.board_url,
                             project_owner: this.add_board.board_project_owner,
                             workspace_id: this.add_board.workspace_id,
                             lists: [],
@@ -604,7 +672,7 @@
                     }
                 })
                 .catch((error) => {
-                    alert("Error: Telah terjadi kesalahan")
+                    console.log(error)
                 })
             },
             saveWorkspace() {
