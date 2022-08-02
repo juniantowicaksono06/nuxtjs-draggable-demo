@@ -266,14 +266,14 @@
                                                     <div class="row mt-2">
                                                         <div class="col-2 col-sm-2 col-lg-1">
                                                             <div v-if="log.member_id">
-                                                                <div class="profile-pic-thumbs text-white py-1 text-center float-left" v-if="log.member_id.picture">
-                                                                    <img :src="log.member_id.picture" class="profile-pic-thumbs rounded-circle" />
+                                                                <div class="profile-pic-thumbs text-white text-center no-zoom" v-if="log.member_id.picture">
+                                                                    <img :src="log.member_id.picture" class="profile-pic-thumbs rounded-circle no-zoom" />
                                                                 </div>
-                                                                <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
+                                                                <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle no-zoom" v-else>
                                                                     {{ generateProfileName(log.user) }}
                                                                 </div>
                                                             </div>
-                                                            <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
+                                                            <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle no-zoom" v-else>
                                                                 {{ generateProfileName(log.user) }}
                                                             </div>
                                                             <div class="log-separator" v-if="log_index != log_activity.length - 1">

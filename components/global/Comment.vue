@@ -22,14 +22,14 @@
         <div class="col-12" style="height: 48px;">
             <div class="">
                 <div v-if="data.member_id">
-                    <div class="profile-pic-thumbs text-white py-1 text-center float-left" v-if="data.member_id.picture">
-                        <img :src="data.member_id.picture" class="profile-pic-thumbs rounded-circle" />
+                    <div class="profile-pic-thumbs text-white py-1 text-center float-left no-zoom" v-if="data.member_id.picture">
+                        <img :src="data.member_id.picture" class="profile-pic-thumbs rounded-circle no-zoom" />
                     </div>
-                    <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left" v-else>
+                    <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left no-zoom" v-else>
                         {{ data.initialName }}
                     </div>
                 </div>
-                <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left" v-else>
+                <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left no-zoom" v-else>
                     {{ data.initialName }}
                 </div>
                 <div class="row">

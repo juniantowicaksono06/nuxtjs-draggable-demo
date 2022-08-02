@@ -252,7 +252,6 @@
     import draggable from "vuedraggable"
     import Card from "./Card.vue"
     import CardProfileMember from "./CardProfileMember.vue"
-    import Topbar from "../Topbar.vue"
     import PopUp from './PopUp.vue'
     import Multiselect from 'vue-multiselect'
     import CardItem from './CardItem.vue'
@@ -854,7 +853,6 @@
             Card,
             draggable,
             CardItem,
-            Topbar,
             CardProfileMember,
             PopUp,
             Multiselect,

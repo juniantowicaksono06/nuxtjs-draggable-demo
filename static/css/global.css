@@ -373,6 +373,9 @@ body, html {
     display: grid !important;
     grid-template-columns: 1fr 1fr auto;
 }
+.no-zoom {
+    transform: none !important;
+}
 
 /* FONT AWESOME ICON NOT INCLUDED IN FORT AWESOME PACKAGE */
 
