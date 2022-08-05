@@ -181,7 +181,7 @@
                             title: 'Success'
                         })
                         this.is_loading = false
-                        let members = JSON.stringify(this.$store.state.members.all_members)
+                        let members = JSON.stringify(this.$store.state.members.board_members)
                         let member = JSON.stringify(this.$store.state.auth.identity)
                         member = JSON.parse(member)
                         members = JSON.parse(members)

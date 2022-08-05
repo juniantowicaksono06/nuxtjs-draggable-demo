@@ -56,8 +56,10 @@
                 </div>
             </div>
             <div class="float-right profile-pic-container justify-content-end">
-                <div v-for="(member, member_index) in item.members" :key="member._id" class="px-1 py-1 position-relative  member" v-on:click="!data.archive ? openProfileCard($event, member, item) : ''" ref="card_info_ref" @click.stop="" v-b-tooltip.hover data-placement="top" :title="member.name">
-                    <img :src="member.picture" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.picture != 'undefined' && member.picture != '')" />
+                <div v-for="(member, member_index) in item.members" :key="member._id" class="px-1 py-1 position-relative  member" v-on:click="!data.archive ? openProfileCard($event, member, item) : ''" ref="card_info_ref" @click.stop="" v-b-tooltip.hover :title="member.name">
+                    <div v-if="memberPicture[member._id]">
+                        <img :src="memberPicture[member._id]" class="profile-pic-thumbs rounded-circle" />
+                    </div>
                     <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
                         {{ generateProfileName(member.name) }}
                     </div>
@@ -90,9 +92,11 @@
                             <div id="member_and_deadline_container">
                                 <div :key="show_modal" v-if="item.members.length > 0">
                                     <h6 class="kanban-text" :key="show_modal">Members</h6>
-                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="openProfileCard($event, member, item)" :key="member._id" ref="card_info_ref" @click.stop="" data-placement="top" v-b-tooltip.hover :title="member.full_name">
-                                        <img :src="member.picture" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.picture != 'undefined' && member.picture != '')" />
-                                        <div class="profile-pic-thumbs bg-primary text-white text-center py-1 rounded-circle" v-else>
+                                    <div v-for="member in item.members" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-on:click="openProfileCard($event, member, item)" :key="member._id" ref="card_info_ref" @click.stop="" v-b-tooltip.hover :title="member.name">
+                                        <div v-if="memberPicture[member._id]">
+                                            <img :src="memberPicture[member._id]" class="profile-pic-thumbs rounded-circle" />
+                                        </div>
+                                        <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else>
                                             {{ generateProfileName(member.name) }}
                                         </div>
                                     </div>                               
@@ -266,8 +270,8 @@
                                                     <div class="row mt-2">
                                                         <div class="col-2 col-sm-2 col-lg-1">
                                                             <div v-if="log.member_id">
-                                                                <div class="profile-pic-thumbs text-white text-center no-zoom" v-if="log.member_id.picture">
-                                                                    <img :src="log.member_id.picture" class="profile-pic-thumbs rounded-circle no-zoom" />
+                                                                <div class="profile-pic-thumbs text-white text-center no-zoom" v-if="memberPicture[log.member_id._id]">
+                                                                    <img :src="memberPicture[log.member_id._id]" class="profile-pic-thumbs rounded-circle no-zoom" />
                                                                 </div>
                                                                 <div class="profile-pic-thumbs border-log-profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle no-zoom" v-else>
                                                                     {{ generateProfileName(log.user) }}
@@ -378,6 +382,9 @@
             document.removeEventListener('click', this.onClickOutside)
         },
         computed: {
+            memberPicture() {
+                return this.$store.state.members.board_members_picture
+            },
             countChecklistChild() {
                 let checklist_done = 0;
                 let total_checklist = 0;
@@ -507,7 +514,8 @@
                         text: this.comment,
                         date: new Date(),
                         member_id: {
-                            picture: this.$store.state.auth.identity.picture
+                            _id: this.$store.state.auth.identity._id,
+                            name: this.$store.state.auth.identity.name
                         }
                     })
                 }
@@ -556,7 +564,7 @@
                     action_confirm_no: null
                 }
                 // if(this.data.archive) {
-                //     let members = Object.assign([], this.$store.state.members.all_members)
+                //     let members = Object.assign([], this.$store.state.members.board_members)
                 //     members = members.filter((value) => {
                 //         if(this.item.members.includes(value._id)) {
                 //             return value

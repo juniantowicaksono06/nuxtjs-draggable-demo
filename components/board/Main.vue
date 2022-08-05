@@ -48,7 +48,7 @@
                             <span class="text-white transparent-button font-sm btn">{{ board.workspace_id ? board.workspace_id.name : '' }} <span class="ml-1"></span></span>
                         </span>
                         <div id="guest_member_list">
-                            <div v-for="(member, member_index) in $store.state.members.all_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member d-inline-block" ref="card_info_ref" @click.stop="" v-b-tooltip.hover data-placement="top" :title="member.name" :style="(member_index > 0 ? {
+                            <div v-for="(member, member_index) in $store.state.members.board_members" :key="member._id" class="ml-1 px-1 py-1 position-relative member d-inline-block" ref="card_info_ref" @click.stop="" v-b-tooltip.hover data-placement="top" :title="member.name" :style="(member_index > 0 ? {
                                 marginLeft: '-20px !important'
                             } : {})">
                                 <img :src="member.picture" class="profile-pic-thumbs rounded-circle" v-if="(typeof member.picture != 'undefined' && member.picture != '')" />
@@ -292,7 +292,7 @@
                 return process.env.BACKEND_URL
             },
             guestMember() {
-                return this.all_members.filter((value) => {
+                return this.board_members.filter((value) => {
                     if(this.board.workspace_id){
                         let current_workspace = this.board.workspace_id._id
                         let current_user_id = this.$store.state.auth.identity._id
@@ -511,7 +511,7 @@
                 let member_exist = false
                 let index = null;
                 let members_id = []
-                let board_members_and_guest = Object.assign([], this.$store.state.members.all_members)
+                let board_members_and_guest = Object.assign([], this.$store.state.members.board_members)
                 let board_members = []
                 let current_workspace = this.$store.state.auth.identity.workspace_id._id
                 for(let a = 0; a < board_members_and_guest.length; a++) {
@@ -603,12 +603,15 @@
                     if(response_member.status == 'OK') {
                         let {data} = response_member
                         this.$store.commit('members/loadMembers', data)
+                        let member_pic = {}
                         data = data.filter((value) => {
                             let current_workspace = this.board.workspace_id._id
                             let current_user_id = this.$store.state.auth.identity._id
+                            member_pic[value._id] = value.picture
                             if(value.workspace_id != current_workspace && current_user_id != value._id) return value
                         })
                         this.member_multiselect = data
+                        this.$store.commit('members/loadMembersPicture', member_pic)
                     }
                 })
             },
@@ -617,7 +620,7 @@
                 .then((response_member) => {
                     if(response_member.status == 'OK') {
                         let {data} = response_member
-                        this.all_members = data
+                        this.board_members = data
                     }
                 })
             },
@@ -820,7 +823,7 @@
                 board_sub_dept: '',
                 all_members: [],
                 member_multiselect: [],
-                board_members: this.$store.state.members.all_members,
+                board_members: this.$store.state.members.board_members,
                 sidebar_observer: null,
                 sidebarKey: 0,
                 workspace_id_selected: null,

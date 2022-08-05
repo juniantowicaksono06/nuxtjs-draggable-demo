@@ -22,8 +22,8 @@
         <div class="col-12" style="height: 48px;">
             <div class="">
                 <div v-if="data.member_id">
-                    <div class="profile-pic-thumbs text-white py-1 text-center float-left no-zoom" v-if="data.member_id.picture">
-                        <img :src="data.member_id.picture" class="profile-pic-thumbs rounded-circle no-zoom" />
+                    <div class="profile-pic-thumbs text-white py-1 text-center float-left no-zoom" v-if="memberPicture[data.member_id._id]">
+                        <img :src="memberPicture[data.member_id._id]" class="profile-pic-thumbs rounded-circle no-zoom" />
                     </div>
                     <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle float-left no-zoom" v-else>
                         {{ data.initialName }}
@@ -85,6 +85,9 @@
         mounted() {
         },
         computed: {
+            memberPicture() {
+                return this.$store.state.members.board_members_picture
+            },
             convertCommentDate() {
                 let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
                 let date = new Date(this.data.date).toLocaleString('en-US', {

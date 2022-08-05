@@ -1,10 +1,14 @@
 export const state = () => ({
-  all_members: [],
+  board_members: [],
+  board_members_picture: {}
 })
 
 
 export const mutations = {
     loadMembers(state, value) {
-        state.all_members = value
+        state.board_members = value
+    },
+    loadMembersPicture(state, value) {
+        state.board_members_picture = value
     },
 }

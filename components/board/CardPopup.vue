@@ -92,7 +92,7 @@
                 selected_date: this.data.data_item.deadline.date == null ? this.currentDate() : this.data.data_item.deadline.date,
                 deadline: this.data.data_item.deadline,
                 date_context: null,
-                all_members: this.$store.state.members.all_members,
+                all_members: this.$store.state.members.board_members,
                 selected_members: this.data.data_item.members,
                 checklist: this.data.data_item.checklists,
             }
