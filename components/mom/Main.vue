@@ -22,6 +22,18 @@
         margin-left: 0;
         padding-left: 0;
     }
+    ul.dashed > li {
+        margin-left: 5px;
+    }
+    ul.dashed > li:before {
+        content: '-';
+        text-indent: -22px;
+        font-weight: bold;
+        margin-left: -8px;
+    }
+    .list-pre {
+        white-space: break-spaces;
+    }
     pre {
         margin-bottom: 0;
         white-space: break-spaces;
@@ -71,7 +83,7 @@
                                             </div>
                                             <div class="card-body py-2 px-2">
                                                 <div class="px-2 py-2" v-if="data_mom.length > 0">
-                                                    <pre><div v-html="mom_data.text"></div></pre>
+                                                    <div v-html="mom_data.text"></div>
                                                 </div>
                                                 <div v-else>
                                                     <!-- <h3><i class="fa fa-warning"></i></h3> -->
@@ -119,13 +131,48 @@
                         let card_text = ``;
                         let card_index = 0
                         list.cards.forEach((card) => {
-                          card_text += `<div class="mb-0"><h6 class="mb-0">    <strong>${list_index += 1}. ${card.name}</strong> <span class="badge badge-primary"><span style="opacity: 0">[</span>${list.name}<span style="opacity: 0">]</span></span></h6></div>`
-                          let comment_text = ''
-                          card.comments.forEach((comment) => {
-                              comment_text += `<ul><li>         <strong>-</strong> ${comment.text}</li></ul>`
-                          })
-                          card_text += comment_text
-                          card_index++;
+                            let badge_colour = ''
+                            let deadline = moment(card.deadline.date).format('YYYY-MM-D')
+                            deadline += " 23:59:59"
+                            let overdue = moment().isAfter(deadline)
+                            if(overdue && !card.deadline.done) {
+                                badge_colour = "badge-danger"
+                            }
+                            else {
+                                switch(list.name.toLowerCase().trim()) {
+                                    case "backlog":
+                                        badge_colour = "bg-orange-colour"
+                                        break
+                                    case "doing":
+                                        badge_colour = "badge-success"
+                                        break
+                                    case "testing":
+                                        badge_colour = "bg-purple"
+                                        break
+                                    case "done":
+                                        badge_colour = "badge-primary"   
+                                        break
+                                    default:
+                                        badge_colour = "badge-success"
+                                        break;
+                                }
+                            }
+                            card_text += `
+                                <div class="mb-0 ml-2">
+                                    <h6 class="mb-0 font-weight-bold">${list_index += 1}. ${card.name}
+                                        <span class="badge px-2 py-1 ${badge_colour}">${list.name}</span>
+                                    </h6>
+                                </div>`
+                            let comment_text = ''
+                            card.comments.forEach((comment) => {
+                                comment_text += `<div class="ml-2">
+                                    <div class="ml-4 mb-1">
+                                        <ul class="dashed list-pre"><li>${comment.text}</li></ul>
+                                    </div>
+                                </div>`
+                            })
+                            card_text += comment_text
+                            card_index++;
                         })
                         mom_data.text += card_text
                     })

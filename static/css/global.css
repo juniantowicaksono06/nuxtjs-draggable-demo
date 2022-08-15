@@ -376,6 +376,14 @@ body, html {
 .no-zoom {
     transform: none !important;
 }
+.bg-orange-colour {
+    background-color: #FFA500;
+    color: #ffff;
+}
+.bg-purple {
+    background-color: #a020f0;
+    color: #ffff;
+}
 
 /* FONT AWESOME ICON NOT INCLUDED IN FORT AWESOME PACKAGE */
 
