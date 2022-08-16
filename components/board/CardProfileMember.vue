@@ -8,8 +8,8 @@
                     </div>
                 </div>
                 <div class="d-flex mt-2" style="flex-shrink: 0;">
-                    <div v-if="this.data.current_member.picture" style="flex-shrink: 0;">
-                        <img :src="this.data.current_member.picture" class="profile-pic rounded-circle"/>
+                    <div v-if="memberPicture[this.data.current_member._id]" style="flex-shrink: 0;">
+                        <img :src="memberPicture[this.data.current_member._id]" class="profile-pic rounded-circle"/>
                     </div>
                     <div style="flex-shrink: 0;" class="profile-pic bg-primary text-white py-4 text-center rounded-circle" v-else>
                         <h2 class="d-inline-block">{{ generateProfileName(this.data.current_member.name) }}</h2>
@@ -34,6 +34,11 @@
             return {
                 member_list: this.data,
             }
+        },
+        computed: {
+            memberPicture() {
+                return this.$store.state.members.board_members_picture
+            },
         },
         props: {
             data: {

@@ -430,7 +430,7 @@
                         </label>
                         <select class="form-control" v-model="board_sub_dept">
                             <option value="">Select Sub Departement</option>
-                            <option :value="subdept" v-for="subdept in $store.state.auth.identity.workspace_id.subdept">{{ subdept }}</option>
+                            <option :value="subdept" v-for="subdept in getSubdept">{{ subdept }}</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -517,6 +517,12 @@
             }).observe(this.$refs.sidebar_logo_ref)
         },
         computed: {
+            getSubdept() {
+                if(this.$store.state.auth.identity.workspace_id) {
+                    return this.$store.state.auth.identity.workspace_id.subdept
+                }
+                return {}
+            },
             getMemberWorkspaceInBoard() {
                 let boards = Object.assign([], this.$store.state.sidebar.sidebar_data.boards)
                 let workspace_id = []
