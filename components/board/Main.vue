@@ -279,9 +279,15 @@
                 this.loadDataBoard()
                 this.resizeKanbanContainer()
             },
+            'board': function() {
+                this.$nextTick(() => {
+                    this.loadDataMember()
+                })
+            },
             'board_id': function() {
-                this.loadDataMember()
-                this.loadDataAllMember()
+                this.$nextTick(() => {
+                    this.loadDataAllMember()
+                })
             },
             'board.name': function() {
                 this.resizeBoard()
@@ -598,6 +604,7 @@
             },
             loadDataMember() {
                 if(!this.board) return false
+                if(Object.keys(this.board).length == 0) return false
                 this.$axios.$get(`/api/member?board_id=${this.board_id}`)
                 .then((response_member) => {
                     if(response_member.status == 'OK') {

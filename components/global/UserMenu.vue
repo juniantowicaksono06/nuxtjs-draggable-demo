@@ -183,8 +183,10 @@
                         this.is_loading = false
                         let members = JSON.stringify(this.$store.state.members.board_members)
                         let member = JSON.stringify(this.$store.state.auth.identity)
+                        let members_pic = JSON.stringify(this.$store.state.members.board_members_picture)
                         member = JSON.parse(member)
                         members = JSON.parse(members)
+                        members_pic = JSON.parse(members_pic)
                         for(let x = 0; x < members.length; x++) {
                             if(member._id == members[x]._id) {
                                 members[x].picture = this.compress_image
@@ -197,6 +199,8 @@
                         this.$store.commit('auth/setProfile', member)
 
                         this.$bvModal.hide('upload_photo_modal')
+                        members_pic[member._id] = this.compress_image
+                        this.$store.commit('members/loadMembersPicture', members_pic)
                     }
                 })
                 .catch(error => {
