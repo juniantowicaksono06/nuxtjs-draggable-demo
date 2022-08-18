@@ -423,8 +423,7 @@
                                 boards[index].description = this.board_description
 
                                 this.board.name = this.board_title
-                                this.board.url = dataSend['url']
-                                this.board_url = dataSend['url']
+                                this.board.url = this.board_url
                                 this.board.project_owner = this.board_project_owner
                                 this.board.description = this.board_description
                                 let sidebar_data = {
