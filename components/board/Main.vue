@@ -272,6 +272,7 @@
                 this.resizeKanbanContainer()
             })
             document.addEventListener('keyup', this.onEscape)
+            this.webSocketEvent()
         },
         watch: {
             '$route.query': function() {
@@ -294,6 +295,9 @@
             }
         },
         computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
             kanbanURL: function() {
                 return process.env.BACKEND_URL
             },
@@ -312,6 +316,42 @@
             content_wrap.style = ''
         },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('edit_board', (response) => {
+                    let result = JSON.parse(response)
+                    if(this.board._id == result['board_id']) {
+                        this.board = {
+                            ...this.board,
+                            ...result.data
+                        }
+                        if(result.data.name) {
+                            this.board_title = result.data.name
+                        }
+                        if(result.data.url) {
+                            this.board_url = result.data.url
+                        }
+                        if(result.data.bot_url) {
+                            this.board_bot_url = result.data.bot_url
+                        }
+                        if(result.data.description) {
+                            this.board_description = result.data.description
+                        }
+                        if(result.data.project_owner) {
+                            this.board_project_owner = result.data.project_owner
+                        }
+                        if(result.data.subdept) {
+                            this.board_sub_dept = result.data.subdept
+                        }
+                        if(result.data.platform) {
+                            console.log(result.data.platform)
+                            this.board_platform_list = result.data.platform
+                        }
+                    }
+                })
+                this.wsInstance.on('add_list', (data) => {
+                    this.board.lists.push(JSON.parse(data))
+                })
+            },
             fileChange() {
                 const files = this.$refs.background_file_ref.files
                 var file_reader = this.$convertFileTob64(files[0])
@@ -348,6 +388,15 @@
                     }
                 }
                 let formData = new FormData()
+                let ws_emit_data = {
+                    name: this.board_title,
+                    platform: {
+                        "Aplikasi Mobile": false,
+                        "Bot Telegram": false,
+                        "Web": false
+                    }
+
+                }
                 formData.append('id', this.board._id)
                 formData.append('name', this.board_title)
 
@@ -357,25 +406,31 @@
                             if(this.board_platform_list[key] == true) {
                                 // dataSend['url'] = this.board_url
                                 formData.append('url', this.board_url)
+                                ws_emit_data['url'] = this.board_url
                             }
                             else {
                                 // dataSend['url'] = ''
                                 formData.append('url', '')
+                                ws_emit_data['url'] = ''
                             }
                         }
                         if(key == 'Bot Telegram') {
                             if(this.board_platform_list[key] == true) {
                                 // dataSend['bot_url'] = this.board_bot_url
                                 formData.append('bot_url', this.board_bot_url)
+                                ws_emit_data['bot_url'] = this.board_bot_url
                             }
                             else {
                                 // dataSend['bot_url'] = ''
                                 formData.append('bot_url', '')
+                                ws_emit_data['bot_url'] = ''
                             }
                         }
+
                         if(this.board_platform_list[key] == true) {
                             // dataSend['platform'].push(key)
                             formData.append('platform[]', key)
+                            ws_emit_data['platform'][key] = this.board_platform_list[key]
                         } 
                     }
                 }
@@ -383,10 +438,16 @@
                     formData.append('platform[]', null)
                     formData.append('url', '')
                     formData.append('bot_url', '')
+                    ws_emit_data['platform'] = []
+                    ws_emit_data['url'] = ''
+                    ws_emit_data['bot_url'] = ''
                 }
                 formData.append('project_owner', this.board_project_owner)
                 formData.append('description', this.board_description)
                 formData.append('subdept', this.board_sub_dept)
+                ws_emit_data['project_owner'] = this.board_project_owner
+                ws_emit_data['description'] = this.board_description
+                ws_emit_data['subdept'] = this.board_sub_dept
                 if(this.$refs.background_file_ref.files.length > 0) {
                     formData.append('picture', this.$refs.background_file_ref.files[0])
                 }
@@ -412,6 +473,10 @@
                             icon: 'success',
                             title: 'Success'
                         })
+                        this.wsInstance.emit('edit_board', JSON.stringify({
+                            board_id: this.board._id,
+                            data: ws_emit_data
+                        }))
                         let boards = JSON.stringify(this.$store.state.sidebar.sidebar_data.boards)
                         boards = JSON.parse(boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
@@ -708,6 +773,7 @@
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        this.board_title = this.board.name
                         // Do Something
                         Swal.fire({
                             text: 'Board has been rename',
@@ -719,6 +785,12 @@
                             icon: 'success',
                             title: 'Success'
                         })
+                        this.wsInstance.emit('edit_board', JSON.stringify({
+                            board_id: this.board._id,
+                            data: {
+                                name: this.board.name 
+                            }
+                        }))
                     }
                 })
                 .catch((error) => {
@@ -787,6 +859,11 @@
                             "name": this.add_list_value,
                             "cards": []
                         })
+                        this.wsInstance.emit('add_list', JSON.stringify({
+                            "_id": data._id,
+                            "name": this.add_list_value,
+                            "cards": []
+                        }))
                         Swal.fire({
                             text: 'List has been created',
                             toast: true,

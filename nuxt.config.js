@@ -9,7 +9,8 @@ export default {
   },
   env: {
     BACKEND_URL: process.env.BACKEND_URL,
-    SALT_KEY: process.env.SALT_KEY
+    SALT_KEY: process.env.SALT_KEY,
+    WEBSOCKET_URL: process.env.WEBSOCKET_URL
   },
   head: {
     title: 'Project Management',
@@ -40,7 +41,8 @@ export default {
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     '~/plugins/axios',
-    '~/plugins/global'
+    '~/plugins/global',
+    '~/plugins/socket_io',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -70,7 +72,7 @@ export default {
     babel: {
       compact: true
     }
-  },
+  }
   // server: {
   //   host: '0'
   // }

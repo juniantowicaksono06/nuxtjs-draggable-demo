@@ -55,19 +55,50 @@
                 type: Object
             }
         },
-        // beforeDestroy() {
-        //     document.removeEventListener('keyup', this.onEscape)
-        // },
         mounted() {
             document.addEventListener('keyup', this.onEscape)
-                // if(e.key == 'Escape') {
-                //     this.$refs.card_name_ref.style.display = 'block'
-                //     this.$refs.card_name_edit.style.display = 'none'
-                //     this.onEscape()
-                // }
-            
+            this.webSocketEvent()
+        },
+        computed: {
+            wsInstance() {
+                return this.$getWsInstance()
+            }
         },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('archive_item', (response) => {
+                    let data = JSON.parse(response)
+                    if(this.kanban_card) {
+                        if(this.kanban_card._id == data.list_id) {
+                            this.kanban_card.cards.some((value, index) => {
+                                if(value._id == data.data['card_id']) {
+                                    this.kanban_card.cards.splice(index, 1)
+                                    return
+                                }
+                            })
+                        }
+                    }
+                })
+                this.wsInstance.on('add_item', (response) => {
+                    let data = JSON.parse(response)
+                    if(this.kanban_card) {
+                        if(this.kanban_card._id == data.list_id) {
+                            this.kanban_card.cards.push(data['data'])
+                        }
+                    }
+                })
+                this.wsInstance.on('edit_item', (response) => {
+                    let data = JSON.parse(response)
+                    if(this.kanban_card) {
+                        if(this.kanban_card._id == data.list_id) {
+                            this.kanban_card = {
+                                ...this.kanban_card,
+                                ...data.data
+                            }
+                        }
+                    }
+                })
+            },
             archiveItem(index, id) {
                 let config = {
                     headers: {
@@ -92,6 +123,12 @@
                             icon: 'success',
                             title: 'Success'
                         })
+                        this.wsInstance.emit('archive_item', JSON.stringify({
+                            list_id: this.kanban_card._id,
+                            data: {
+                                card_id: id 
+                            }
+                        }))
                     }
                 }) 
                 .catch((error) => {
@@ -164,6 +201,13 @@
                             icon: 'success',
                             title: 'Success'
                         })
+                        this.wsInstance.emit('edit_item', JSON.stringify({
+                            list_id: this.kanban_card._id,
+                            data: {
+                                name: this.kanban_card.name
+                            }
+                        }))
+                        
                     }
                 })
                 .catch((error) => {
@@ -227,6 +271,21 @@
                             "checklists": [],
                             "comments": []
                         })
+                        this.wsInstance.emit('add_item', JSON.stringify({
+                            list_id: this.kanban_card._id,
+                            data: {
+                                "deadline": {
+                                    "date": null,
+                                    "done": false
+                                },
+                                "_id": data._id,
+                                "name": task_name,
+                                "description": "",
+                                "members": [],
+                                "checklists": [],
+                                "comments": []
+                            }
+                        }))
                         this.disableAddItem()
                     }
                 }) 

@@ -31,6 +31,7 @@
     const CryptoJS = require("crypto-js");
     import WorkspaceSidebar from "../components/workspace/WorkspaceSidebar.vue";
     import UserMenu from "../components/global/UserMenu.vue";
+    // import { io } from 'socket.io-client'
     export default {
         middleware: ['auth'],
         components: {
@@ -39,6 +40,7 @@
         },
         mounted() {
             this.loadDataWorkspaceAndMember()
+            this.$createWsInstance()
         },
         methods: {
             loadDataWorkspaceAndMember(init = true) {
