@@ -431,6 +431,7 @@
                                     boards: boards
                                 }
                                 this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                                document.title = `${this.board.name} Board`
                                 return true
                             }
                         })
