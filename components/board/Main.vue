@@ -89,9 +89,9 @@
                 <div class="row pl-5 pr-5" id="kanban_section" style="width: 100%;">
                     <div id="kanban_container" ref="kanban_container_ref">
                         <draggable v-model="board.lists" tag="div" class="pb-5 d-flex" animation=250 @end="endDrag">
-                            <div v-for="(k, index) in board.lists" :key="k._id" v-on:mousedown="dragCard(k._id, index)">
+                            <div v-for="(list, index) in board.lists" :key="list._id" v-on:mousedown="dragCard(list._id, index)">
                                 <Card :data="{
-                                    kanban: k,
+                                    kanban: list,
                                     index: index,
                                     board_id: board._id,
                                     workspace_id: board.workspace_id._id
@@ -317,6 +317,69 @@
         },
         methods: {
             webSocketEvent() {
+                this.wsInstance.on('slide_item', (response) => {
+                    let result = JSON.parse(response)
+                    let data = result.data
+                    if(data.item.board_id != this.board_id) return
+                    let card_data = null
+                    this.board.lists.some((list, list_index) => {
+                        if(list._id == data.item.origin_list_id) {
+                            list.cards.some((card, card_index) => {
+                                if(card._id == data.item.id) {
+                                    card_data = card   
+                                    this.board.lists[list_index].cards.splice(card_index, 1)
+                                    return
+                                }
+                            })
+                            return
+                        }
+                    })
+                    this.board.lists.some((list, index) => {
+                        if(list._id == data.item.dest_list_id) {
+                            list.cards.push(card_data)      
+                            return
+                        }
+                    })
+                })
+                this.wsInstance.on('restore_item', (response) => {
+                    let result = JSON.parse(response)
+                    let data = result.data
+                    if(result.board_id != this.board_id) return
+                    this.board.lists.some((list, index) => {
+                        if(list._id == result.list_id) {
+                            this.board.lists[index].cards.push(data)
+                            return true
+                        }
+                    })
+                })
+                this.wsInstance.on('slide_list', (response) => {
+                    let result = JSON.parse(response)
+                    let data = result.data
+                    if(data.lists.board_id != this.board_id) return
+                    this.board.lists.some((list, index) => {
+                        if(list._id == data.lists['list_id']) {
+                            this.board.lists.splice(data.lists['index'], 0, this.board.lists.splice(index, 1)[0])
+                            return true
+                        }
+                    })
+                    console.log(this.board.lists)
+                })
+                this.wsInstance.on('archive_item', (response) => {
+                    let data = JSON.parse(response)
+                    this.board.lists.some((list, index) => {
+                        if(list._id == data.list_id) {
+                            if(list.cards.length > 0) {
+                                list.cards.some((card, index) => {
+                                    if(card._id == data.data['card_id']) {
+                                        list.cards.splice(index, 1)
+                                        return
+                                    }
+                                })
+                            }
+                            return
+                        }
+                    })
+                })
                 this.wsInstance.on('edit_board', (response) => {
                     let result = JSON.parse(response)
                     if(this.board._id == result['board_id']) {
@@ -326,6 +389,7 @@
                         }
                         if(result.data.name) {
                             this.board_title = result.data.name
+                            document.title = `${this.board_title} Board`
                         }
                         if(result.data.url) {
                             this.board_url = result.data.url
@@ -343,7 +407,6 @@
                             this.board_sub_dept = result.data.subdept
                         }
                         if(result.data.platform) {
-                            console.log(result.data.platform)
                             this.board_platform_list = result.data.platform
                         }
                     }
@@ -473,10 +536,10 @@
                             icon: 'success',
                             title: 'Success'
                         })
-                        this.wsInstance.emit('edit_board', JSON.stringify({
+                        this.$wsEmit({
                             board_id: this.board._id,
                             data: ws_emit_data
-                        }))
+                        }, 'edit_board')
                         let boards = JSON.stringify(this.$store.state.sidebar.sidebar_data.boards)
                         boards = JSON.parse(boards)
                         let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
@@ -530,13 +593,22 @@
                             if(value._id == item.list_id) {
                                 item._id = data._id
                                 this.board.lists[index].cards.push(item)
+                                this.$wsEmit({
+                                    board_id: this.board_id,
+                                    list_id: this.board.lists[index]._id,
+                                    data: {
+                                        ...item
+                                    }
+                                }, 'restore_item')
                                 return true
                             }
                         })
                     }
                     this.closeArchiveModal()
                 })
-                .catch(error => {})
+                .catch(error => {
+                    console.log(error)
+                })
             },
             openEditBoardModal() {
                 this.bg_picture = ''
@@ -569,6 +641,11 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         // Do Something
+                        this.$wsEmit({
+                            data: {
+                                lists: this.drag_data
+                            }
+                        }, 'slide_list')
                         this.drag_data = {}
                     }
                 }) 
@@ -576,6 +653,7 @@
             },
             dragCard(card_id, index){
                 this.drag_data['board_id'] = this.board_id
+                console.log(this.board_id)
                 this.drag_data['list_id'] = card_id
             },
             saveMember() {
@@ -785,12 +863,12 @@
                             icon: 'success',
                             title: 'Success'
                         })
-                        this.wsInstance.emit('edit_board', JSON.stringify({
+                        this.$wsEmit({
                             board_id: this.board._id,
                             data: {
                                 name: this.board.name 
                             }
-                        }))
+                        }, 'edit_board')
                     }
                 })
                 .catch((error) => {
@@ -859,11 +937,11 @@
                             "name": this.add_list_value,
                             "cards": []
                         })
-                        this.wsInstance.emit('add_list', JSON.stringify({
+                        this.$wsEmit({
                             "_id": data._id,
                             "name": this.add_list_value,
                             "cards": []
-                        }))
+                        }, 'add_list')
                         Swal.fire({
                             text: 'List has been created',
                             toast: true,
@@ -890,6 +968,7 @@
         },
         data() {
             return {
+                tes: 1,
                 bg_picture: '',
                 show_popup: false,
                 popup_trigger: null,

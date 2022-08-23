@@ -131,7 +131,7 @@
                                 <button class="btn btn-default" v-on:click="hideEditButton('description')"><i class="fa fa-times"></i></button>
                             </div>
                             <!-- CHECKLISTS -->
-                            <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist.checklist_id" v-if="item.checklists.length > 0">
+                            <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist._id" v-if="item.checklists.length > 0">
                                 <div class="d-flex mb-2">
                                     <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
                                     <span class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-else>{{ item.name }}</span>
@@ -377,11 +377,15 @@
             })
             this.initOption()
             document.addEventListener('click', this.onClickOutside)
+            this.webSocketEvent()
         },
         beforeDestroy() {
             document.removeEventListener('click', this.onClickOutside)
         },
         computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
             memberPicture() {
                 return this.$store.state.members.board_members_picture
             },
@@ -439,8 +443,21 @@
             }
         },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('edit_item', (response) => {
+                    let result = JSON.parse(response)
+                    if(result.item_id != this.item._id) return
+                    Object.keys(result.data).forEach((value) => {
+                        this.item[value] = result.data[value]
+                    })
+                })
+                this.wsInstance.on('add_comment', (response) => {
+                    let result = JSON.parse(response)
+                    if(result.item_id != this.item._id) return
+                    this.item['comments'] = result.data['comments']
+                })
+            },
             initModal() {
-                // this.loadLog()
                 if(this.data.archive === true) return
                 this.$axios.$get(`/api/card/${this.item._id}`)
                 .then((response) => {
@@ -534,6 +551,12 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
+                this.$wsEmit({
+                    item_id: this.item._id,
+                    data: {
+                        comments: this.item.comments
+                    }
+                }, 'add_comment')
                 setTimeout(() => {
                     this.$refs.comment_list_ref.scrollTo(0, this.$refs.comment_list_ref.scrollHeight)
                 }, 100)
@@ -607,6 +630,12 @@
                     if(response.status == 'OK') {
                         // Do Something
                         this.hideEditButton('description')
+                        this.$wsEmit({
+                            item_id: this.item._id,
+                            data: {
+                                description: description
+                            }
+                        }, 'edit_item')
                     }
                 })
                 .catch((error) => {
@@ -709,6 +738,13 @@
                             icon: 'success',
                             title: 'Success'
                         })
+                        let ws_data = {
+                            item_id: this.item._id,
+                            data: {
+                                name: this.item.name
+                            }
+                        }
+                        this.$wsEmit(ws_data, 'edit_item')
                     }
                 })
                 .catch((error) => {
@@ -957,14 +993,19 @@
                                 'name': this.add_checklist_child.item_name,
                                 'done': false
                             })
+                            this.$nextTick(() => {
+                                this.$wsEmit({
+                                    item_id: this.item._id,
+                                    data: {
+                                        checklists: this.item.checklists
+                                    },
+                                }, 'edit_item')
+                            })
                             this.add_checklist_child.item_name = ''
                             this.add_checklist_child.enable = false
-                            return
                         }
-                        alert('Telah terjadi kesalahan')
                     }) 
                     .catch((error) => {
-                        alert('Error: Telah terjadi kesalahan')
                     })
                 }
             },

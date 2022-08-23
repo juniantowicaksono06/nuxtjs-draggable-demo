@@ -147,9 +147,15 @@
         beforeDestroy() {
             document.removeEventListener('click', this.onClickOutside)
         },
+        computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
+        },
         methods: {
             actionLogout() {
                 this.$cookies.remove('credentials');
+                this.$destroyWsInstance();
                 this.$router.push('/login/');
             },
             selectImage() {

@@ -515,8 +515,12 @@
             new ResizeObserver(() => {
                 this.calculateSidebarContainerHeight()
             }).observe(this.$refs.sidebar_logo_ref)
+            this.webSocketEvent()
         },
         computed: {
+            wsInstance() {
+                return this.$getWsInstance()
+            },
             getSubdept() {
                 if(this.$store.state.auth.identity.workspace_id) {
                     return this.$store.state.auth.identity.workspace_id.subdept
@@ -535,6 +539,20 @@
             }
         },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('add_board', (data) => {
+                    const result = JSON.parse(data)
+                    let boards = this.$store.state.sidebar.sidebar_data.boards ? JSON.parse(JSON.stringify(this.$store.state.sidebar.sidebar_data.boards)) : []
+                    let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                    if(boards.length == 0) return
+                    boards.push(result.data)
+                    let sidebar_data = {
+                        workspaces: workspaces,
+                        boards: boards
+                    }
+                    this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                })
+            },
             fileChange() {
                 const files = this.$refs.background_file_ref.files
                 var file_reader = this.$convertFileTob64(files[0])
@@ -674,6 +692,19 @@
                         }
                         this.board_platform = ''
                         this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                        this.$wsEmit({
+                            data: {
+                                _id: data._id,
+                                name: this.add_board.board_name,
+                                description: this.add_board.board_description,
+                                // url: this.add_board.board_url,
+                                url: this.add_board.board_url,
+                                project_owner: this.add_board.board_project_owner,
+                                workspace_id: this.add_board.workspace_id,
+                                lists: [],
+                                members: [],
+                            }
+                        }, 'add_board')
                         this.$bvModal.hide('create_new_board')
                     }
                 })

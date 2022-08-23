@@ -257,40 +257,6 @@
             },
             saveBoard() {
                 if(this.board_title.trim() == '') return
-                // let config = {
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     }
-                // }
-                // let dataSend = {
-                //     name: this.board_title,
-                //     workspace_id: this.$store.state.auth.identity.workspace_id._id,
-                //     platform: []
-                // }
-                // for(const key in this.board_platform_list) {
-                //     if(key == 'Web') {
-                //         if(this.board_platform_list[key] == true) {
-                //             dataSend['url'] = this.board_url
-                //         }
-                //         else {
-                //             dataSend['url'] = ''
-                //         }
-                //     }
-                //     if(key == 'Bot Telegram') {
-                //         if(this.board_platform_list[key] == true) {
-                //             dataSend['bot_url'] = this.board_bot_url
-                //         }
-                //         else {
-                //             dataSend['bot_url'] = ''
-                //         }
-                //     }
-                //     if(this.board_platform_list[key] == true) {
-                //         dataSend['platform'].push(key)
-                //     } 
-                // }
-                // dataSend['project_owner'] = this.board_project_owner
-                // dataSend['description'] = this.board_description
-                // dataSend['subdept'] = this.board_sub_dept
 
                 let config = {
                     headers: {
@@ -325,9 +291,6 @@
                         } 
                     }
                 }
-                // dataSend['project_owner'] = this.board_project_owner
-                // dataSend['description'] = this.board_description
-                // dataSend['subdept'] = this.board_sub_dept
                 formData.append('project_owner', this.board_project_owner)
                 formData.append('description', this.board_description)
                 formData.append('subdept', this.board_sub_dept)
@@ -365,6 +328,18 @@
                             workspaces: workspaces,
                             boards: boards
                         }
+                        this.$wsEmit({
+                            data: {
+                                _id: data._id,
+                                name: this.board_title,
+                                description: this.board_description,
+                                url: this.board_url,
+                                project_owner: this.board_project_owner,
+                                workspace_id: this.$store.state.auth.identity.workspace_id._id,
+                                lists: [],
+                                members: [],
+                            }
+                        }, 'add_board')
                         this.$store.commit('sidebar/setSidebarData', sidebar_data)
                         this.$router.push(`/board/?board_id=${data._id}`)
                     }
