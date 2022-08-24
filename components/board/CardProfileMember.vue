@@ -114,6 +114,12 @@
                             // Do Something
                             this.data.item.members.splice(index, 1)
                             this.close()
+                            this.$wsEmit({
+                                item_id: this.data.item._id,
+                                data: {
+                                    members: this.data.item.members
+                                }
+                            }, 'edit_item')
                         }
                     })
                     .catch((error) => {

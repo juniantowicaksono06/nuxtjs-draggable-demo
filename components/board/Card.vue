@@ -73,14 +73,14 @@
                         }
                     }
                 })
-                this.wsInstance.on('edit_item', (response) => {
-                    let data = JSON.parse(response)
+                this.wsInstance.on('edit_list', (response) => {
+                    let result = JSON.parse(response)
                     if(this.data.kanban) {
-                        if(this.data.kanban._id == data.list_id) {
-                            this.data.kanban = {
-                                ...this.data.kanban,
-                                ...data.data
-                            }
+                        if(this.data.kanban._id == result.list_id) {
+                            Object.keys(result.data).some((res) => {
+                                this.data.kanban[res] = result.data[res]
+                            })
+                            return
                         }
                     }
                 })
@@ -197,7 +197,7 @@
                             data: {
                                 name: this.data.kanban.name
                             }
-                        }, 'edit_item')
+                        }, 'edit_list')
                     }
                 })
                 .catch((error) => {

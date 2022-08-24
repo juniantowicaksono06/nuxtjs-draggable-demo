@@ -119,6 +119,7 @@
         },
         mounted() {
             this.searchMom()
+            this.webSocketEvent()
         },
         computed: {
             mom_data: function() {
@@ -178,9 +179,20 @@
                     })
                 })
                 return mom_data
-            }
+            },
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
         },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('mom_update', (response) => {
+                    if(response == 'update') {
+                        console.log(response)
+                        this.searchMom()
+                    }
+                })
+            },
             convertDate(date) {
                 let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone; 
                 let date_1 = new Date(date).toLocaleString('en-US', {

@@ -133,7 +133,7 @@
                             <!-- CHECKLISTS -->
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist._id" v-if="item.checklists.length > 0">
                                 <div class="d-flex mb-2">
-                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="changeChecklistName(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
+                                    <input class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-model="checklist.name" v-on:blur="renameChecklist(checklist, checklist._id)" v-on:focus="storeOldValue(checklist.name)" v-on:keyup.enter="$event.target.blur()" v-if="!data.archive" />
                                     <span class="ml-0 pl-0 pr-0 mr-0 input-transparent" v-else>{{ item.name }}</span>
                                     <span class="btn btn-transparent" v-on:click="showCardPopUp($event, 'confirmation', {
                                         btn_confirm_block: true,
@@ -448,7 +448,34 @@
                     let result = JSON.parse(response)
                     if(result.item_id != this.item._id) return
                     Object.keys(result.data).forEach((value) => {
-                        this.item[value] = result.data[value]
+                        if(result.checklist_id && !result.checklist_child_id) {
+                            this.item.checklists.some((checklist, checklist_index) => {
+                                if(checklist._id == result.checklist_id) {
+                                    Object.keys(result.data).forEach((res) => {
+                                        checklist[res] = result.data[res]
+                                    })
+                                    return
+                                }
+                            })
+                        }
+                        else if(result.checklist_child_id) {
+                            this.item.checklists.some((checklist, checklist_index) => {
+                                if(checklist._id == result.checklist_id) {
+                                    checklist.childs.some((child, child_index) => {
+                                        if(child._id == result.checklist_child_id) {
+                                            Object.keys(result.data).some((res) => {
+                                                child[res] = result.data[res]
+                                            })
+                                            return
+                                        }
+                                    })
+                                    return
+                                }
+                            })
+                        }
+                        else {
+                            this.item[value] = result.data[value]
+                        }
                     })
                 })
                 this.wsInstance.on('add_comment', (response) => {
@@ -557,6 +584,7 @@
                         comments: this.item.comments
                     }
                 }, 'add_comment')
+                this.$wsEmit({}, 'mom_update')
                 setTimeout(() => {
                     this.$refs.comment_list_ref.scrollTo(0, this.$refs.comment_list_ref.scrollHeight)
                 }, 100)
@@ -642,7 +670,7 @@
                     alert("Error: Telah terjadi kesalahan")
                 })
             },
-            changeChecklistName(checklist, checklist_id) {
+            renameChecklist(checklist, checklist_id) {
                 let config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -672,6 +700,13 @@
                             title: 'Success'
                         })
                     }
+                    this.$wsEmit({
+                        item_id: this.item._id,
+                        checklist_id: checklist_id,
+                        data: {
+                            name: checklist.name
+                        },
+                    }, 'edit_item')
                 })
                 .catch((error) => {
                     Swal.fire({
@@ -705,6 +740,15 @@
                         // Do Something
                         this.edit_date = true
                         this.item.deadline.done = done
+                        this.$wsEmit({
+                            item_id: this.item._id,
+                            data: {
+                                deadline: {
+                                    date: this.item.deadline.date,
+                                    done: done
+                                }
+                            }
+                        }, 'edit_item')
                     }
                 })
                 .catch((error) => {
@@ -798,6 +842,12 @@
                             icon: 'success',
                             title: 'Success'
                         })
+                        this.$wsEmit({
+                            item_id: this.item._id,
+                            data: {
+                                checklists: checklist
+                            },
+                        }, 'edit_item')
                     }
                 }) 
                 .catch((error) => {
@@ -839,6 +889,12 @@
                             icon: 'success',
                             title: 'Success'
                         })
+                        this.$wsEmit({
+                            item_id: this.item._id,
+                            data: {
+                                checklists: this.item.checklists
+                            },
+                        }, 'edit_item')
                     }
                 }) 
                 .catch((error) => {
@@ -1043,9 +1099,18 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         checklist_child.done = done
+                        this.$wsEmit({
+                            item_id: this.item._id,
+                            checklist_id: parent_id,
+                            checklist_child_id: checklist_child._id,
+                            data: {
+                                ...checklist_child
+                            },
+                        }, 'edit_item')
                     }
                 }) 
                 .catch((error) => {
+                    console.log(error)
                     alert('Error: Telah terjadi kesalahan')
                 })
             }
