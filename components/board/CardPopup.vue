@@ -84,6 +84,7 @@
     </div>
 </template>
 <script>
+    import moment from 'moment'
     export default {
         data() {
             return {
@@ -157,15 +158,42 @@
                 }, config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        let task_total = 0
+                        let task_overdue = 0
+                        let deadline = moment(this.selected_date).format('YYYY-MM-D')
+                        deadline += " 23:59:59"
+                        let overdue = moment().isAfter(deadline)
+                        if(!this.data.data_item.deadline.date) {
+                            if(overdue && !this.data.data_item.deadline.done) {
+                                task_overdue++
+                            }
+                            task_total++
+                        }
+                        else if(this.data.data_item.deadline.date) {
+                            let previous_date = moment(this.data.data_item.deadline.date).format('YYYY-MM-D')
+                            let previous_date_overdue = moment().isAfter(previous_date)
+                            let deadline = moment(this.selected_date).format('YYYY-MM-D')
+                            deadline += '23:59:59'
+                            let overdue = moment().isAfter(deadline)
+                        }
                         // Do Something
                         this.data.data_item.deadline.date = this.selected_date
                         this.$nextTick(() => {
                             this.$wsEmit({
-                               item_id: this.data.data_item._id,
-                               data: {
-                                deadline: this.data.data_item.deadline
-                               } 
+                                item_id: this.data.data_item._id,
+                                data: {
+                                    deadline: this.data.data_item.deadline
+                                } 
                             }, 'edit_item')
+                            this.$wsEmit({
+                                board_id: this.$route.query.board_id,
+                                data: {
+                                    lists: {
+                                        task_overdue: task_overdue,
+                                        task_total: task_total
+                                    }
+                                } 
+                            }, 'workspace')
                         })
                         this.closeCardPopUp()
                     }

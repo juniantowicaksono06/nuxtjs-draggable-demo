@@ -215,6 +215,7 @@
     export default {
         mounted() {
             // this.loadAllDataBoard()
+            this.webSocketEvent()
         },
         data() {
             return {
@@ -235,7 +236,40 @@
                 },
             }
         },
+        computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
+        },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('workspace', (response) => {
+                    let result = JSON.parse(response)
+                    console.log(result)
+                    let boards = JSON.parse(JSON.stringify(this.$store.state.sidebar.sidebar_data.boards))
+                    let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                    boards.some((board, board_index) => {
+                        if(board._id == result.board_id) {
+                            Object.keys(result.data).some((key, data_index) => {
+                                if(key == 'lists') {
+                                    Object.keys(result.data[key]).some((list_key) => {
+                                        board.lists[list_key] += result.data[key][list_key]
+                                    })
+                                    this.$nextTick(() => {
+                                        let sidebar_data = {
+                                            boards: boards,
+                                            workspaces: workspaces
+                                        }
+                                        this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                                    })
+                                    return
+                                }
+                            })
+                            return
+                        }
+                    })
+                })
+            },
             fileChange() {
                 const files = this.$refs.background_file_ref.files
                 var file_reader = this.$convertFileTob64(files[0])

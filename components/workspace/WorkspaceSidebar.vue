@@ -296,7 +296,7 @@
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-if="'workspace_id' in $store.state.auth.identity">
-                    <div v-for="(work, index) in $store.state.sidebar.sidebar_data.workspaces" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id || getMemberWorkspaceInBoard.includes(work._id)">
+                    <div v-for="(work, index) in $store.state.sidebar.sidebar_data.workspaces" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id || getMemberWorkspaceInBoard.includes(work._id)" :key="work._id">
                         <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
                             <div class="workspace-icon">
                                 <span class="workspace-icon-square">
@@ -309,7 +309,7 @@
                             </div>
                         </div>
                         <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
-                            <div v-for="(board, board_index) in $store.state.sidebar.sidebar_data.boards" :key="$store.state.sidebar.sidebar_data.boards._id" v-if="work._id == board.workspace_id">
+                            <div v-for="(board, board_index) in $store.state.sidebar.sidebar_data.boards" :key="board._id" v-if="work._id == board.workspace_id">
                                 <div class="d-flex justify-content-between">
                                     <div class="board-icon">
                                         <span class="board-icon-circle kanban-text">

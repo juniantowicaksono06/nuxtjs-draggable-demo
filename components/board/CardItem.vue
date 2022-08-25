@@ -749,6 +749,30 @@
                                 }
                             }
                         }, 'edit_item')
+                        let task_overdue = 0
+                        let task_done = 0
+                        let deadline = moment(this.item.deadline.date).format('YYYY-MM-D')
+                        deadline += " 23:59:59"
+                        let overdue = moment().isAfter(deadline)
+                        if(overdue && !this.item.deadline.done) {
+                            task_overdue++
+                            task_done--
+                        }
+                        else if(this.item.deadline.done) {
+                            task_done++
+                        }
+                        else if(!this.item.deadline.done) {
+                            task_done--
+                        }
+                        this.$wsEmit({
+                            board_id: this.$route.query.board_id,
+                            data: {
+                                lists: {
+                                    task_overdue: task_overdue,
+                                    task_done: task_done
+                                }
+                            }
+                        }, 'workspace')
                     }
                 })
                 .catch((error) => {

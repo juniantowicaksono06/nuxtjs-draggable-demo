@@ -1,25 +1,25 @@
 <template>
     <div class="kanban-card card" ref="card_ref">
         <div class="card-header kanban-header">
-            <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ data.kanban.name }}</p> 
-            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="data.kanban.name" v-on:blur="renameCard($event)" v-on:focus="storeOldValue" v-on:keyup.enter="$event.target.blur()" />
+            <p class="kanban-header-input mb-0" style="display: block;" ref="card_name_ref" v-on:click="enableEditKanbanName($event)">{{ data.list.name }}</p> 
+            <input class="kanban-header-input" ref="card_name_edit" style="display:none;" v-model="data.list.name" v-on:blur="renameCard($event)" v-on:focus="storeOldValue" v-on:keyup.enter="$event.target.blur()" />
         </div>
         <div class="card-body kanban-body py-1 px-2" ref="card_body_ref">
-            <draggable group="task" v-model="data.kanban.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="data.kanban._id">
-                <div v-for="(item, index_item) in data.kanban.cards" :key="item._id" draggable=".kanban-item" v-on:mousedown="dragCard(item, data.kanban._id)">
+            <draggable group="task" v-model="data.list.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="data.list._id">
+                <div v-for="(item, index_item) in data.list.cards" :key="item._id" draggable=".kanban-item" v-on:mousedown="dragCard(item, data.list._id)">
                     <CardItem :data="{
                         item: item,
-                        card_name: data.kanban.name,
+                        card_name: data.list.name,
                         index_item: index_item
                     }" @archiveItem="archiveItem" />
                 </div>
             </draggable>
         </div>
         <div class="kanban-footer">
-            <div class="add-item kanban-item kanban-text w-100 px-3 py-3" v-on:click="enableAddItem($event, data.kanban._id)" :class="((!add_item_enabled) || (add_item_enabled && data.kanban._id != add_item_id) ? 'd-block' : 'd-none')">
+            <div class="add-item kanban-item kanban-text w-100 px-3 py-3" v-on:click="enableAddItem($event, data.list._id)" :class="((!add_item_enabled) || (add_item_enabled && data.list._id != add_item_id) ? 'd-block' : 'd-none')">
                 <strong>+</strong> Add Item
             </div>
-            <div class="add-item kanban-item w-100 px-2 py-2 kanban-text" :class="((add_item_enabled == true && data.kanban._id == add_item_id) ? 'd-block' : 'd-none')">
+            <div class="add-item kanban-item w-100 px-2 py-2 kanban-text" :class="((add_item_enabled == true && data.list._id == add_item_id) ? 'd-block' : 'd-none')">
                 <input ref="add_item_ref" type="text" v-model="add_item_value" class="form-control ml-0 mr-0 kanban-text add-item" style="resize: none;" placeholder="Enter a title for this card"  v-on:keyup.enter="addItem">
                 <div class="d-flex mt-2">
                     <button class="btn btn-primary kanban-text" v-on:click="addItem">Add Item</button>
@@ -67,18 +67,18 @@
             webSocketEvent() {
                 this.wsInstance.on('add_item', (response) => {
                     let data = JSON.parse(response)
-                    if(this.data.kanban) {
-                        if(this.data.kanban._id == data.list_id) {
-                            this.data.kanban.cards.push(data['data'])
+                    if(this.data.list) {
+                        if(this.data.list._id == data.list_id) {
+                            this.data.list.cards.push(data['data'])
                         }
                     }
                 })
                 this.wsInstance.on('edit_list', (response) => {
                     let result = JSON.parse(response)
-                    if(this.data.kanban) {
-                        if(this.data.kanban._id == result.list_id) {
+                    if(this.data.list) {
+                        if(this.data.list._id == result.list_id) {
                             Object.keys(result.data).some((res) => {
-                                this.data.kanban[res] = result.data[res]
+                                this.data.list[res] = result.data[res]
                             })
                             return
                         }
@@ -93,7 +93,7 @@
                     data: {
                         id: id,
                         board_id: this.data.board_id,
-                        list_id: this.data.kanban._id
+                        list_id: this.data.list._id
                     }
                 }
                 this.$axios.$delete(`/api/card/`, config)
@@ -110,7 +110,7 @@
                             title: 'Success'
                         })
                         this.$wsEmit({
-                            list_id: this.data.kanban._id,
+                            list_id: this.data.list._id,
                             data: {
                                 card_id: id 
                             }
@@ -119,10 +119,10 @@
                 }) 
                 .catch((error) => {
                 })
-                this.data.kanban.cards.splice(index, 1)
+                this.data.list.cards.splice(index, 1)
             },
             storeOldValue() {
-                this.old_value = this.data.kanban.name
+                this.old_value = this.data.list.name
             },
             dragCard(item, card_id){
                 this.drag_data['id'] = item._id
@@ -163,8 +163,8 @@
                 this.$refs.card_name_edit.select()
             },
             renameCard(event) {
-                if(this.data.kanban.name.trim() == '' || this.data.kanban.name.trim() == this.old_value.trim()) {
-                    this.data.kanban.name = this.old_value
+                if(this.data.list.name.trim() == '' || this.data.list.name.trim() == this.old_value.trim()) {
+                    this.data.list.name = this.old_value
                     this.old_value = ''
                     return
                 }
@@ -177,8 +177,8 @@
                     }
                 }
                 this.$axios.$put(`/api/list`, new URLSearchParams({
-                    name: this.data.kanban.name,
-                    id: this.data.kanban._id
+                    name: this.data.list.name,
+                    id: this.data.list._id
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
@@ -193,9 +193,9 @@
                             title: 'Success'
                         })
                         this.$wsEmit({
-                            list_id: this.data.kanban._id,
+                            list_id: this.data.list._id,
                             data: {
-                                name: this.data.kanban.name
+                                name: this.data.list.name
                             }
                         }, 'edit_list')
                     }
@@ -234,7 +234,7 @@
                 }
                 this.$axios.$post(`/api/card`, new URLSearchParams({
                     name: task_name,
-                    list_id: this.data.kanban._id
+                    list_id: this.data.list._id
                 }), config)
                 .then((response) => {
                     if(response.status == 'OK') {
@@ -249,7 +249,7 @@
                             title: 'Success'
                         })
                         let {data} = response
-                        this.data.kanban.cards.push({
+                        this.data.list.cards.push({
                             "deadline": {
                                 "date": null,
                                 "done": false
@@ -262,7 +262,7 @@
                             "comments": []
                         })
                         this.$wsEmit({
-                            list_id: this.data.kanban._id,
+                            list_id: this.data.list._id,
                             data: {
                                 "deadline": {
                                     "date": null,

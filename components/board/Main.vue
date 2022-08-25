@@ -91,7 +91,7 @@
                         <draggable v-model="board.lists" tag="div" class="pb-5 d-flex" animation=250 @end="endDrag">
                             <div v-for="(list, index) in board.lists" :key="list._id" v-on:mousedown="dragCard(list._id, index)">
                                 <Card :data="{
-                                    kanban: list,
+                                    list: list,
                                     index: index,
                                     board_id: board._id,
                                     workspace_id: board.workspace_id._id

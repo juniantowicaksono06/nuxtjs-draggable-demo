@@ -188,7 +188,6 @@
             webSocketEvent() {
                 this.wsInstance.on('mom_update', (response) => {
                     if(response == 'update') {
-                        console.log(response)
                         this.searchMom()
                     }
                 })
