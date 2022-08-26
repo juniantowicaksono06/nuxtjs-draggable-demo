@@ -243,31 +243,59 @@
         },
         methods: {
             webSocketEvent() {
-                this.wsInstance.on('workspace', (response) => {
+                this.wsInstance.on('edit_board', (response) => {
                     let result = JSON.parse(response)
-                    console.log(result)
                     let boards = JSON.parse(JSON.stringify(this.$store.state.sidebar.sidebar_data.boards))
                     let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
                     boards.some((board, board_index) => {
                         if(board._id == result.board_id) {
                             Object.keys(result.data).some((key, data_index) => {
-                                if(key == 'lists') {
-                                    Object.keys(result.data[key]).some((list_key) => {
-                                        board.lists[list_key] += result.data[key][list_key]
-                                    })
-                                    this.$nextTick(() => {
-                                        let sidebar_data = {
-                                            boards: boards,
-                                            workspaces: workspaces
+                                if(key == 'platform') {
+                                    let platform = []
+                                    Object.keys(result.data.platform).some(key => {
+                                        if(result.data.platform[key]) {
+                                            platform.push(key)
                                         }
-                                        this.$store.commit('sidebar/setSidebarData', sidebar_data)
                                     })
-                                    return
+                                    board['platform'] = platform
+                                }
+                                else {
+                                    board[key] = result.data[key]
                                 }
                             })
+                            console.log(board)
                             return
                         }
                     })
+                    this.$store.commit('sidebar/setSidebarData', {
+                        workspaces: workspaces,
+                        boards: boards
+                    })
+                })
+                this.wsInstance.on('workspace', (response) => {
+                    if(response == 'refresh') {
+                        this.$axios.$get(`/api/workspace`)
+                        .then((response_workspace) => {
+                            if(response_workspace.status != 'OK') {
+                                return
+                            }
+                            this.$axios.$get(`/api/board`)
+                            .then((response_board) => {
+                                if(response_board.status != 'OK') {
+                                    return
+                                }
+                                this.$store.commit('sidebar/setSidebarData', {
+                                    workspaces: response_workspace.data,
+                                    boards: response_board.data
+                                })
+
+                                if(init) {
+                                    this.$nextTick()
+                                    this.$forceUpdate()
+                                }
+                            }) 
+                        })
+                    }
                 })
             },
             fileChange() {

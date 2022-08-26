@@ -187,12 +187,7 @@
                             }, 'edit_item')
                             this.$wsEmit({
                                 board_id: this.$route.query.board_id,
-                                data: {
-                                    lists: {
-                                        task_overdue: task_overdue,
-                                        task_total: task_total
-                                    }
-                                } 
+                                data: 'refresh' 
                             }, 'workspace')
                         })
                         this.closeCardPopUp()
@@ -227,6 +222,10 @@
                                 deadline: this.data.data_item.deadline
                             },
                         }, 'edit_item')
+                        this.$wsEmit({
+                            board_id: this.$route.query.board_id,
+                            data: 'refresh' 
+                        }, 'workspace')
                     })
                 })
                 .catch((error) => {

@@ -766,12 +766,7 @@
                         }
                         this.$wsEmit({
                             board_id: this.$route.query.board_id,
-                            data: {
-                                lists: {
-                                    task_overdue: task_overdue,
-                                    task_done: task_done
-                                }
-                            }
+                            data: 'refresh'
                         }, 'workspace')
                     }
                 })
