@@ -30,7 +30,7 @@
                                         {{ generateProfileName(member.name) }}
                                     </div>
                                     <p class="mb-0 mt-1 ml-2 profile-fullname member-fullname">{{ member.name }}</p>
-                                    <p class="mb-0 mt-1" v-for="selected in selected_members" v-if="(member._id == selected._id)"><i class="fa fa-check"></i></p>
+                                    <p class="mb-0 mt-1" v-for="selected in data.data_item.members" v-if="(member._id == selected._id)"><i class="fa fa-check"></i></p>
                                 </div>
                             </div>
                         </div>
@@ -84,6 +84,7 @@
     </div>
 </template>
 <script>
+    import moment from 'moment'
     export default {
         data() {
             return {
@@ -93,11 +94,19 @@
                 deadline: this.data.data_item.deadline,
                 date_context: null,
                 all_members: this.$store.state.members.board_members,
-                selected_members: this.data.data_item.members,
-                checklist: this.data.data_item.checklists,
+            }
+        },
+        watch: {
+            'data.data_item.deadline.date': {
+                handler: function(value) {
+                    this.selected_date = value
+                }
             }
         },
         computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
             btnYesType() {
                 if(this.option.btn_confirm_yes) return `btn btn-${this.option.btn_confirm_yes}`
                 return 'btn btn-success'
@@ -149,8 +158,38 @@
                 }, config)
                 .then((response) => {
                     if(response.status == 'OK') {
+                        let task_total = 0
+                        let task_overdue = 0
+                        let deadline = moment(this.selected_date).format('YYYY-MM-D')
+                        deadline += " 23:59:59"
+                        let overdue = moment().isAfter(deadline)
+                        if(!this.data.data_item.deadline.date) {
+                            if(overdue && !this.data.data_item.deadline.done) {
+                                task_overdue++
+                            }
+                            task_total++
+                        }
+                        else if(this.data.data_item.deadline.date) {
+                            let previous_date = moment(this.data.data_item.deadline.date).format('YYYY-MM-D')
+                            let previous_date_overdue = moment().isAfter(previous_date)
+                            let deadline = moment(this.selected_date).format('YYYY-MM-D')
+                            deadline += '23:59:59'
+                            let overdue = moment().isAfter(deadline)
+                        }
                         // Do Something
                         this.data.data_item.deadline.date = this.selected_date
+                        this.$nextTick(() => {
+                            this.$wsEmit({
+                                item_id: this.data.data_item._id,
+                                data: {
+                                    deadline: this.data.data_item.deadline
+                                } 
+                            }, 'edit_item')
+                            this.$wsEmit({
+                                board_id: this.$route.query.board_id,
+                                data: 'refresh' 
+                            }, 'workspace')
+                        })
                         this.closeCardPopUp()
                     }
                 })
@@ -176,6 +215,18 @@
                         date: null,
                         done: false
                     }
+                    this.$nextTick(() => {
+                        this.$wsEmit({
+                            item_id: this.data.data_item._id,
+                            data: {
+                                deadline: this.data.data_item.deadline
+                            },
+                        }, 'edit_item')
+                        this.$wsEmit({
+                            board_id: this.$route.query.board_id,
+                            data: 'refresh' 
+                        }, 'workspace')
+                    })
                 })
                 .catch((error) => {
                     alert("Error: Telah terjadi kesalahan")
@@ -203,15 +254,21 @@
                 .then((response) => {
                     if(response.status == 'OK') {
                         let {data} = response
-                        this.checklist.push({
+                        this.data.data_item.checklists.push({
                             '_id': data._id,
                             'name': this.checklist_name,
                             'childs': []
                         }) 
+                        this.$nextTick(() => {
+                            this.$wsEmit({
+                                item_id: this.data.data_item._id,
+                                data: {
+                                    checklists: this.data.data_item.checklists
+                                },
+                            }, 'edit_item')
+                        })
                         this.checklist_name = ''
-                        return
                     }
-                    alert('Telah terjadi kesalahan')
                 }) 
                 .catch((error) => {
                     alert('Error: Telah terjadi kesalahan')
@@ -221,12 +278,12 @@
                 let member_exist = false
                 let index = null;
                 let members_id = []
-                for(let a = 0; a < this.selected_members.length; a++) {
-                   if(this.selected_members[a]._id == member._id && index === null) {
+                for(let a = 0; a < this.data.data_item.members.length; a++) {
+                   if(this.data.data_item.members[a]._id == member._id && index === null) {
                        member_exist = true
                        index = a
                    }
-                   members_id.push(this.selected_members[a]._id)
+                   members_id.push(this.data.data_item.members[a]._id)
                 }
                 // ADD MEMBER
                 if(!member_exist) {
@@ -249,11 +306,17 @@
                     if(response.status == 'OK') {
                         // Do Something
                         if(!member_exist) {
-                            this.selected_members.push(member)
+                            this.data.data_item.members.push(member)
                         }
                         else {
-                            this.selected_members.splice(index, 1)
+                            this.data.data_item.members.splice(index, 1)
                         }
+                        this.$wsEmit({
+                            item_id: this.data.data_item._id,
+                            data: {
+                                members: this.data.data_item.members
+                            }
+                        }, 'edit_item')
                     }
                 })
                 .catch((error) => {

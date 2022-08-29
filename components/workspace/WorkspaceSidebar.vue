@@ -296,7 +296,7 @@
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
                 <div v-if="'workspace_id' in $store.state.auth.identity">
-                    <div v-for="(work, index) in $store.state.sidebar.sidebar_data.workspaces" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id || getMemberWorkspaceInBoard.includes(work._id)">
+                    <div v-for="(work, index) in $store.state.sidebar.sidebar_data.workspaces" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id || getMemberWorkspaceInBoard.includes(work._id)" :key="work._id">
                         <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
                             <div class="workspace-icon">
                                 <span class="workspace-icon-square">
@@ -309,7 +309,7 @@
                             </div>
                         </div>
                         <div class='workspace-item workspace-item-open' @click.stop="" ref="workspace_item_ref">
-                            <div v-for="(board, board_index) in $store.state.sidebar.sidebar_data.boards" :key="$store.state.sidebar.sidebar_data.boards._id" v-if="work._id == board.workspace_id">
+                            <div v-for="(board, board_index) in $store.state.sidebar.sidebar_data.boards" :key="board._id" v-if="work._id == board.workspace_id">
                                 <div class="d-flex justify-content-between">
                                     <div class="board-icon">
                                         <span class="board-icon-circle kanban-text">
@@ -515,8 +515,12 @@
             new ResizeObserver(() => {
                 this.calculateSidebarContainerHeight()
             }).observe(this.$refs.sidebar_logo_ref)
+            this.webSocketEvent()
         },
         computed: {
+            wsInstance() {
+                return this.$getWsInstance()
+            },
             getSubdept() {
                 if(this.$store.state.auth.identity.workspace_id) {
                     return this.$store.state.auth.identity.workspace_id.subdept
@@ -535,6 +539,20 @@
             }
         },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('add_board', (data) => {
+                    const result = JSON.parse(data)
+                    let boards = this.$store.state.sidebar.sidebar_data.boards ? JSON.parse(JSON.stringify(this.$store.state.sidebar.sidebar_data.boards)) : []
+                    let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                    if(boards.length == 0) return
+                    boards.push(result.data)
+                    let sidebar_data = {
+                        workspaces: workspaces,
+                        boards: boards
+                    }
+                    this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                })
+            },
             fileChange() {
                 const files = this.$refs.background_file_ref.files
                 var file_reader = this.$convertFileTob64(files[0])
@@ -674,6 +692,19 @@
                         }
                         this.board_platform = ''
                         this.$store.commit('sidebar/setSidebarData', sidebar_data)
+                        this.$wsEmit({
+                            data: {
+                                _id: data._id,
+                                name: this.add_board.board_name,
+                                description: this.add_board.board_description,
+                                // url: this.add_board.board_url,
+                                url: this.add_board.board_url,
+                                project_owner: this.add_board.board_project_owner,
+                                workspace_id: this.add_board.workspace_id,
+                                lists: [],
+                                members: [],
+                            }
+                        }, 'add_board')
                         this.$bvModal.hide('create_new_board')
                     }
                 })

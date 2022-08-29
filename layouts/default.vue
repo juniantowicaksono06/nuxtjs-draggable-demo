@@ -31,6 +31,7 @@
     const CryptoJS = require("crypto-js");
     import WorkspaceSidebar from "../components/workspace/WorkspaceSidebar.vue";
     import UserMenu from "../components/global/UserMenu.vue";
+    // import { io } from 'socket.io-client'
     export default {
         middleware: ['auth'],
         components: {
@@ -39,8 +40,38 @@
         },
         mounted() {
             this.loadDataWorkspaceAndMember()
+            this.$createWsInstance()
+            this.webSocketEvent()
+        },
+        computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
         },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('member', (response) => {
+                    let result = JSON.parse(response)
+                    let members = JSON.parse(JSON.stringify(this.$store.state.members.board_members))
+                    let members_picture = JSON.parse(JSON.stringify(this.$store.state.members.board_members_picture))
+                    members.some((member, member_index) => {
+                        if(member._id == result.member_id) {
+                            members[member_index] = result.data
+                            return
+                        }
+                    })
+                    if(Object.keys(members_picture).length > 0) {
+                        Object.keys(members_picture).some((key) => {
+                            if(key == result.member_id) {
+                                members_picture[key] = result.data.picture
+                                return
+                            }
+                        })
+                    }
+                    this.$store.commit('members/loadMembers', members)
+                    this.$store.commit('members/loadMembersPicture', members_picture)
+                })
+            },
             loadDataWorkspaceAndMember(init = true) {
                 this.$axios.$get(`/api/workspace`)
                 .then((response_workspace) => {

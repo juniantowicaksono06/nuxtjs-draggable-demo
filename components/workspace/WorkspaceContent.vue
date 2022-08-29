@@ -215,6 +215,7 @@
     export default {
         mounted() {
             // this.loadAllDataBoard()
+            this.webSocketEvent()
         },
         data() {
             return {
@@ -235,7 +236,68 @@
                 },
             }
         },
+        computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
+        },
         methods: {
+            webSocketEvent() {
+                this.wsInstance.on('edit_board', (response) => {
+                    let result = JSON.parse(response)
+                    let boards = JSON.parse(JSON.stringify(this.$store.state.sidebar.sidebar_data.boards))
+                    let workspaces = this.$store.state.sidebar.sidebar_data.workspaces
+                    boards.some((board, board_index) => {
+                        if(board._id == result.board_id) {
+                            Object.keys(result.data).some((key, data_index) => {
+                                if(key == 'platform') {
+                                    let platform = []
+                                    Object.keys(result.data.platform).some(key => {
+                                        if(result.data.platform[key]) {
+                                            platform.push(key)
+                                        }
+                                    })
+                                    board['platform'] = platform
+                                }
+                                else {
+                                    board[key] = result.data[key]
+                                }
+                            })
+                            console.log(board)
+                            return
+                        }
+                    })
+                    this.$store.commit('sidebar/setSidebarData', {
+                        workspaces: workspaces,
+                        boards: boards
+                    })
+                })
+                this.wsInstance.on('workspace', (response) => {
+                    if(response == 'refresh') {
+                        this.$axios.$get(`/api/workspace`)
+                        .then((response_workspace) => {
+                            if(response_workspace.status != 'OK') {
+                                return
+                            }
+                            this.$axios.$get(`/api/board`)
+                            .then((response_board) => {
+                                if(response_board.status != 'OK') {
+                                    return
+                                }
+                                this.$store.commit('sidebar/setSidebarData', {
+                                    workspaces: response_workspace.data,
+                                    boards: response_board.data
+                                })
+
+                                if(init) {
+                                    this.$nextTick()
+                                    this.$forceUpdate()
+                                }
+                            }) 
+                        })
+                    }
+                })
+            },
             fileChange() {
                 const files = this.$refs.background_file_ref.files
                 var file_reader = this.$convertFileTob64(files[0])
@@ -257,40 +319,6 @@
             },
             saveBoard() {
                 if(this.board_title.trim() == '') return
-                // let config = {
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     }
-                // }
-                // let dataSend = {
-                //     name: this.board_title,
-                //     workspace_id: this.$store.state.auth.identity.workspace_id._id,
-                //     platform: []
-                // }
-                // for(const key in this.board_platform_list) {
-                //     if(key == 'Web') {
-                //         if(this.board_platform_list[key] == true) {
-                //             dataSend['url'] = this.board_url
-                //         }
-                //         else {
-                //             dataSend['url'] = ''
-                //         }
-                //     }
-                //     if(key == 'Bot Telegram') {
-                //         if(this.board_platform_list[key] == true) {
-                //             dataSend['bot_url'] = this.board_bot_url
-                //         }
-                //         else {
-                //             dataSend['bot_url'] = ''
-                //         }
-                //     }
-                //     if(this.board_platform_list[key] == true) {
-                //         dataSend['platform'].push(key)
-                //     } 
-                // }
-                // dataSend['project_owner'] = this.board_project_owner
-                // dataSend['description'] = this.board_description
-                // dataSend['subdept'] = this.board_sub_dept
 
                 let config = {
                     headers: {
@@ -325,9 +353,6 @@
                         } 
                     }
                 }
-                // dataSend['project_owner'] = this.board_project_owner
-                // dataSend['description'] = this.board_description
-                // dataSend['subdept'] = this.board_sub_dept
                 formData.append('project_owner', this.board_project_owner)
                 formData.append('description', this.board_description)
                 formData.append('subdept', this.board_sub_dept)
@@ -365,6 +390,18 @@
                             workspaces: workspaces,
                             boards: boards
                         }
+                        this.$wsEmit({
+                            data: {
+                                _id: data._id,
+                                name: this.board_title,
+                                description: this.board_description,
+                                url: this.board_url,
+                                project_owner: this.board_project_owner,
+                                workspace_id: this.$store.state.auth.identity.workspace_id._id,
+                                lists: [],
+                                members: [],
+                            }
+                        }, 'add_board')
                         this.$store.commit('sidebar/setSidebarData', sidebar_data)
                         this.$router.push(`/board/?board_id=${data._id}`)
                     }

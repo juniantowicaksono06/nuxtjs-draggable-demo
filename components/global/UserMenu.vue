@@ -147,9 +147,15 @@
         beforeDestroy() {
             document.removeEventListener('click', this.onClickOutside)
         },
+        computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
+            },
+        },
         methods: {
             actionLogout() {
                 this.$cookies.remove('credentials');
+                this.$destroyWsInstance();
                 this.$router.push('/login/');
             },
             selectImage() {
@@ -201,6 +207,10 @@
                         this.$bvModal.hide('upload_photo_modal')
                         members_pic[member._id] = this.compress_image
                         this.$store.commit('members/loadMembersPicture', members_pic)
+                        this.$wsEmit({
+                            member_id: member._id,
+                            data: member
+                        }, 'member')
                     }
                 })
                 .catch(error => {
