@@ -4,7 +4,7 @@ export default function({app, store}, inject) {
     inject('createWsInstance', () => {
         if(socket_io == null) {
             socket_io = io(process.env.WEBSOCKET_URL, {
-                transports: ['websocket'],
+                transports: ['polling'],
                 auth: {
                     token: store.state.auth.credentials
                 }
