@@ -1,4 +1,4 @@
-<style>
+<style scoped>
     .card-background {
         border-radius: 10px;
     }
@@ -26,11 +26,13 @@
                 <div class="card-body">
                     <div id="ideation">
                         <b-button variant="primary" v-on:click="openModal"><i class="fa fa-plus"></i> Add Ideation</b-button>
-                        <draggable v-model="ideation_data" tag="div" animation="250" class="pb-5 pt-3 row" id="ideation_data">
-                            <div class="col-12 col-md-4 col-lg-3" v-for="idea in ideation_data">
-                                <Card :data="idea" />
+                        <!-- <draggable v-model="ideation_data" tag="div" animation="250" class="pb-5 pt-3 row" id="ideation_data" @end="endDrag"> -->
+                            <div class="row pb-5 pt-3">
+                                <div class="col-12 col-md-4 col-lg-4 mb-3" v-for="(idea, index) in ideation_data" :key="idea._id">
+                                    <Card :data="idea" />
+                                </div>
                             </div>
-                        </draggable>
+                        <!-- </draggable> -->
                     </div>
                 </div>
             </div>
@@ -52,6 +54,7 @@
 </template>
 <script>
     import draggable from "vuedraggable"
+    import Swal from 'sweetalert2'
     import Card from './Card.vue'
     export default {
         data() {
@@ -65,7 +68,8 @@
                 ideation_input_error: {
                     title: '',
                     description: ''
-                }
+                },
+                drag_data: {}
             }
         },
         components: {
@@ -73,8 +77,40 @@
             Card
         },
         methods: {
+            dragCard(id, index) {
+                this.drag_data['id'] = id
+            },
+            endDrag() {
+                this.drag_data['index'] = $event.newIndex.toString()
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$put(`/api/ideation/slide`, this.drag_data, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        this.drag_data = {}
+                    }
+                })
+                .catch((error) => {})
+            },
             openModal() {
                 this.$bvModal.show('add_ideation')
+            },
+            loadIdeation() {
+                this.isLoading = true
+                this.$axios.$get('/api/ideation')
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        const { data } = response
+                        this.ideation_data = data
+                    }
+                    this.isLoading = false
+                })
+                .catch((error) => {
+                    this.isLoading = false
+                })
             },
             saveIdeation() {
                 let error = false
@@ -85,26 +121,49 @@
                     } 
                 })
                 if(this.ideation_data.length > 0 && !error) {
-                    this.ideation_data.push(this.ideation_input)
-                    this.ideation_input = {
-                        title: '',
-                        description: ''
+                    let config = {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
                     }
-                    this.$bvModal.hide('add_ideation')
+                    this.$axios.$post(`/api/ideation`, {
+                        title: this.ideation_input['title'],
+                        description: this.ideation_input['description']
+                    }, config)
+                    .then((response) => {
+                        if(response.status == 'OK') {
+                            const {data} = response
+                            let ideation = {
+                                ...this.ideation_input,
+                                _id: data._id
+                            } 
+                            console.log(ideation)
+                            this.ideation_data.push(ideation)
+                            this.ideation_input = {
+                                title: '',
+                                description: ''
+                            }
+                            Swal.fire({
+                                text: 'Ideation created',
+                                toast: true,
+                                timer: 3000,
+                                position: 'bottom-right',
+                                showConfirmButton: false,
+                                showCancelButton: false,
+                                icon: 'success',
+                                title: 'Success'
+                            })
+                        }
+                        this.$bvModal.hide('add_ideation')
+                    })
+                    .catch((error) => {
+                        this.$bvModal.hide('add_ideation')
+                    })
                 }
             }
         },
         mounted() {
-            this.ideation_data = [
-                {
-                    title: 'Tes Ideation 1',
-                    description: 'This is a Description',
-                },
-                {
-                    title: 'Tes Ideation 2',
-                    description: 'This is a Description',
-                },
-            ]
+            this.loadIdeation()
         }
     }
 </script>

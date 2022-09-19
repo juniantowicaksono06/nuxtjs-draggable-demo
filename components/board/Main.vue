@@ -653,7 +653,6 @@
             },
             dragCard(card_id, index){
                 this.drag_data['board_id'] = this.board_id
-                console.log(this.board_id)
                 this.drag_data['list_id'] = card_id
             },
             saveMember() {
