@@ -29,7 +29,7 @@
                         <!-- <draggable v-model="ideation_data" tag="div" animation="250" class="pb-5 pt-3 row" id="ideation_data" @end="endDrag"> -->
                             <div class="row pb-5 pt-3">
                                 <div class="col-12 col-md-4 col-lg-4 mb-3" v-for="(idea, index) in ideation_data" :key="idea._id">
-                                    <Card :data="idea" />
+                                    <Card :data="idea" @deleteIdeation="deleteIdeation" />
                                 </div>
                             </div>
                         <!-- </draggable> -->
@@ -41,12 +41,12 @@
             <div class="mb-2">
                 <label for="title">Title</label>
                 <input type="text" class="form-control" placeholder="Title" v-model="ideation_input.title">
-                <span>{{ ideation_input_error['title'] }}</span>
+                <span class="text-danger">{{ ideation_input_error['title'] }}</span>
             </div>
             <div class="mb-2">
                 <label for="title">Description</label>
                 <textarea class="form-control" placeholder="Description" v-model="ideation_input.description"></textarea>
-                <span>{{ ideation_input_error['description'] }}</span>
+                <span class="text-danger">{{ ideation_input_error['description'] }}</span>
             </div>
             <b-button variant="primary" v-on:click="saveIdeation"><i class="fa fa-save"></i> Save</b-button>
         </b-modal>
@@ -76,25 +76,84 @@
             draggable,
             Card
         },
-        methods: {
-            dragCard(id, index) {
-                this.drag_data['id'] = id
+        computed: {
+            wsInstance: function() {
+                return this.$getWsInstance()
             },
-            endDrag() {
-                this.drag_data['index'] = $event.newIndex.toString()
+        },
+        methods: {
+            webSocketEvent() {
+                this.wsInstance.on('create_ideation', (response) => {
+                    let result = JSON.parse(response)
+                    let data = result.data
+                    this.ideation_data.splice(0, 0, data)
+                })
+                this.wsInstance.on('update_ideation', (response) => {
+                    let result = JSON.parse(response)
+                    let data = result.data
+                    let card_id = result.card_id
+                    this.ideation_data.forEach((ideation) => {
+                        if(ideation._id == card_id) {
+                            // this.ideation_data.splice(ideation_index, 1)
+                            ideation['title'] = data['title']
+                            ideation['description'] = data['description']
+                            return
+                        }
+                    })
+                })
+
+                this.wsInstance.on('delete_ideation', (response) => {
+                    let result = JSON.parse(response)
+                    let data = result.data
+                    this.ideation_data.forEach((ideation, ideation_index) => {
+                        if(ideation._id == data._id) {
+                            this.ideation_data.splice(ideation_index, 1)
+                            return
+                        }
+                    })
+                })
+            },
+            deleteIdeation(id) {
+                let index = null
+                this.ideation_data.forEach((ideation, ideation_index) => {
+                    if(ideation._id == id) {
+                        index = ideation_index
+                        return
+                    }
+                })
                 let config = {
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
                 }
-                this.$axios.$put(`/api/ideation/slide`, this.drag_data, config)
-                .then((response) => {
-                    if(response.status == 'OK') {
-                        this.drag_data = {}
+                this.$axios.$delete(`/api/ideation/${id}`, config)
+                .then(response => {
+                    if(index != null) {
+                        this.ideation_data.splice(index, 1)
                     }
                 })
-                .catch((error) => {})
+                .catch(error => {
+                    console.log(error)
+                })
             },
+            // dragCard(id, index) {
+            //     this.drag_data['id'] = id
+            // },
+            // endDrag() {
+            //     this.drag_data['index'] = $event.newIndex.toString()
+            //     let config = {
+            //         headers: {
+            //             'Content-Type': 'application/json'
+            //         }
+            //     }
+            //     this.$axios.$put(`/api/ideation/slide`, this.drag_data, config)
+            //     .then((response) => {
+            //         if(response.status == 'OK') {
+            //             this.drag_data = {}
+            //         }
+            //     })
+            //     .catch((error) => {})
+            // },
             openModal() {
                 this.$bvModal.show('add_ideation')
             },
@@ -137,8 +196,7 @@
                                 ...this.ideation_input,
                                 _id: data._id
                             } 
-                            console.log(ideation)
-                            this.ideation_data.push(ideation)
+                            this.ideation_data.splice(0, 0, ideation)
                             this.ideation_input = {
                                 title: '',
                                 description: ''
@@ -153,6 +211,9 @@
                                 icon: 'success',
                                 title: 'Success'
                             })
+                            this.$wsEmit({
+                                data: ideation
+                            }, 'create_ideation')
                         }
                         this.$bvModal.hide('add_ideation')
                     })
@@ -163,6 +224,7 @@
             }
         },
         mounted() {
+            this.webSocketEvent()
             this.loadIdeation()
         }
     }
