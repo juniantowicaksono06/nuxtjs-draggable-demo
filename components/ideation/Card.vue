@@ -47,8 +47,8 @@
         </div>
         <div :class="`card-body my-card ${data._id}`" v-on:click="toggleInput($event, 'description')">
             <pre v-if="!input_active.description"><h6 class="mb-0" :ref="`description_${data._id}`">{{ data.description }}</h6></pre>
-            <div class="w-100" v-else>
-                <textarea class="form-control" v-model="description" :ref="`description_${data._id}`" v-on:keyup="setDescriptionHeight"></textarea>
+            <div class="w-100 mb-4" v-else>
+                <textarea class="form-control" v-model="description" :ref="`description_${data._id}`" v-on:keypress="setDescriptionHeight" v-on:keyup="setDescriptionHeight" v-on:focus="setDescriptionHeight"></textarea>
             </div>
             <div class="mt-2" v-if="input_active.description">
                 <b-button variant="primary" v-on:click="updateCard($event)"><i class="fa fa-save"></i> Save</b-button>
@@ -62,6 +62,14 @@
 </template>
 <script>
     export default {
+        watch: {
+            'data': {
+                handler: function(value) {
+                    this.setDescriptionHeight()
+                },
+                deep: true
+            },
+        },
         data() {
             return {
                 input_active: {
@@ -76,11 +84,6 @@
             deleteIdeation(event) {
                 event.preventDefault()
                 this.$emit('deleteIdeation', this.data._id)
-                this.$wsEmit({
-                    data: {
-                        _id: this.data._id
-                    }
-                }, 'delete_ideation')
                 this.show_modal = false
             },
             confirmDelete(event) {

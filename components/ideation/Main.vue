@@ -27,9 +27,17 @@
                     <div id="ideation">
                         <b-button variant="primary" v-on:click="openModal"><i class="fa fa-plus"></i> Add Ideation</b-button>
                         <!-- <draggable v-model="ideation_data" tag="div" animation="250" class="pb-5 pt-3 row" id="ideation_data" @end="endDrag"> -->
-                            <div class="row pb-5 pt-3">
+                            <div class="row pb-5 pt-3" v-if="ideation_data.length > 0">
                                 <div class="col-12 col-md-4 col-lg-4 mb-3" v-for="(idea, index) in ideation_data" :key="idea._id">
                                     <Card :data="idea" @deleteIdeation="deleteIdeation" />
+                                </div>
+                            </div>
+                            <div class="row pb-5 pt-3" v-else> 
+                                <div class="col-12">
+                                    <h1 class="text-center text-warning mb-3">
+                                        <i class="fa fa-lightbulb fa-3x"></i>
+                                    </h1>
+                                    <h3 class="text-center">No Ideation Found!</h3>
                                 </div>
                             </div>
                         <!-- </draggable> -->
@@ -130,6 +138,11 @@
                 .then(response => {
                     if(index != null) {
                         this.ideation_data.splice(index, 1)
+                        this.$wsEmit({
+                            data: {
+                                _id: id
+                            }
+                        }, 'delete_ideation')
                     }
                 })
                 .catch(error => {
@@ -179,7 +192,7 @@
                         error = true
                     } 
                 })
-                if(this.ideation_data.length > 0 && !error) {
+                if(!error) {
                     let config = {
                         headers: {
                             'Content-Type': 'application/json'
