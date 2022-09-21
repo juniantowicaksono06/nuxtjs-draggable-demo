@@ -346,6 +346,12 @@
                     </nuxt-link>
                     <span v-else class="text-white btn btn-transparent text-left">MOM</span>
                 </div>
+                <div :class="($route.path == '/ideation/' ? 'sidebar-item-active sidebar-item' : 'sidebar-item sidebar-item')">
+                    <nuxt-link to="/ideation/" v-if="$route.path != '/ideation/'" class="text-white btn btn-transparent text-left">
+                        Ideation
+                    </nuxt-link>
+                    <span v-else class="text-white btn btn-transparent text-left">Ideation</span>
+                </div>
                 <div class="sidebar-item">
                     <button class="btn btn-transparent text-white" v-on:click="actionLogout">Logout</button>
                 </div>
