@@ -47,7 +47,7 @@
                     <b-button variant="primary" v-on:click="openCreateBoard"><i class="fa fa-plus"></i> Create new board</b-button>
                 </div>
                 <div class="row">
-                    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="board.workspace_id == $store.state.auth.identity.workspace_id._id || board.members.includes($store.state.auth.identity._id)" :key="board._id">
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="myWorkspace.includes(board.workspace_id) || board.members.includes($store.state.auth.identity._id)" :key="board._id">
                         <div class="card rounded workspace-card hover-pointer" style="border: none;">
                             <div class="card-header bg-primary">
                                 <div class="row">
@@ -171,7 +171,7 @@
                                 </label>
                                 <select class="form-control" v-model="board_sub_dept">
                                     <option value="">Select Sub Departement</option>
-                                    <option :value="subdept" v-for="subdept in $store.state.auth.identity.workspace_id.subdept">{{ subdept }}</option>
+                                    <option :value="subdept" v-for="subdept in workspaceSubdept">{{ subdept }}</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -240,6 +240,20 @@
             wsInstance: function() {
                 return this.$getWsInstance()
             },
+            workspaceSubdept: function(){
+                let subdept = []
+                this.$store.state.auth.identity.workspace.forEach(workspace => {
+                    workspace.subdept.forEach(dept => {
+                        subdept.push(dept)
+                    });
+                });
+                return subdept
+            },
+            myWorkspace: function(){
+                return this.$store.state.auth.identity.workspace.map(workspace => {
+                    return workspace._id
+                })
+            }
         },
         methods: {
             webSocketEvent() {

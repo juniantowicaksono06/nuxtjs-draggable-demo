@@ -289,14 +289,14 @@
                         Gantt
                     </nuxt-link>
                 </div>
-                <div :class="($route.path == '/' ? 'd-flex justify-content-between sidebar-item-active sidebar-item' : 'd-flex justify-content-between sidebar-item')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace_id">
+                <div :class="($route.path == '/' ? 'd-flex justify-content-between sidebar-item-active sidebar-item' : 'd-flex justify-content-between sidebar-item')" id="workspace_label" ref="workspace_label_ref" v-if="$store.state.auth.identity.workspace">
                     <span v-if="$route.path != '/'" v-on:click="changeWorkspace">Workspace</span>
                     <span v-else>Workspace</span>
                 </div>
             </div>
             <div id="sidebar_container" ref="sidebar_container_ref">
-                <div v-if="'workspace_id' in $store.state.auth.identity">
-                    <div v-for="(work, index) in $store.state.sidebar.sidebar_data.workspaces" class="workspace" v-if="work._id == $store.state.auth.identity.workspace_id._id || getMemberWorkspaceInBoard.includes(work._id)" :key="work._id">
+                <div v-if="'workspace' in $store.state.auth.identity">
+                    <div v-for="(work, index) in $store.state.auth.identity.workspace" class="workspace" v-if="myWorkspace.includes(work._id) || getMemberWorkspaceInBoard.includes(work._id)" :key="work._id">
                         <div class="sidebar-text hover-pointer workspace-name d-flex justify-content-between">
                             <div class="workspace-icon">
                                 <span class="workspace-icon-square">
@@ -503,6 +503,11 @@
                 },
             }    
         },
+        computed: {
+            myWorkspace: function(){
+                return this.$store.state.auth.identity.workspace
+            }
+        },
         props: {
             data: {
                 type: Object
@@ -542,6 +547,11 @@
                     }
                 }
                 return workspace_id
+            },
+            myWorkspace(){
+                return this.$store.state.auth.identity.workspace.map(workspace => {
+                    return workspace._id
+                })
             }
         },
         methods: {
