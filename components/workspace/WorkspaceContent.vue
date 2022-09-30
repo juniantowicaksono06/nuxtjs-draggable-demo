@@ -43,11 +43,19 @@
                 <div class="px-2">
                     <h5 class="mb-2">Boards</h5>
                 </div>
-                <div class="mb-2">
-                    <b-button variant="primary" v-on:click="openCreateBoard"><i class="fa fa-plus"></i> Create new board</b-button>
-                </div>
                 <div class="row">
-                    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-2" v-for="(board, index) in $store.state.sidebar.sidebar_data.boards" v-if="myWorkspace.includes(board.workspace_id) || board.members.includes($store.state.auth.identity._id)" :key="board._id">
+                    <div class="offset-9 form-group col-3">
+                        <select class="form-control" v-model="filterWorkspace">
+                            <option value="">All Workspace</option>
+                            <option :value="work._id" v-for="work, index in $store.state.auth.identity.workspace" :key="index">{{ work.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- <div class="mb-2">
+                    <b-button variant="primary" v-on:click="openCreateBoard"><i class="fa fa-plus"></i> Create new board</b-button>
+                </div> -->
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-2" v-for="(board, index) in myBoard" v-if="myWorkspace.includes(board.workspace_id) || board.members.includes($store.state.auth.identity._id)" :key="board._id">
                         <div class="card rounded workspace-card hover-pointer" style="border: none;">
                             <div class="card-header bg-primary">
                                 <div class="row">
@@ -55,7 +63,7 @@
                                         <h6 class="mb-0 no-select text-white">{{ board.name }}</h6>
                                     </nuxt-link>
                                     <div v-if="board.platform" class="col-12 col-md-6 text-right mt-3 mt-md-0 cursor-default">
-                                        <div class="d-inline-block text-white" v-for="platform in board.platform">
+                                        <div class="d-inline-block text-white" v-for="platform, index in board.platform" :key="index">
                                             <span v-if="platform == 'Aplikasi Mobile'" class="ml-3" v-b-tooltip.hover :title="platform"><i class="fa fa-mobile hover-pointer" v-on:click.stop=""></i></span>
                                             <a target="_blank" :href="board.bot_url" v-else-if="platform == 'Bot Telegram' && board.bot_url" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-robot hover-pointer"></i></a>
                                             <a target="_blank" :href="board.url" v-else-if="platform == 'Web' && board.url" class="ml-3 text-white" v-b-tooltip.hover :title="platform" v-on:click.stop=""><i class="fa fa-globe hover-pointer"></i></a>
@@ -171,7 +179,7 @@
                                 </label>
                                 <select class="form-control" v-model="board_sub_dept">
                                     <option value="">Select Sub Departement</option>
-                                    <option :value="subdept" v-for="subdept in workspaceSubdept">{{ subdept }}</option>
+                                    <option :value="subdept" v-for="subdept,index in workspaceSubdept" :key="index">{{ subdept }}</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -219,6 +227,7 @@
         },
         data() {
             return {
+                filterWorkspace: '',
                 selected_workspace: '',
                 bg_picture: '',
                 board_title: '',
@@ -253,6 +262,13 @@
                 return this.$store.state.auth.identity.workspace.map(workspace => {
                     return workspace._id
                 })
+            },
+            myBoard: function(){
+                if (this.filterWorkspace !== '') {
+                    return this.$store.state.sidebar.sidebar_data.boards.filter(val => val.workspace_id === this.filterWorkspace)
+                }else{
+                    return this.$store.state.sidebar.sidebar_data.boards
+                }
             }
         },
         methods: {
