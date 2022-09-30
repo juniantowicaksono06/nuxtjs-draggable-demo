@@ -9,7 +9,7 @@ export default async function({redirect, store, app, $axios}) {
             let profile = await $axios.get('/api/profile')
             let response = profile.data
             if(response.status == 'OK') {
-                if('workspace_id' in response.data == false) {
+                if(response.data.workspace.length == 0) {
                     return redirect('/selectworkspace')
                 }
                 else {

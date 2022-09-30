@@ -22,6 +22,13 @@
                     <h5 class="mb-0">Gantt Chart</h5>
                 </div>
                 <div class="card-body">
+                    <div class="row">
+                        <div class="offset-9 form-group col-3">
+                            <select class="form-control" v-model="workspace" @change="loadGantt(workspace)">
+                                <option :value="work._id" v-for="work, index in myWorkspace" :key="index">{{ work.name }}</option>
+                            </select>
+                        </div>
+                    </div>
                     <div style="" class="gantt" id="GanttChartDIV"></div>
                 </div>
             </div>
@@ -42,6 +49,7 @@ export default {
     data(){
         return {
             gantt: null,
+            workspace: null,
             ref: {
                 subdept: [],
                 user: []
@@ -60,15 +68,19 @@ export default {
         kanbanURL: function() {
             return process.env.BACKEND_URL
         },
+        myWorkspace: function(){
+            return this.$store.state.auth.identity.workspace
+        }
     },
     mounted(){
-        this.loadGantt();
+        this.workspace = this.myWorkspace[0]._id
+        this.loadGantt(this.workspace);
     },
     created(){
-       
+      
     },
     methods: {
-        loadGantt(){
+        loadGantt(workspace_id){
             this.isLoading = true
             this.gantt = new JSGantt.GanttChart(document.getElementById('GanttChartDIV'), 'day');
             let _this2 = this;
@@ -87,7 +99,7 @@ export default {
                 vShowEndDate: 0,
             });
             // this.$preloaders.open();
-            axios.get(this.kanbanURL + 'report/gantt', {
+            axios.get(this.kanbanURL + 'report/gantt?workspace_id=' + workspace_id, {
                 headers: {
                    'Content-type': 'application/json'
                 }

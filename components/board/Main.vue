@@ -170,9 +170,10 @@
                         <label for="sub_department" class="kanban-text">
                             Sub Departement
                         </label>
+                       
                         <select class="form-control" v-model="board_sub_dept">
                             <option value="" selected>Select Sub Departement</option>
-                            <option :value="subdept" v-for="subdept in $store.state.auth.identity.workspace_id.subdept">{{ subdept }}</option>
+                            <option :value="subdept" v-for="subdept in workspaceSubdept">{{ subdept }}</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -309,6 +310,15 @@
                         if(value.workspace_id != current_workspace && current_user_id != value._id) return value
                     }
                 })
+            },
+            workspaceSubdept: function(){
+                let subdept = []
+                this.$store.state.auth.identity.workspace.forEach(workspace => {
+                    workspace.subdept.forEach(dept => {
+                        subdept.push(dept)
+                    });
+                });
+                return subdept
             },
         },
         beforeDestroy() {
