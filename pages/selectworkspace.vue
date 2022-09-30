@@ -37,7 +37,7 @@
         },
         methods: {
             loadData() {
-                this.workspace = this.$store.state.sidebar.sidebar_data.workspaces
+                this.workspace = this.$store.state.sidebar.sidebar_data.workspaces.filter(val => val.visibility === 'public')
             },
             selectWorkspace() {
                 let config = {
