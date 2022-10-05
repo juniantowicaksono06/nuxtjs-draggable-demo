@@ -11,6 +11,12 @@
         overflow: hidden !important;
     }
 </style>
+<style>
+    .gtaskname div, .gres div {
+        white-space: break-spaces !important;
+        overflow: hidden !important;
+    }
+</style>
 <template>
     <div class="container-fluid py-3 mb-4 h-100" style="overflow: auto;">
         <div v-if="isLoading">
@@ -110,6 +116,23 @@ export default {
                 // this.$preloaders.close();
                 this.gantt.Draw();
                 this.isLoading = false
+                this.$nextTick(() => {
+                    let taskname = document.querySelectorAll('.gtasktable .gtaskname > div')
+                    taskname.forEach((element) => {
+                        let elementExists = element.querySelector('span')
+                        if(elementExists == null) {
+                            let div = document.createElement('div')
+                            let ul = document.createElement('ul')
+                            let li = document.createElement('li')
+                            ul.classList.add('px-3')
+                            let content = element.innerHTML.replace(/&nbsp;/g, '')
+                            li.innerHTML = content
+                            ul.append(li)
+                            div.append(ul)
+                            element.innerHTML = div.innerHTML
+                        }
+                    })
+                })
             })
         },
         requestFail(){
