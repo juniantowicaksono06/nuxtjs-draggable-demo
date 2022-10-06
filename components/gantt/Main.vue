@@ -128,46 +128,54 @@ export default {
                 this.gantt.Draw();
                 this.isLoading = false
                 this.$nextTick(() => {
-                    let taskname = document.querySelectorAll('.gtasktable .gtaskname > div')
-                    taskname.forEach((element) => {
-                        let elementExists = element.querySelector('span')
-                        if(elementExists == null) {
-                            let div = document.createElement('div')
-                            let ul = document.createElement('ul')
-                            let li = document.createElement('li')
-                            ul.classList.add('px-3', 'py-2')
-                            let content = element.innerHTML.replace(/&nbsp;/g, '')
-                            li.innerHTML = content
-                            ul.append(li)
-                            div.append(ul)
-                            element.innerHTML = div.innerHTML
-                            let task_parent_element = element.parentElement.parentElement
-                            let id = task_parent_element.getAttribute('id')
-                            if(id != null) {
-                                id = id.split('_')
-                                id = id.length > 0 ? id[id.length - 1] : 0
-                                let element_progress = document.getElementById(`GanttChartDIVchildrow_${id}`)
-                                let member = document.querySelector(`#GanttChartDIVchild_${id} > .gres`)
-                                let member_value = member.querySelector('div').innerHTML
-                                member_value = member_value.split(',')
-                                member_value = member_value.map((value) => {
-                                    let name = value.split(' ')
-                                    if(name.length > 1) {
-                                        return this.capitalizeEachWord(`${name[0]} ${name[1]}`)
-                                    }
-                                    return this.capitalizeEachWord(name[0])
-                                }).join(', ')
-                                member.querySelector('div').innerHTML = member_value
-                                let element_height = task_parent_element.offsetHeight
-                                if(element_progress != null) {
-                                    let member_height = member.offsetHeight
-                                    element_height = member_height > element_height ? member_height : element_height
-                                    element_progress.style.setProperty('height', `${element_height}px`, 'important')
-                                }
-                            }
-                        }
+                    this.refreshChart()
+                    new MutationObserver(() => {
+                        this.refreshChart()
+                    }).observe(document.getElementById('GanttChartDIV'), {
+                        childList: true
                     })
                 })
+            })
+        },
+        refreshChart() {
+            let taskname = document.querySelectorAll('.gtasktable .gtaskname > div')
+            taskname.forEach((element) => {
+                let elementExists = element.querySelector('span')
+                if(elementExists == null) {
+                    let div = document.createElement('div')
+                    let ul = document.createElement('ul')
+                    let li = document.createElement('li')
+                    ul.classList.add('px-3', 'py-2')
+                    let content = element.innerHTML.replace(/&nbsp;/g, '')
+                    li.innerHTML = content
+                    ul.append(li)
+                    div.append(ul)
+                    element.innerHTML = div.innerHTML
+                    let task_parent_element = element.parentElement.parentElement
+                    let id = task_parent_element.getAttribute('id')
+                    if(id != null) {
+                        id = id.split('_')
+                        id = id.length > 0 ? id[id.length - 1] : 0
+                        let element_progress = document.getElementById(`GanttChartDIVchildrow_${id}`)
+                        let member = document.querySelector(`#GanttChartDIVchild_${id} > .gres`)
+                        let member_value = member.querySelector('div').innerHTML
+                        member_value = member_value.split(',')
+                        member_value = member_value.map((value) => {
+                            let name = value.split(' ')
+                            if(name.length > 1) {
+                                return this.capitalizeEachWord(`${name[0]} ${name[1]}`)
+                            }
+                            return this.capitalizeEachWord(name[0])
+                        }).join(', ')
+                        member.querySelector('div').innerHTML = member_value
+                        let element_height = task_parent_element.offsetHeight
+                        if(element_progress != null) {
+                            let member_height = member.offsetHeight
+                            element_height = member_height > element_height ? member_height : element_height
+                            element_progress.style.setProperty('height', `${element_height}px`, 'important')
+                        }
+                    }
+                }
             })
         },
         requestFail(){
