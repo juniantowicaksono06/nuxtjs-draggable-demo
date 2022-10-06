@@ -57,7 +57,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: 0" v-on:click="togglePopUp($event)">
+                        <div class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" data-toggle="tooltip" data-placement="top" title="Add member" style="margin: 0" v-on:click="togglePopUp($event)" v-if="isGuest">
                             <p class="px-0 py-1 profile-pic-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
                                 <span><i class="fa fa-plus"></i></span>
                             </p>
@@ -283,12 +283,14 @@
             },
             'board': function() {
                 this.$nextTick(() => {
+                    // this.loadDataMember()
                     this.loadDataMember()
                 })
             },
             'board_id': function() {
                 this.$nextTick(() => {
-                    this.loadDataAllMember()
+                    // this.loadDataAllMember()
+                    this.loadDataMember()
                 })
             },
             'board.name': function() {
@@ -296,6 +298,11 @@
             }
         },
         computed: {
+            isGuest: function() {
+                if(this.board.workspace_id == null) return true
+                let current_user_workspace = this.$store.state.auth.identity.workspace
+                return current_user_workspace.find((a) => a['_id'] == this.board.workspace_id._id) != undefined
+            },
             wsInstance: function() {
                 return this.$getWsInstance()
             },
@@ -303,13 +310,14 @@
                 return process.env.BACKEND_URL
             },
             guestMember() {
-                return this.board_members.filter((value) => {
-                    if(this.board.workspace_id){
-                        let current_workspace = this.board.workspace_id._id
-                        let current_user_id = this.$store.state.auth.identity._id
-                        if(value.workspace_id != current_workspace && current_user_id != value._id) return value
-                    }
-                })
+                return this.guest_members
+                // return this.board_members.filter((value) => {
+                //     if(this.board.workspace_id){
+                //         let current_workspace = this.board.workspace_id._id
+                //         let current_user_id = this.$store.state.auth.identity._id
+                //         if(value.workspace_id != current_workspace && current_user_id != value._id) return value
+                //     }
+                // })
             },
             workspaceSubdept: function(){
                 let subdept = []
@@ -671,11 +679,14 @@
                 let members_id = []
                 let board_members_and_guest = Object.assign([], this.$store.state.members.board_members)
                 let board_members = []
-                let current_workspace = this.$store.state.auth.identity.workspace_id._id
+                let current_workspace = this.board.workspace_id._id
                 for(let a = 0; a < board_members_and_guest.length; a++) {
-                    if(board_members_and_guest[a].workspace_id == current_workspace) {
-                        board_members.push(board_members_and_guest[a])
-                    }
+                    board_members_and_guest[a].workspace.some((workspace) => {
+                        if(workspace == current_workspace) {
+                            board_members.push(board_members_and_guest[a])
+                            return false
+                        }
+                    })
                 }
                 if(this.member_multiselect.length > 0) {
                     for(let a = 0; a < this.member_multiselect.length; a++) {
@@ -769,8 +780,24 @@
                             member_pic[value._id] = value.picture
                             if(value.workspace_id != current_workspace && current_user_id != value._id) return value
                         })
-                        this.member_multiselect = data
+                        this.$axios.$get(`/api/guest_member/${this.board.workspace_id._id}`)
+                        .then((response) => {
+                            if(response.status == 'OK') {
+                                let current_user = this.$store.state.auth.identity
+                                // let all_members = response.data
+                                this.guest_members = response.data
+                                this.member_multiselect = data.filter((member) => {
+                                    for(let i = 0; i < response.data.length; i++) {
+                                        if(response.data[i]._id == member._id && current_user.workspace.find((a) => a['_id'] == this.board.workspace_id._id) != 'undefined') {
+                                            return member
+                                        } 
+                                    }
+                                })
+                            }
+                        })
+                        // this.loadDataAllMember
                         this.$store.commit('members/loadMembersPicture', member_pic)
+                        this.board_members = data
                     }
                 })
             },
@@ -996,6 +1023,7 @@
                 all_members: [],
                 member_multiselect: [],
                 board_members: this.$store.state.members.board_members,
+                guest_members: [],
                 sidebar_observer: null,
                 sidebarKey: 0,
                 workspace_id_selected: null,
