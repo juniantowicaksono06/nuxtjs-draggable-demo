@@ -20,6 +20,9 @@
         max-width: 500px;
         width: auto;
     }
+    .gtaskname ul {
+        list-style-type: none;
+    }
 </style>
 <template>
     <div class="container-fluid py-3 mb-4 h-100" style="overflow: auto;">
