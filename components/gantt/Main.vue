@@ -164,7 +164,9 @@ export default {
                     let div = document.createElement('div')
                     let ul = document.createElement('ul')
                     let li = document.createElement('li')
-                    ul.classList.add('px-2', 'py-1', 'ml-1')
+                    ul.classList.add('px-2', 'ml-1', 'my-0')
+                    ul.style.paddingTop = '3px'
+                    ul.style.paddingBottom = '3px'
                     let content = element.innerHTML.replace(/&nbsp;/g, '')
                     li.innerHTML = content
                     ul.append(li)
