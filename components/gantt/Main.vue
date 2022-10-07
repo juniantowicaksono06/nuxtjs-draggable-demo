@@ -84,7 +84,8 @@ export default {
                 user: []
             },
             input: {},
-            isLoading: false
+            isLoading: false,
+            loaded_change: false
         }
     },
     components: {
@@ -113,7 +114,9 @@ export default {
             value = value.toLowerCase()
             let words = value.split(' ')
             words = words.map((value) => {
-                return value[0].toUpperCase()  + value.substring(1)
+                if(value[0] != undefined) {
+                    return value[0].toUpperCase()  + value.substring(1)
+                }
             })
             return words.join(' ')
         },
@@ -135,6 +138,7 @@ export default {
                 vShowStartDate: 0,
                 vShowEndDate: 0,
             });
+            this.loaded_change = false
             // this.$preloaders.open();
             axios.get(this.kanbanURL + 'report/gantt?workspace_id=' + workspace_id, {
                 headers: {
@@ -149,10 +153,22 @@ export default {
                 this.$nextTick(() => {
                     this.refreshChart()
                     new MutationObserver(() => {
+                        this.loaded_change = false
                         this.refreshChart()
                     }).observe(document.getElementById('GanttChartDIV'), {
                         childList: true
                     })
+                    new ResizeObserver(() => {
+                        this.refreshChart()
+                    }).observe(document.getElementById('GanttChartDIV'))
+                    // document.getElementById('sidebar').addEventListener('click', () => {
+                    //     this.refreshChart()
+                    // })
+                    // new MutationObserver(() => {
+                    //     this.refreshChart()
+                    // }).observe(document.getElementById('sidebar'), {
+                    //     childList: true
+                    // })
                 })
             })
         },
@@ -160,7 +176,7 @@ export default {
             let taskname = document.querySelectorAll('.gtasktable .gtaskname > div')
             taskname.forEach((element) => {
                 let elementExists = element.querySelector('span')
-                if(elementExists == null) {
+                if(elementExists == null && !this.loaded_change) {
                     let div = document.createElement('div')
                     let ul = document.createElement('ul')
                     let li = document.createElement('li')
@@ -191,13 +207,30 @@ export default {
                         member.querySelector('div').innerHTML = member_value
                         let element_height = task_parent_element.offsetHeight
                         if(element_progress != null) {
-                            let member_height = member.offsetHeight
-                            element_height = member_height > element_height ? member_height : element_height
+                            let member_element_height = member.offsetHeight
+                            element_height = member_element_height > element_height ? member_element_height : element_height
+                            element_progress.style.setProperty('height', `${element_height}px`, 'important')
+                        }
+                    }
+                }
+                else if(this.loaded_change) {
+                    let task_parent_element = element.parentElement.parentElement
+                    let id = task_parent_element.getAttribute('id')
+                    if(id != null) {
+                        id = id.split('_')
+                        id = id.length > 0 ? id[id.length - 1]: 0
+                        let element_progress = document.getElementById(`GanttChartDIVchildrow_${id}`)
+                        let member = document.querySelector(`#GanttChartDIVchild_${id} > .gres`)
+                        let element_height = task_parent_element.offsetHeight
+                        if(element_progress != null) {
+                            let member_element_height = member.offsetHeight
+                            element_height = member_element_height > element_height ? member_element_height : element_height
                             element_progress.style.setProperty('height', `${element_height}px`, 'important')
                         }
                     }
                 }
             })
+            this.loaded_change = true
         },
         requestFail(){
             Swal.fire({
