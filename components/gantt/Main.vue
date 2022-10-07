@@ -16,6 +16,22 @@
         white-space: break-spaces !important;
         overflow: hidden !important;
     }
+    .gtaskname > div {
+        width: 100%;
+        max-width: 100%;
+    }
+    .gcomp {
+        max-width: 50px;
+        min-width: 50px;
+        width: 50px;
+    }
+    .gres > div {
+        padding: 5px 5px;
+    }
+    .gchartcontainer {
+        display:grid;
+        grid-template-columns: 1.35fr 1fr auto;
+    }
     #GanttChartDIVglisthead .gselector {
         max-width: 500px;
         width: auto;
@@ -148,7 +164,7 @@ export default {
                     let div = document.createElement('div')
                     let ul = document.createElement('ul')
                     let li = document.createElement('li')
-                    ul.classList.add('px-3', 'py-2')
+                    ul.classList.add('px-2', 'py-1', 'ml-1')
                     let content = element.innerHTML.replace(/&nbsp;/g, '')
                     li.innerHTML = content
                     ul.append(li)
