@@ -210,6 +210,10 @@ export default {
                             let member_element_height = member.offsetHeight
                             element_height = member_element_height > element_height ? member_element_height : element_height
                             element_progress.style.setProperty('height', `${element_height}px`, 'important')
+                            let a = document.querySelector('.gtasktableouterwrapper')
+                            let b = document.querySelector('.footerdays')
+                            let lineHeight = a.offsetHeight - b.offsetHeight
+                            document.getElementById('GanttChartDIVline1').style.height = `${lineHeight}px`
                         }
                     }
                 }
@@ -226,6 +230,10 @@ export default {
                             let member_element_height = member.offsetHeight
                             element_height = member_element_height > element_height ? member_element_height : element_height
                             element_progress.style.setProperty('height', `${element_height}px`, 'important')
+                            let a = document.querySelector('.gtasktableouterwrapper')
+                            let b = document.querySelector('.footerdays')
+                            let lineHeight = a.offsetHeight - b.offsetHeight
+                            document.getElementById('GanttChartDIVline1').style.height = `${lineHeight}px`
                         }
                     }
                 }
