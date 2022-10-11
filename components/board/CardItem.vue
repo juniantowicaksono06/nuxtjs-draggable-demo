@@ -167,7 +167,7 @@
                                         <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-else disabled="true" />
                                     </div>
                                     <div class="col-10 mt-0 px-0 d-flex justify-content-between">
-                                        <div>
+                                        <div style="flex: 5">
                                             <input class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent" :style="child.done ? {
                                                 fontSize: '14px',
                                                 fontWeight: 'normal',
@@ -185,7 +185,7 @@
                                                 fontWeight: 'normal'
                                             }" v-else>{{ child.name }}</span>
                                         </div>
-                                        <div v-if="child.member_id" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-b-tooltip.hover :title="child.member_id.name">
+                                        <div v-if="child.member_id" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-b-tooltip.hover :title="child.member_id.name" @click.stop="" v-on:click="showCardPopUp($event, 'card_members', {}, { checklistChildIndex: child_index, checklistChildId: child._id, checklistIndex: checklist_index, checklistId: item.checklists[checklist_index]._id })">
                                             <div v-if="memberPicture[child.member_id._id]">
                                                 <img :src="memberPicture[child.member_id._id]" class="profile-checklist-thumbs rounded-circle" />
                                             </div>
