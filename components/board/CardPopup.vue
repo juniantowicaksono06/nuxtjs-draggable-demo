@@ -362,6 +362,12 @@
                     if(response.status == 'OK') {
                         this.data.data_item.checklists[this.data.target.checklistIndex].childs[this.data.target.checklistChildIndex].member_id = member
                         this.closeCardPopUp()
+                        this.$wsEmit({
+                            child_id: this.data.target.checklistChildId,
+                            data: {
+                                member: member
+                            }
+                        }, 'member_checklist')
                     }
                 })
                 .catch((error) => {

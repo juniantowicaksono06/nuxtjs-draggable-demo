@@ -471,6 +471,17 @@
         },
         methods: {
             webSocketEvent() {
+                this.wsInstance.on('member_checklist', (response) => {
+                    let result = JSON.parse(response)
+                    this.item.checklists.forEach((checklist) => {
+                        checklist.childs.forEach((child, index) => {
+                            if(child._id == result.child_id) {
+                                checklist.childs[index].member_id = result.data.member
+                            }  
+                        })
+                    })
+                    this.$forceUpdate()
+                })
                 this.wsInstance.on('edit_item', (response) => {
                     let result = JSON.parse(response)
                     if(result.item_id != this.item._id) return
