@@ -21,7 +21,7 @@
                     <div class="col-12 mt-2">
                         <h6>Card members</h6>
                         <div id="member_list_container">
-                            <div v-for="(member, member_index) in all_members" v-if="(member.name.toLowerCase().includes(search_member.toLowerCase()) || search_member.trim() == '' || member.email.toLowerCase().includes(search_member.toLowerCase()))" v-on:click="toggleCardMember($event, member)">
+                            <div v-for="(member, member_index) in data.data_item.members" v-if="(member.name.toLowerCase().includes(search_member.toLowerCase()) || search_member.trim() == '' || member.email.toLowerCase().includes(search_member.toLowerCase()))" v-on:click="toggleCardMember($event, member)">
                                 <div class="d-flex member-list-item mb-2">
                                     <div v-if="member.picture">
                                         <img :src="member.picture" style="width: 32px;"  class="rounded-circle" />
