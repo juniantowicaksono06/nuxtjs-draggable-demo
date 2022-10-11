@@ -31,6 +31,11 @@
         max-height: 500px;
         overflow-y: auto;
     }
+    .profile-checklist-thumbs {
+        width: 22px;
+        font-size: 10pt;
+        height: 22px;
+    }
 </style>
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
@@ -161,36 +166,51 @@
                                         <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" :value="child.done" v-on:change="checklistChildHandle(child, checklist._id)" v-if="!data.archive" />
                                         <input type="checkbox" class="form-control mr-0" :checked="child.done" style="width: 14px; height: 14px;" v-model="child.done" v-else disabled="true" />
                                     </div>
-                                    <div class="col-10 mt-0 px-0">
-                                        <input class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent" :style="child.done ? {
-                                            fontSize: '14px',
-                                            fontWeight: 'normal',
-                                            textDecoration: 'line-through'
-                                        } : {
-                                            fontSize: '14px',
-                                            fontWeight: 'normal'
-                                        }" v-on:keyup.enter="$event.target.blur()" :readonly="(child.done)" v-model="child.name" v-on:focus="storeOldValue(child.name)"  v-on:change="checklistChildHandle(child, checklist._id, 'name')" v-if="!data.archive" />
-                                        <span class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent"  :style="child.done ? {
-                                            fontSize: '14px',
-                                            fontWeight: 'normal',
-                                            textDecoration: 'line-through'
-                                        } : {
-                                            fontSize: '14px',
-                                            fontWeight: 'normal'
-                                        }" v-else>{{ child.name }}</span>
+                                    <div class="col-10 mt-0 px-0 d-flex justify-content-between">
+                                        <div>
+                                            <input class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent" :style="child.done ? {
+                                                fontSize: '14px',
+                                                fontWeight: 'normal',
+                                                textDecoration: 'line-through'
+                                            } : {
+                                                fontSize: '14px',
+                                                fontWeight: 'normal'
+                                            }" v-on:keyup.enter="$event.target.blur()" :readonly="(child.done)" v-model="child.name" v-on:focus="storeOldValue(child.name)"  v-on:change="checklistChildHandle(child, checklist._id, 'name')" v-if="!data.archive" />
+                                            <span class="ml-0 pl-0 pt-0 pr-0 mr-0 kanban-text input-transparent"  :style="child.done ? {
+                                                fontSize: '14px',
+                                                fontWeight: 'normal',
+                                                textDecoration: 'line-through'
+                                            } : {
+                                                fontSize: '14px',
+                                                fontWeight: 'normal'
+                                            }" v-else>{{ child.name }}</span>
+                                        </div>
+                                        <div v-if="child.member_id" class="px-1 py-1 position-relative member hover-pointer d-inline-block" v-b-tooltip.hover :title="child.member_id.name">
+                                            <div v-if="memberPicture[child.member_id._id]">
+                                                <img :src="memberPicture[child.member_id._id]" class="profile-checklist-thumbs rounded-circle" />
+                                            </div>
+                                            <div class="profile-checklist-thumbs bg-primary text-white text-center rounded-circle" v-else>
+                                                {{ generateProfileName(child.member_id.name) }}
+                                            </div>
+                                        </div>
+                                        <div v-if="!child.member_id" class="px-1 py-1 position-relative member hover-pointer d-inline-block" ref="card_info_ref" @click.stop="" v-b-tooltip.hover data-placement="top" title="Add member" style="margin: auto 0;" v-on:click="showCardPopUp($event, 'card_members', {}, { checklistChildIndex: child_index, checklistChildId: child._id, checklistIndex: checklist_index, checklistId: item.checklists[checklist_index]._id })">
+                                            <p class="profile-checklist-thumbs rounded-circle" style="text-align: center; margin: auto 0;background-color: #E5E7EB;">
+                                                <span><i class="fa fa-plus"></i></span>
+                                            </p>
+                                        </div>  
                                     </div>
-                                    <div class="float-right" style="margin-top: -5px;" v-if="!data.archive">
+                                    <div class="float-right" v-if="!data.archive">
                                         <span class="kanban-text btn btn-transparent" v-on:click="showCardPopUp($event, 'confirmation', {
-                                        btn_confirm_block: true,
-                                        btn_confirm_yes: 'danger',
-                                        confirm_text: 'Are you sure you want to delete this checklist?',
-                                        action_confirm_yes: deleteChecklistChild,
-                                        action_confirm_no: closeCardPopUp,
-                                        data: [
-                                            child_index, checklist.childs, checklist._id
-                                        ]
-                                    })" @click.stop="">
-                                            <i class="fa fa-trash"></i>
+                                            btn_confirm_block: true,
+                                            btn_confirm_yes: 'danger',
+                                            confirm_text: 'Are you sure you want to delete this checklist?',
+                                            action_confirm_yes: deleteChecklistChild,
+                                            action_confirm_no: closeCardPopUp,
+                                            data: [
+                                                child_index, checklist.childs, checklist._id
+                                            ]
+                                        })" @click.stop="">
+                                                <i class="fa fa-trash"></i>
                                         </span>
                                     </div>
                                 </div>
@@ -311,6 +331,7 @@
                         <CardPopup :data="{
                             card_type: card_type,
                             data_item: item,
+                            target: target,  
                         }"
                         :option="option"
                         :closeCardPopUp="closeCardPopUp" 
@@ -366,7 +387,13 @@
                 // Target Element for Profile Pop Up
                 target_element_profile: {},
                 old_value: '',
-                load_comment: false
+                load_comment: false,
+                target: {
+                    checklistId: null,
+                    checklistIndex: null,
+                    checklistChildId: null,
+                    checklistChildIndex: null,
+                }
             }
         },
         mounted() {
@@ -970,7 +997,8 @@
                     }
                 })
             },
-            showCardPopUp(event, type, option = {}) {
+            showCardPopUp(event, type, option = {}, target = {}) {
+                this.target = target;
                 this.show_popup = !this.show_popup
                 if(!this.show_popup) return
                 this.option = option

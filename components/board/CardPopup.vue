@@ -2,7 +2,7 @@
     <div class="card">
         <div class="card-header">
             <h6 class="text-center mb-0">
-                <span v-if="(data.card_type == 'members')">Members</span>
+                <span v-if="(data.card_type == 'members' || data.card_type == 'card_members')">Members</span>
                 <span v-if="(data.card_type == 'checklist')">Checklist</span>
                 <span v-if="(data.card_type == 'dates')">Dates</span>
                 <span v-if="(data.card_type == 'confirmation')">Confirmation</span>
@@ -13,6 +13,29 @@
         </div>
         <div class="card-body px-1 py-1">
             <!-- MEMBERS TYPES -->
+            <div id="card_members_type" :class="(data.card_type == 'card_members' ? 'type-active': 'type-inactive')">
+                <div class="row">
+                    <div class="col-12">
+                        <input class="form-control kanban-text" placeholder="Search members" v-model="search_member" />
+                    </div>
+                    <div class="col-12 mt-2">
+                        <h6>Card members</h6>
+                        <div id="member_list_container">
+                            <div v-for="(member, member_index) in all_members" v-if="(member.name.toLowerCase().includes(search_member.toLowerCase()) || search_member.trim() == '' || member.email.toLowerCase().includes(search_member.toLowerCase()))" v-on:click="toggleCardMember($event, member)">
+                                <div class="d-flex member-list-item mb-2">
+                                    <div v-if="member.picture">
+                                        <img :src="member.picture" style="width: 32px;"  class="rounded-circle" />
+                                    </div>
+                                    <div class="profile-pic-thumbs bg-primary text-white py-1 text-center rounded-circle" v-else style="width: 42px;">
+                                        {{ generateProfileName(member.name) }}
+                                    </div>
+                                    <p class="mb-0 mt-1 ml-2 profile-fullname member-fullname">{{ member.name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="members_type" :class="(data.card_type == 'members' ? 'type-active': 'type-inactive')">
                 <div class="row">
                     <div class="col-12">
@@ -317,6 +340,28 @@
                                 members: this.data.data_item.members
                             }
                         }, 'edit_item')
+                    }
+                })
+                .catch((error) => {
+                    alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            toggleCardMember(event, member) {
+                let config = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+                this.$axios.$put(`/api/card/checklist/child`, {
+                    id: this.data.target.checklistChildId,
+                    card_id: this.data.data_item._id,
+                    checklist_id: this.data.target.checklistId,
+                    member_id: member._id
+                }, config)
+                .then((response) => {
+                    if(response.status == 'OK') {
+                        this.data.data_item.checklists[this.data.target.checklistIndex].childs[this.data.target.checklistChildIndex].member_id = member
+                        this.closeCardPopUp()
                     }
                 })
                 .catch((error) => {
