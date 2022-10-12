@@ -53,7 +53,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="offset-9 form-group col-3">
-                            <select class="form-control" v-model="workspace" @change="loadGantt(workspace)">
+                            <select class="form-control" v-model="workspace" @change="loadGantt(workspace, false)">
                                 <option :value="work._id" v-for="work, index in myWorkspace" :key="index">{{ work.name }}</option>
                             </select>
                         </div>
@@ -120,7 +120,7 @@ export default {
             })
             return words.join(' ')
         },
-        loadGantt(workspace_id){
+        loadGantt(workspace_id, reload = true){
             this.isLoading = true
             this.gantt = new JSGantt.GanttChart(document.getElementById('GanttChartDIV'), 'day');
             let _this2 = this;
@@ -151,24 +151,18 @@ export default {
                 this.gantt.Draw();
                 this.isLoading = false
                 this.$nextTick(() => {
-                    this.refreshChart()
-                    new MutationObserver(() => {
-                        this.loaded_change = false
+                    if(reload) {
                         this.refreshChart()
-                    }).observe(document.getElementById('GanttChartDIV'), {
-                        childList: true
-                    })
-                    new ResizeObserver(() => {
-                        this.refreshChart()
-                    }).observe(document.getElementById('GanttChartDIV'))
-                    // document.getElementById('sidebar').addEventListener('click', () => {
-                    //     this.refreshChart()
-                    // })
-                    // new MutationObserver(() => {
-                    //     this.refreshChart()
-                    // }).observe(document.getElementById('sidebar'), {
-                    //     childList: true
-                    // })
+                        new MutationObserver(() => {
+                            this.loaded_change = false
+                            this.refreshChart()
+                        }).observe(document.getElementById('GanttChartDIV'), {
+                            childList: true
+                        })
+                        new ResizeObserver(() => {
+                            this.refreshChart()
+                        }).observe(document.getElementById('GanttChartDIV'))
+                    }
                 })
             })
         },
@@ -236,6 +230,12 @@ export default {
                             document.getElementById('GanttChartDIVline1').style.height = `${lineHeight}px`
                         }
                     }
+                }
+            })
+            let gcomplete = document.querySelectorAll('.gtasktable .gcomp')
+            gcomplete.forEach((value) => {
+                if(value.innerHTML == '<div></div>') {
+                    value.innerHTML = '<div>0%</div>'
                 }
             })
             this.loaded_change = true
