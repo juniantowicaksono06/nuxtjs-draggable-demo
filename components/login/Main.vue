@@ -30,44 +30,46 @@
                                     <h5 class="text-center">Login</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="form-group">
-                                        <label class="login-text">User Domain</label>
-                                        <div class="input-group">
-                                            <input v-model="username_input" type="text" class="form-control" placeholder="User Domain..." autofocus>
-                                            <div class="input-group-append">
-                                                <div class="btn btn-primary login-normal-cursor">
-                                                    <i class="fa fa-user"></i>
+                                    <form action="#" @submit="actionLogin">
+                                        <div class="form-group">
+                                            <label class="login-text">User Domain</label>
+                                            <div class="input-group">
+                                                <input v-model="username_input" type="text" class="form-control" placeholder="User Domain..." autofocus>
+                                                <div class="input-group-append">
+                                                    <div class="btn btn-primary login-normal-cursor">
+                                                        <i class="fa fa-user"></i>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="form-error text-danger">
-                                            <span class="kanban-text">{{ username_error }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="login-text">Password</label>
-                                        <div class="input-group">
-                                            <input v-model="password_input" type="password" class="form-control" placeholder="Password..." autofocus>
-                                            <div class="input-group-append">
-                                                <div class="btn btn-primary login-normal-cursor">
-                                                    <i class="fa fa-lock"></i>
-                                                </div>
+                                            <div class="form-error text-danger">
+                                                <span class="kanban-text">{{ username_error }}</span>
                                             </div>
                                         </div>
-                                        <div class="form-error text-danger">
-                                            <span class="kanban-text">{{ password_error }}</span>
+                                        <div class="form-group">
+                                            <label class="login-text">Password</label>
+                                            <div class="input-group">
+                                                <input v-model="password_input" type="password" class="form-control" placeholder="Password..." autofocus>
+                                                <div class="input-group-append">
+                                                    <div class="btn btn-primary login-normal-cursor">
+                                                        <i class="fa fa-lock"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-error text-danger">
+                                                <span class="kanban-text">{{ password_error }}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="input-group justify-content-between">
-                                            <!-- <div class="input-group-prepend ml-4">
-                                                <input type="checkbox" class="form-check-input" v-model="remember_me_input">
-                                                <label class="form-check-label">Remember me</label>
-                                            </div> -->
-                                            <button type="button" class="btn btn-primary" v-on:click="actionLogin">Sign In</button>
+                                        <div class="form-group">
+                                            <div class="input-group justify-content-between">
+                                                <!-- <div class="input-group-prepend ml-4">
+                                                    <input type="checkbox" class="form-check-input" v-model="remember_me_input">
+                                                    <label class="form-check-label">Remember me</label>
+                                                </div> -->
+                                                <button type="submit" class="btn btn-primary" >Sign In</button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    </div>
+                                    </form>
+                                    </div> 
                             </div>
                         </div>
                     </div>
@@ -107,7 +109,8 @@
                     }
                 }
             },
-            actionLogin() {
+            actionLogin(e) {
+                e.preventDefault()
                 this.isLoading = true
                 if(this.username_input.trim() == '' || this.password_input.trim() == '') {
                     this.triggerWarning('empty'); 
