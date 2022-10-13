@@ -14,7 +14,7 @@
     }
     .comment-text {
         font-size: 14px;
-        white-space: pre-wrap;
+        /* white-space: pre-wrap; */
     }
 </style>
 <template>
@@ -50,7 +50,7 @@
             <!-- <div class="card" v-if="!edit || data.user_domain != $store.state.auth.identity.user_domain"> -->
             <div class="card">
                 <div class="card-body px-2 py-2">
-                    <div class="comment-text">{{ data.text }}</div>
+                    <div class="comment-text" v-html="memberComment"></div>
                 </div>
             </div>
             <!-- <div class="form-group" v-if="edit">
@@ -85,6 +85,12 @@
         mounted() {
         },
         computed: {
+            memberComment() {
+                let re = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi
+                let comment = this.data.text
+                comment = comment.replace(/(<([^>]+)>)/gi, "");
+                return `<pre style="font-size: 1rem;white-space: break-spaces;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";">${comment.replace(re, "<a href='$1' target='_blank'>$1</a>")}</pre>`
+            },
             memberPicture() {
                 return this.$store.state.members.board_members_picture
             },
