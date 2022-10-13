@@ -17,6 +17,13 @@
         /* white-space: pre-wrap; */
     }
 </style>
+<style>
+    .comment-text pre {
+        white-space: break-spaces;
+        font-size: 1rem;
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    }
+</style>
 <template>
     <div class="row mb-3 mt-2">
         <div class="col-12" style="height: 48px;">
@@ -89,7 +96,7 @@
                 let re = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi
                 let comment = this.data.text
                 comment = comment.replace(/(<([^>]+)>)/gi, "");
-                return `<pre style="font-size: 1rem;white-space: break-spaces;font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";">${comment.replace(re, "<a href='$1' target='_blank'>$1</a>")}</pre>`
+                return `<pre>${comment.replace(re, "<a href='$1' target='_blank'>$1</a>")}</pre>`
             },
             memberPicture() {
                 return this.$store.state.members.board_members_picture
