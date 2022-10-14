@@ -240,6 +240,10 @@
                                 <i class="fa fa-clock"></i>
                                 <span class="kanban-text ml-2">Dates</span>
                             </div>
+                            <div class="modal-list-option" v-on:click="showCardPopUp($event, 'label')" ref="label_item_ref" @click.stop=''>
+                                <i class="fa fa-tag"></i>
+                                <span class="kanban-text ml-2">Label</span>
+                            </div>
                             <div class="mt-5">
                                 <div class="modal-list-option" v-on:click="showCardPopUp($event, 'confirmation', {
                                     btn_confirm_block: true,
@@ -331,7 +335,8 @@
                         <CardPopup :data="{
                             card_type: card_type,
                             data_item: item,
-                            target: target,  
+                            target: target,
+                            labels: ref.labels
                         }"
                         :option="option"
                         :closeCardPopUp="closeCardPopUp" 
@@ -382,6 +387,9 @@
                     current_member: {},
                     item: {}
                 },
+                ref: {
+                    labels: []
+                },
                 // Target Element for Pop Up
                 target_element: null,
                 // Target Element for Profile Pop Up
@@ -405,6 +413,9 @@
             this.initOption()
             document.addEventListener('click', this.onClickOutside)
             this.webSocketEvent()
+        },
+        created(){
+            this.getLabel()
         },
         beforeDestroy() {
             document.removeEventListener('click', this.onClickOutside)
@@ -660,6 +671,11 @@
                 //     })
                 //     this.item.members = members
                 // }
+            },
+            getLabel(){
+                this.$axios.$get(`/api/label`).then((response) => {
+                   this.ref.labels = response.data
+                })
             },
             storeOldValue(name) {
                 this.old_value = name

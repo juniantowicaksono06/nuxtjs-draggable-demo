@@ -1,3 +1,11 @@
+<style scoped>
+.card-label {
+    width: auto;
+    height: 30px;
+    border-radius: 5px;
+}
+</style>
+
 <template>
     <div class="card">
         <div class="card-header">
@@ -5,6 +13,7 @@
                 <span v-if="(data.card_type == 'members' || data.card_type == 'card_members')">Members</span>
                 <span v-if="(data.card_type == 'checklist')">Checklist</span>
                 <span v-if="(data.card_type == 'dates')">Dates</span>
+                <span v-if="(data.card_type == 'label')">Label</span>
                 <span v-if="(data.card_type == 'confirmation')">Confirmation</span>
                 <span class="float-right hover-pointer" v-on:click="closeCardPopUp">
                     <i class="fa fa-times"></i>
@@ -91,6 +100,15 @@
                     </div>
                 </div>
             </div>
+            <!-- LABEL TYPES -->
+            <div id="label_type" :class="(data.card_type == 'label' ? 'type-active': 'type-inactive')">
+                <div class="form-check my-2" v-for="label, index in data.labels" :key="index">
+                    <input class="form-check-input" type="radio" name="cardlabel" v-model="cardLabel" :checked="cardLabel == label._id" @change="() => cardLabel = label._id">
+                    <div :class="label.color + ' form-check-label card-label text-white px-3'" >
+                        {{ label.name }}
+                    </div>
+                </div>
+            </div>
             <!-- CONFIRMATION TYPES -->
             <div id="confirmation" :class="(data.card_type == 'confirmation' ? 'type-actice' : 'type-inactive')">
                 <div class="px-3">
@@ -117,6 +135,7 @@
                 deadline: this.data.data_item.deadline,
                 date_context: null,
                 all_members: this.$store.state.members.board_members,
+                cardLabel: null
             }
         },
         watch: {
