@@ -133,9 +133,8 @@
                                     </div>
                                 </div>
                                 <div v-if="item.labels != null">
-                                   
                                     <h6 class="kanban-text" :key="show_modal">Label</h6>
-                                    <span :class=" item.labels.color + ' badge text-white py-1 px-3'">{{ item.labels.name }}</span>
+                                    <a v-on:click="showCardPopUp($event, 'label')" ref="label_item_ref" @click.stop='' ><span :class=" item.labels.color + ' badge text-white py-1 px-3'">{{ item.labels.name }}</span></a>
                                 </div>
                             </div>
                         </div>
