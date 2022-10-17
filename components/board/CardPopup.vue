@@ -103,7 +103,7 @@
             <!-- LABEL TYPES -->
             <div id="label_type" :class="(data.card_type == 'label' ? 'type-active': 'type-inactive')">
                 <div class="form-check my-2" v-for="label, index in labels" :key="index">
-                    <input class="form-check-input" type="radio" name="cardlabel" v-model="cardLabel" :checked="cardLabel === label._id" @change="selectLabel(label)">
+                    <input class="form-check-input" type="radio" name="cardlabel" :checked="data.data_item.labels._id === label._id" @change="selectLabel(label)">
                     <div :class="label.color + ' form-check-label card-label text-white px-3'" >
                         {{ label.name }}
                     </div>
@@ -137,8 +137,7 @@
                 selected_date: this.data.data_item.deadline.date == null ? this.currentDate() : this.data.data_item.deadline.date,
                 deadline: this.data.data_item.deadline,
                 date_context: null,
-                all_members: this.$store.state.members.board_members,
-                cardLabel: null
+                all_members: this.$store.state.members.board_members
             }
         },
         watch: {
