@@ -36,9 +36,18 @@
         font-size: 10pt;
         height: 22px;
     }
+    .card-label {
+        width: 45px;
+        height: 10px;
+        border-radius: 5px;
+        /* margin: 9px; */
+        margin-left: 8px;
+        margin-top: 8px;
+    }
 </style>
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
+        <span v-if="item.labels != null" :class="item.labels.color + ' card-label'"></span>
         <div class="py-2 px-2">
             <span class="kanban-text">{{ item.name }}</span>
         </div>
@@ -122,6 +131,11 @@
                                             <h6 class="kanban-text mb-0">{{ convertDate(item.deadline.date, true) }}</h6>
                                         </div>
                                     </div>
+                                </div>
+                                <div v-if="item.labels != null">
+                                   
+                                    <h6 class="kanban-text" :key="show_modal">Label</h6>
+                                    <span :class=" item.labels.color + ' badge text-white py-1 px-3'">{{ item.labels.name }}</span>
                                 </div>
                             </div>
                         </div>
@@ -335,8 +349,7 @@
                         <CardPopup :data="{
                             card_type: card_type,
                             data_item: item,
-                            target: target,
-                            labels: ref.labels
+                            target: target
                         }"
                         :option="option"
                         :closeCardPopUp="closeCardPopUp" 
@@ -387,9 +400,6 @@
                     current_member: {},
                     item: {}
                 },
-                ref: {
-                    labels: []
-                },
                 // Target Element for Pop Up
                 target_element: null,
                 // Target Element for Profile Pop Up
@@ -413,9 +423,6 @@
             this.initOption()
             document.addEventListener('click', this.onClickOutside)
             this.webSocketEvent()
-        },
-        created(){
-            this.getLabel()
         },
         beforeDestroy() {
             document.removeEventListener('click', this.onClickOutside)
@@ -671,11 +678,6 @@
                 //     })
                 //     this.item.members = members
                 // }
-            },
-            getLabel(){
-                this.$axios.$get(`/api/label`).then((response) => {
-                   this.ref.labels = response.data
-                })
             },
             storeOldValue(name) {
                 this.old_value = name

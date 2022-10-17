@@ -10,7 +10,7 @@
                     <CardItem :data="{
                         item: item,
                         card_name: data.list.name,
-                        index_item: index_item
+                        index_item: index_item,
                     }" @archiveItem="archiveItem" />
                 </div>
             </draggable>

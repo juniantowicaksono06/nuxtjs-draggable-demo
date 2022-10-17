@@ -102,12 +102,15 @@
             </div>
             <!-- LABEL TYPES -->
             <div id="label_type" :class="(data.card_type == 'label' ? 'type-active': 'type-inactive')">
-                <div class="form-check my-2" v-for="label, index in data.labels" :key="index">
-                    <input class="form-check-input" type="radio" name="cardlabel" v-model="cardLabel" :checked="cardLabel == label._id" @change="() => cardLabel = label._id">
+                <div class="form-check my-2" v-for="label, index in labels" :key="index">
+                    <input class="form-check-input" type="radio" name="cardlabel" v-model="cardLabel" :checked="cardLabel === label._id" @change="selectLabel(label)">
                     <div :class="label.color + ' form-check-label card-label text-white px-3'" >
                         {{ label.name }}
                     </div>
                 </div>
+                <button class="btn btn-block btn-light" v-if="(data.data_item.labels)" v-on:click="removeLabel">
+                    Remove
+                </button>
             </div>
             <!-- CONFIRMATION TYPES -->
             <div id="confirmation" :class="(data.card_type == 'confirmation' ? 'type-actice' : 'type-inactive')">
@@ -148,6 +151,9 @@
         computed: {
             wsInstance: function() {
                 return this.$getWsInstance()
+            },
+            labels: function(){
+                return this.$store.state.card.labels
             },
             btnYesType() {
                 if(this.option.btn_confirm_yes) return `btn btn-${this.option.btn_confirm_yes}`
@@ -385,6 +391,29 @@
                 })
                 .catch((error) => {
                     alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            selectLabel(label){
+                this.cardLabel = label._id
+                this.$axios.$put('/api/card', {
+                    id: this.data.data_item._id,
+                    labels: this.cardLabel
+                }).then((response) => {
+                    if (response.status == 'OK') {
+                        this.data.data_item.labels = label
+                        this.closeCardPopUp()
+                    }
+                })
+            },
+            removeLabel(){
+                this.$axios.$put('/api/card', {
+                    id: this.data.data_item._id,
+                    labels: null
+                }).then((response) => {
+                    if (response.status == 'OK') {
+                        this.data.data_item.labels = null
+                        this.closeCardPopUp()
+                    }
                 })
             }
         }
