@@ -278,17 +278,6 @@
                                 <i class="fa fa-tag"></i>
                                 <span class="kanban-text ml-2">Label</span>
                             </div>
-                            <div class="mt-5">
-                                <div class="modal-list-option" v-on:click="showCardPopUp($event, 'confirmation', {
-                                    btn_confirm_block: true,
-                                    btn_confirm_yes: 'danger',
-                                    confirm_text: 'Are you sure you want to archive this card?',
-                                    action_confirm_yes: archiveItem,
-                                    action_confirm_no: closeCardPopUp
-                                })" ref="archive_item_ref" @click.stop="">
-                                    <i class="fa fa-archive"></i>
-                                    <span class="kanban-text ml-2">Archive</span>
-                                </div>
                             <div class="modal-list-option" v-on:click="showCardPopUp($event, 'confirmation', {
                                 btn_confirm_block: true,
                                 btn_confirm_yes: 'danger',
@@ -384,7 +373,6 @@
                         :closeCardPopUp="closeCardPopUp" 
                         :generateProfileName="generateProfileName"
                        />
-                    </div>
                     </div>
                 </div>
             </b-modal>
@@ -547,7 +535,7 @@
                     })
                     this.$forceUpdate()
                 })
-                
+
                 this.wsInstance.on('edit_item', (response) => {
                     let result = JSON.parse(response)
                     if(result.item_id != this.item._id) return
