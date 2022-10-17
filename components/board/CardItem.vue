@@ -1,7 +1,21 @@
+<style>
+    .description-off pre {
+        white-space: break-spaces;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+</style>
 <style scoped>
     #comment_list {
         max-height: 500px;
         overflow: auto;
+    }
+    .description-off {
+        border: 1px solid lightgray;
+        min-height: 134px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        max-height: 134px;
+        overflow-y: auto;
     }
     .log-user {
         font-size: 14px;
@@ -142,12 +156,19 @@
                     <div class="row ml-0 pl-0 pr-0" id="modal_content">
                         <div :class="data.archive ? 'col-12 col-sm-12 col-md-12 col-lg-12 pl-0 mt-2' : 'col-12 col-sm-12 col-md-12 col-lg-9 pl-0 mt-2'">
                             <h5 class="ml-0 pl-0 pr-0 no-select font-weight-bold">Description</h5>
-                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditButton('description')" rows="5" v-if="!data.archive"></textarea>
-                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" rows="5" disabled="true" v-else></textarea>
-                            <div :class="(show_edit_button['description'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')" v-if="!data.archive">
+                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" v-on:focus="showEditButton('description')" rows="5" v-show="!data.archive && description_active" ref="card_description_ref" v-on:blur="disableDescription"></textarea>
+                            <div v-show="!description_active && !data.archive" class="description-off" v-on:click="enableDescription($event)">
+                                <div v-if="item.description" v-html="inactive_description">
+                                </div>
+                                <div v-else>
+                                    Add description
+                                </div>
+                            </div>
+                            <textarea class="form-control" placeholder="Add description" v-model="item.description" style="resize: none;" rows="5" disabled="true" v-show="data.archive"></textarea>
+                            <!-- <div :class="(show_edit_button['description'] ? 'form-group d-block mt-2' : 'form-group d-none mt-2')" v-if="!data.archive">
                                 <button class="btn btn-primary" v-on:click="changeDescription">Save Description</button>
                                 <button class="btn btn-default" v-on:click="hideEditButton('description')"><i class="fa fa-times"></i></button>
-                            </div>
+                            </div> -->
                             <!-- CHECKLISTS -->
                             <div class="mt-2 mb-2" v-for="(checklist, checklist_index) in item.checklists" :key="checklist._id" v-if="item.checklists.length > 0">
                                 <div class="d-flex mb-2">
@@ -268,6 +289,15 @@
                                     <i class="fa fa-archive"></i>
                                     <span class="kanban-text ml-2">Archive</span>
                                 </div>
+                            <div class="modal-list-option" v-on:click="showCardPopUp($event, 'confirmation', {
+                                btn_confirm_block: true,
+                                btn_confirm_yes: 'danger',
+                                confirm_text: 'Are you sure you want to archive this card?',
+                                action_confirm_yes: archiveItem,
+                                action_confirm_no: closeCardPopUp
+                            })" ref="archive_item_ref" @click.stop="">
+                                <i class="fa fa-archive"></i>
+                                <span class="kanban-text ml-2">Archive</span>
                             </div>
                         </div>
                         <div class="col-12 col-sm-12 col-md-12 col-lg-9 pl-0 mt-2">
@@ -355,6 +385,7 @@
                         :generateProfileName="generateProfileName"
                        />
                     </div>
+                    </div>
                 </div>
             </b-modal>
         </div>
@@ -372,6 +403,7 @@
         data() {
             return {
                 edit_date: false,
+                description_active: false,
                 profile_key: 0,
                 item: this.data.item,
                 show_modal: false,
@@ -427,6 +459,12 @@
             document.removeEventListener('click', this.onClickOutside)
         },
         computed: {
+            inactive_description() {
+                let re = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi
+                let description = this.item.description
+                description = description.replace(/(<([^>]+)>)/gi, "");
+                return `<pre style="font-size: 1rem;">${description.replace(re, "<a target='_blank' href='$1'>$1</a>")}</pre>`
+            },
             wsInstance: function() {
                 return this.$getWsInstance()
             },
@@ -497,6 +535,19 @@
                         this.$forceUpdate()
                     }
                 })
+
+                this.wsInstance.on('member_checklist', (response) => {
+                    let result = JSON.parse(response)
+                    this.item.checklists.forEach((checklist) => {
+                        checklist.childs.forEach((child, index) => {
+                            if(child._id == result.child_id) {
+                                checklist.childs[index].member_id = result.data.member
+                            }  
+                        })
+                    })
+                    this.$forceUpdate()
+                })
+                
                 this.wsInstance.on('edit_item', (response) => {
                     let result = JSON.parse(response)
                     if(result.item_id != this.item._id) return
@@ -535,6 +586,22 @@
                     let result = JSON.parse(response)
                     if(result.item_id != this.item._id) return
                     this.item['comments'] = result.data['comments']
+                })
+            },
+            disableDescription() {
+                this.description_active = false
+                this.saveDescription()
+            },
+            enableDescription(event) {
+                // console.log(event.target.tagName)
+                if(event.target.tagName == 'A') {
+                    return
+                }
+                this.description_active = true
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        this.$refs.card_description_ref.focus()
+                    }, 1)
                 })
             },
             initModal() {
@@ -696,13 +763,13 @@
             hideEditButton(target) {
                 this.show_edit_button[`${target}`] = false
             },
-            changeDescription() {
+            saveDescription() {
                 let config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }
-                let description = this.item.description.trim()
+                let description = this.item.description || this.item.description != null ? this.item.description.trim() : ''
                 this.$axios.$put(`/api/card`, new URLSearchParams({
                     id: this.item._id,
                     description: description
