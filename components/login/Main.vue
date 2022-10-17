@@ -30,7 +30,7 @@
                                     <h5 class="text-center">Login</h5>
                                 </div>
                                 <div class="card-body">
-                                    <form action="#" @submit="actionLogin">
+                                    <form v-on:submit.prevent="actionLogin">
                                         <div class="form-group">
                                             <label class="login-text">User Domain</label>
                                             <div class="input-group">
@@ -109,8 +109,7 @@
                     }
                 }
             },
-            actionLogin(e) {
-                e.preventDefault()
+            actionLogin() {
                 this.isLoading = true
                 if(this.username_input.trim() == '' || this.password_input.trim() == '') {
                     this.triggerWarning('empty'); 

@@ -50,9 +50,18 @@
         font-size: 10pt;
         height: 22px;
     }
+    .card-label {
+        width: 45px;
+        height: 10px;
+        border-radius: 5px;
+        /* margin: 9px; */
+        margin-left: 8px;
+        margin-top: 8px;
+    }
 </style>
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
+        <span v-if="item.labels != null" :class="item.labels.color + ' card-label'"></span>
         <div class="py-2 px-2">
             <span class="kanban-text">{{ item.name }}</span>
         </div>
@@ -136,6 +145,10 @@
                                             <h6 class="kanban-text mb-0">{{ convertDate(item.deadline.date, true) }}</h6>
                                         </div>
                                     </div>
+                                </div>
+                                <div v-if="item.labels != null">
+                                    <h6 class="kanban-text" :key="show_modal">Label</h6>
+                                    <a v-on:click="showCardPopUp($event, 'label')" ref="label_item_ref" @click.stop='' ><span :class=" item.labels.color + ' badge text-white py-1 px-3'">{{ item.labels.name }}</span></a>
                                 </div>
                             </div>
                         </div>
@@ -261,6 +274,21 @@
                                 <i class="fa fa-clock"></i>
                                 <span class="kanban-text ml-2">Dates</span>
                             </div>
+                            <div class="modal-list-option" v-on:click="showCardPopUp($event, 'label')" ref="label_item_ref" @click.stop=''>
+                                <i class="fa fa-tag"></i>
+                                <span class="kanban-text ml-2">Label</span>
+                            </div>
+                            <div class="mt-5">
+                                <div class="modal-list-option" v-on:click="showCardPopUp($event, 'confirmation', {
+                                    btn_confirm_block: true,
+                                    btn_confirm_yes: 'danger',
+                                    confirm_text: 'Are you sure you want to archive this card?',
+                                    action_confirm_yes: archiveItem,
+                                    action_confirm_no: closeCardPopUp
+                                })" ref="archive_item_ref" @click.stop="">
+                                    <i class="fa fa-archive"></i>
+                                    <span class="kanban-text ml-2">Archive</span>
+                                </div>
                             <div class="modal-list-option" v-on:click="showCardPopUp($event, 'confirmation', {
                                 btn_confirm_block: true,
                                 btn_confirm_yes: 'danger',
@@ -350,12 +378,13 @@
                         <CardPopup :data="{
                             card_type: card_type,
                             data_item: item,
-                            target: target,  
+                            target: target
                         }"
                         :option="option"
                         :closeCardPopUp="closeCardPopUp" 
                         :generateProfileName="generateProfileName"
                        />
+                    </div>
                     </div>
                 </div>
             </b-modal>
@@ -497,6 +526,16 @@
         },
         methods: {
             webSocketEvent() {
+                this.wsInstance.on('edit_label', (response) => {
+                    let result = JSON.parse(response)
+                    if(result.item_id != this.item._id) return
+                    if(Object.keys(result.data).length > 0) {
+                        const {labels} = result.data
+                        this.item.labels = labels
+                        this.$forceUpdate()
+                    }
+                })
+
                 this.wsInstance.on('member_checklist', (response) => {
                     let result = JSON.parse(response)
                     this.item.checklists.forEach((checklist) => {
@@ -508,6 +547,7 @@
                     })
                     this.$forceUpdate()
                 })
+                
                 this.wsInstance.on('edit_item', (response) => {
                     let result = JSON.parse(response)
                     if(result.item_id != this.item._id) return

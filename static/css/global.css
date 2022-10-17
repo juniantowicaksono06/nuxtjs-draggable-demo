@@ -346,8 +346,9 @@ body, html {
     }
 }
 #member_and_deadline_container {
-    display: grid;
-    grid-template-columns: auto 50%;
+    display: flex;
+    justify-content: space-between;
+    width: 50%;
 }
 .bg-gray {
     background-color: rgba(9,30,66,0.07843);

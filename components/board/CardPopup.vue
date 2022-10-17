@@ -1,3 +1,11 @@
+<style scoped>
+.card-label {
+    width: auto;
+    height: 30px;
+    border-radius: 5px;
+}
+</style>
+
 <template>
     <div class="card">
         <div class="card-header">
@@ -5,6 +13,7 @@
                 <span v-if="(data.card_type == 'members' || data.card_type == 'card_members')">Members</span>
                 <span v-if="(data.card_type == 'checklist')">Checklist</span>
                 <span v-if="(data.card_type == 'dates')">Dates</span>
+                <span v-if="(data.card_type == 'label')">Label</span>
                 <span v-if="(data.card_type == 'confirmation')">Confirmation</span>
                 <span class="float-right hover-pointer" v-on:click="closeCardPopUp">
                     <i class="fa fa-times"></i>
@@ -91,6 +100,18 @@
                     </div>
                 </div>
             </div>
+            <!-- LABEL TYPES -->
+            <div id="label_type" :class="(data.card_type == 'label' ? 'type-active': 'type-inactive')">
+                <div class="form-check my-2" v-for="label, index in labels" :key="index">
+                    <input class="form-check-input" type="radio" name="cardlabel" :checked="data.data_item.labels && data.data_item.labels._id === label._id" @change="selectLabel(label)">
+                    <div :class="label.color + ' form-check-label card-label text-white px-3'" >
+                        {{ label.name }}
+                    </div>
+                </div>
+                <button class="btn btn-block btn-light" v-if="(data.data_item.labels)" v-on:click="removeLabel">
+                    Remove
+                </button>
+            </div>
             <!-- CONFIRMATION TYPES -->
             <div id="confirmation" :class="(data.card_type == 'confirmation' ? 'type-actice' : 'type-inactive')">
                 <div class="px-3">
@@ -116,7 +137,7 @@
                 selected_date: this.data.data_item.deadline.date == null ? this.currentDate() : this.data.data_item.deadline.date,
                 deadline: this.data.data_item.deadline,
                 date_context: null,
-                all_members: this.$store.state.members.board_members,
+                all_members: this.$store.state.members.board_members
             }
         },
         watch: {
@@ -129,6 +150,9 @@
         computed: {
             wsInstance: function() {
                 return this.$getWsInstance()
+            },
+            labels: function(){
+                return this.$store.state.card.labels
             },
             btnYesType() {
                 if(this.option.btn_confirm_yes) return `btn btn-${this.option.btn_confirm_yes}`
@@ -372,6 +396,41 @@
                 })
                 .catch((error) => {
                     alert("Error: Telah terjadi kesalahan")
+                })
+            },
+            selectLabel(label){
+                this.cardLabel = label._id
+                this.$axios.$put('/api/card', {
+                    id: this.data.data_item._id,
+                    labels: this.cardLabel
+                }).then((response) => {
+                    if (response.status == 'OK') {
+                        this.data.data_item.labels = label
+                        this.$wsEmit({
+                            item_id: this.data.data_item._id,
+                            data: {
+                                labels: label
+                            }
+                        }, 'edit_label')
+                        this.closeCardPopUp()
+                    }
+                })
+            },
+            removeLabel(){
+                this.$axios.$put('/api/card', {
+                    id: this.data.data_item._id,
+                    labels: null
+                }).then((response) => {
+                    if (response.status == 'OK') {
+                        this.data.data_item.labels = null
+                        this.$wsEmit({
+                            item_id: this.data.data_item._id,
+                            data: {
+                                labels: null
+                            }
+                        }, 'edit_label')
+                        this.closeCardPopUp()
+                    }
                 })
             }
         }

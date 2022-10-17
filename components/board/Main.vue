@@ -265,6 +265,7 @@
         async mounted() {
             this.board_id = this.$route.query.board_id
             this.loadDataBoard()
+            this.getLabel()
             this.resizeKanbanContainer()
             new ResizeObserver(() => {
                 this.resizeKanbanContainer()
@@ -431,6 +432,11 @@
                 })
                 this.wsInstance.on('add_list', (data) => {
                     this.board.lists.push(JSON.parse(data))
+                })
+            },
+            getLabel(){
+                this.$axios.$get(`/api/label`).then((response) => {
+                   this.$store.commit('card/loadLabels', response.data)
                 })
             },
             fileChange() {
