@@ -489,6 +489,15 @@
         },
         methods: {
             webSocketEvent() {
+                this.wsInstance.on('edit_label', (response) => {
+                    let result = JSON.parse(response)
+                    if(result.item_id != this.item._id) return
+                    if(Object.keys(result.data).length > 0) {
+                        const {labels} = result.data
+                        this.item.labels = labels
+                        this.$forceUpdate()
+                    }
+                })
                 this.wsInstance.on('edit_item', (response) => {
                     let result = JSON.parse(response)
                     if(result.item_id != this.item._id) return

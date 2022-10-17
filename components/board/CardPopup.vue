@@ -400,6 +400,12 @@
                 }).then((response) => {
                     if (response.status == 'OK') {
                         this.data.data_item.labels = label
+                        this.$wsEmit({
+                            item_id: this.data.data_item._id,
+                            data: {
+                                labels: label
+                            }
+                        }, 'edit_label')
                         this.closeCardPopUp()
                     }
                 })
@@ -411,6 +417,12 @@
                 }).then((response) => {
                     if (response.status == 'OK') {
                         this.data.data_item.labels = null
+                        this.$wsEmit({
+                            item_id: this.data.data_item._id,
+                            data: {
+                                labels: null
+                            }
+                        }, 'edit_label')
                         this.closeCardPopUp()
                     }
                 })
