@@ -51,6 +51,14 @@
                             <div class="container">
                                 <div class="row mb-2">
                                     <div class="col-12">
+                                        <h5>Workspace</h5>
+                                    </div>
+                                    <div class="col-12 col-sm-12 col-md-12 col-lg-3 mb-3">
+                                        <select class="form-control" v-model="workspace">
+                                            <option :value="work._id" v-for="work, index in myWorkspace" :key="index">{{ work.name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
                                         <h5>Choose a Date</h5>
                                     </div>
                                     <div class="col-12 col-sm-12 col-md-12 col-lg-4">
@@ -115,9 +123,11 @@
                     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
                 })).format('YYYY-M-D'),
                 data_mom: [],
+                workspace: null
             }
         },
         mounted() {
+            this.workspace = this.myWorkspace[0]._id
             this.searchMom()
             this.webSocketEvent()
         },
@@ -183,6 +193,9 @@
             wsInstance: function() {
                 return this.$getWsInstance()
             },
+            myWorkspace: function(){
+                return this.$store.state.auth.identity.workspace
+            }
         },
         methods: {
             webSocketEvent() {
@@ -200,7 +213,7 @@
                 return `${moment(date_1).format('D MMMM YYYY')}`
             },
             searchMom() {
-                this.$axios.$get(`/api/mom?start=${this.start_date}&end=${this.end_date}`)
+                this.$axios.$get(`/api/mom?start=${this.start_date}&end=${this.end_date}&workspace_id=${this.workspace}`)
                 .then((response) => {
                     if(response.status != 'OK') return
                     const { data } = response
