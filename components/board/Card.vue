@@ -6,7 +6,7 @@
         </div>
         <div class="card-body kanban-body py-1 px-2" ref="card_body_ref">
             <draggable group="task" v-model="data.list.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="data.list._id">
-                <div v-for="(item, index_item) in cards" :key="item._id" draggable=".kanban-item" v-on:mousedown="dragCard(item, data.list._id)">
+                <div v-for="(item, index_item) in cards" :key="item._id" draggable=".kanban-item" :data-id="item._id">
                     <CardItem :data="{
                         item: item,
                         card_name: data.list.name,
@@ -139,13 +139,11 @@
             storeOldValue() {
                 this.old_value = this.data.list.name
             },
-            dragCard(item, card_id){
-                this.drag_data['id'] = item._id
-                this.drag_data['board_id'] = this.data.board_id
-                this.drag_data['origin_list_id'] = card_id
-            },
             endDrag(event) {
+                this.drag_data['id'] = event.item.dataset.id
+                this.drag_data['board_id'] = this.data.board_id
                 this.drag_data['dest_list_id'] = event.to.dataset.id
+                this.drag_data['origin_list_id'] = event.from.dataset.id
                 if(this.drag_data['dest_list_id'] == this.drag_data['origin_list_id']) return
                 let config = {
                     headers: {
