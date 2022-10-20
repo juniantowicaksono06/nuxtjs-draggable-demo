@@ -26,9 +26,15 @@
                 <div class="card-body">
                     <div id="ideation">
                         <b-button variant="primary" v-on:click="openModal"><i class="fa fa-plus"></i> Add Ideation</b-button>
+                        <div class="offset-9 form-group col-3">
+                            <label>Select Workspace</label>
+                            <select class="form-control" v-model="workspace" @change="loadIdeation">
+                                <option :value="work._id" v-for="work, index in myWorkspace" :key="index">{{ work.name }}</option>
+                            </select>
+                        </div>
                         <!-- <draggable v-model="ideation_data" tag="div" animation="250" class="pb-5 pt-3 row" id="ideation_data" @end="endDrag"> -->
                             <div class="row pb-5 pt-3" v-if="ideation_data.length > 0">
-                                <div class="col-12 col-md-4 col-lg-4 mb-3" v-for="(idea, index) in ideation_data" :key="idea._id">
+                                <div class="col-12 col-md-4 col-lg-4 mb-3" v-for="(idea) in ideation_data" :key="idea._id">
                                     <Card :data="idea" @deleteIdeation="deleteIdeation" />
                                 </div>
                             </div>
@@ -52,6 +58,12 @@
                 <span class="text-danger">{{ ideation_input_error['title'] }}</span>
             </div>
             <div class="mb-2">
+                <label>Workspace</label>
+                <select class="form-control" v-model="ideation_input.workspace_id">
+                    <option :value="work._id" v-for="work, index in myWorkspace" :key="index">{{ work.name }}</option>
+                </select>
+            </div>
+            <div class="mb-2">
                 <label for="title">Description</label>
                 <textarea class="form-control" placeholder="Description" v-model="ideation_input.description"></textarea>
                 <span class="text-danger">{{ ideation_input_error['description'] }}</span>
@@ -71,12 +83,14 @@
                 ideation_data: [],
                 ideation_input: {
                     title: '',
-                    description: ''
+                    description: '',
+                    workspace_id: ''
                 },
                 ideation_input_error: {
                     title: '',
                     description: ''
                 },
+                workspace: null,
                 drag_data: {}
             }
         },
@@ -88,6 +102,9 @@
             wsInstance: function() {
                 return this.$getWsInstance()
             },
+            myWorkspace: function(){
+                return this.$store.state.auth.identity.workspace
+            }
         },
         methods: {
             webSocketEvent() {
@@ -172,7 +189,7 @@
             },
             loadIdeation() {
                 this.isLoading = true
-                this.$axios.$get('/api/ideation')
+                this.$axios.$get(`/api/ideation?workspace_id=${this.workspace}`)
                 .then((response) => {
                     if(response.status == 'OK') {
                         const { data } = response
@@ -200,7 +217,8 @@
                     }
                     this.$axios.$post(`/api/ideation`, {
                         title: this.ideation_input['title'],
-                        description: this.ideation_input['description']
+                        description: this.ideation_input['description'],
+                        workspace_id: this.ideation_input['workspace_id']
                     }, config)
                     .then((response) => {
                         if(response.status == 'OK') {
@@ -237,6 +255,7 @@
             }
         },
         mounted() {
+            this.workspace = this.myWorkspace[0]._id
             this.webSocketEvent()
             this.loadIdeation()
         }
