@@ -63,19 +63,9 @@
                 return this.$getWsInstance()
             },
             cards(){
-                return this.data.list.cards.map(card => {
-                    return {
-                        ...card,
-                        labels: card.labels ? card.labels : { order: 5 }
-                    }
-                })
-                .sort(function(a, b){
+                return this.data.list.cards.sort(function(a, b){
                     return new Date(b.updatedAt) - new Date(a.updatedAt)
                 })
-                .sort(function(a, b){
-                    return a.labels.order < b.labels.order ? -1 : 1
-                })
-               
             }
         },
         methods: {
