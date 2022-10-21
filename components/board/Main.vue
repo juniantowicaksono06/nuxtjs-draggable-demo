@@ -741,7 +741,15 @@
                             this.$router.push('/')
                             return
                         }
-                        this.board = response.data
+                        
+                        let lists = response.data.lists.map(list => ({
+                            ...list,
+                            cards: list.cards.sort(function(a, b){
+                                return new Date(b.updatedAt) - new Date(a.updatedAt)
+                            })
+                        }))
+                        this.board = {...response.data, lists}
+                        
                         this.$nextTick(() => {
                             this.resizeBoard()
                             document.title = `${this.board.name} Board`

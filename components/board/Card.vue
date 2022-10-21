@@ -6,7 +6,7 @@
         </div>
         <div class="card-body kanban-body py-1 px-2" ref="card_body_ref">
             <draggable group="task" v-model="data.list.cards" ghostClass="kanban-ghost-class" dragClass="kanban-drag-class" animation=250 @end="endDrag" :data-id="data.list._id">
-                <div v-for="(item, index_item) in cards" :key="item._id" draggable=".kanban-item" :data-id="item._id">
+                <div v-for="(item, index_item) in data.list.cards" :key="item._id" draggable=".kanban-item" :data-id="item._id">
                     <CardItem :data="{
                         item: item,
                         card_name: data.list.name,
@@ -61,11 +61,6 @@
         computed: {
             wsInstance() {
                 return this.$getWsInstance()
-            },
-            cards(){
-                return this.data.list.cards.sort(function(a, b){
-                    return new Date(b.updatedAt) - new Date(a.updatedAt)
-                })
             }
         },
         methods: {
