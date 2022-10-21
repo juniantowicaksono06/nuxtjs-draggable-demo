@@ -61,7 +61,7 @@
 </style>
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
-        <span v-if="item.labels._id != null" :class="item.labels.color + ' card-label'"></span>
+        <span v-if="item.labels != null" :class="item.labels.color + ' card-label'"></span>
         <div class="py-2 px-2">
             <span class="kanban-text">{{ item.name }}</span>
         </div>
@@ -146,7 +146,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="item.labels._id != null">
+                                <div v-if="item.labels != null">
                                     <h6 class="kanban-text" :key="show_modal">Label</h6>
                                     <a v-on:click="showCardPopUp($event, 'label')" ref="label_item_ref" @click.stop='' ><span :class=" item.labels.color + ' badge text-white py-1 px-3'">{{ item.labels.name }}</span></a>
                                 </div>
