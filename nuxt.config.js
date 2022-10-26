@@ -43,6 +43,7 @@ export default {
     '~/plugins/axios',
     '~/plugins/global',
     '~/plugins/socket_io',
+    '~/plugins/datepicker'
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

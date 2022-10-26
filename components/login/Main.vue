@@ -30,7 +30,7 @@
                                     <h5 class="text-center">Login</h5>
                                 </div>
                                 <div class="card-body">
-                                    <form v-on:submit.prevent="actionLogin">
+                                    <form method="POST" action="#" v-on:submit.prevent="actionLogin">
                                         <div class="form-group">
                                             <label class="login-text">User Domain</label>
                                             <div class="input-group">

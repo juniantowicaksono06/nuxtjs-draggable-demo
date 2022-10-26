@@ -45,8 +45,10 @@
         <div class="row">
             <div class="col-12">
                 <div class="card card-background">
+                    <div class="card-header">
+                            <h5 class="mb-0">Minutes of Meeting</h5>
+                    </div>
                     <div class="card-body">
-                        <h3>Minutes of Meeting</h3>
                         <div class="mt-3">
                             <div class="container">
                                 <div class="row mb-2">
