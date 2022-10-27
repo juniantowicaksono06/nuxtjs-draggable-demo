@@ -54,8 +54,11 @@
                 <b-button variant="primary" v-on:click="updateCard($event)"><i class="fa fa-save"></i> Save</b-button>
                 <b-button variant="danger" v-on:click="cancelDescription($event)"><i class="fa fa-times"></i> Cancel</b-button>
             </div>
-            <div class="mt-2 d-flex justify-content-end" v-else>
-                <b-button variant="danger" v-on:click="confirmDelete($event)" class="btn-delete d-none"><i class="fa fa-trash"></i> Delete</b-button>
+            <div class="mt-2 d-flex justify-content-between" v-else>
+                <div class="profile-pic-thumbs bg-primary text-white text-center py-1 rounded-circle btn-delete d-none" v-b-tooltip.hover :title="data.createdBy.name">
+                    {{ generateProfileName(data.createdBy.name) }}
+                </div>
+                <b-button variant="danger" v-if="$store.state.auth.identity._id ===  data.createdBy._id" v-on:click="confirmDelete($event)" class="btn-delete d-none"><i class="fa fa-trash"></i> Delete</b-button>
             </div>
         </div>
     </div>
@@ -149,6 +152,19 @@
                 .catch((error) => {
                     // this.$bvModal.hide('add_ideation')
                 })
+            },
+            generateProfileName(fullname) {
+                if(fullname) {
+                    let split_name = fullname.split(' ')
+                    let initial = '';
+                    if(split_name.length > 1) {
+                        initial = `${split_name[0].charAt(0)}${split_name[split_name.length - 1].charAt(0)}`
+                    }
+                    else if(split_name.length == 1) {
+                        initial = `${split_name[0].charAt(0)}`
+                    }
+                    return initial
+                }
             }
         },
         props: {

@@ -61,7 +61,7 @@
 </style>
 <template>
     <div class="card kanban-item mb-1 mt-1" v-on:click="showModalItem($event, item, kanban_name)">
-        <span v-if="item.labels != null" :class="item.labels.color + ' card-label'"></span>
+        <span v-if="item.labels != null" :class="item.labels.color + ' card-label'" v-b-tooltip.hover :title="item.labels.name"></span>
         <div class="py-2 px-2">
             <span class="kanban-text">{{ item.name }}</span>
         </div>
