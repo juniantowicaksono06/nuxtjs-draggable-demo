@@ -1,3 +1,9 @@
+<style scoped>
+    p .list-group-item {
+        margin-bottom: 0.2rem !important;
+    }
+</style>
+
 <template>
     <div class="container-fluid py-3 mb-4 h-100" style="overflow: auto;">
         <div data-app class="pb-3">
@@ -8,8 +14,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="offset-3 col-3 my-auto">
-                              <button type="button" @click="filterPeriod('This Month')" :class="periode === 'This Month' ? 'btn-primary' : 'btn-outline-primary'" class="btn">This Month</button>
-                              <button type="button" @click="filterPeriod('Range')" :class="periode === 'Range' ? 'btn-primary' : 'btn-outline-primary'" class="btn">Range</button>
+                            <button type="button" @click="filterPeriod('This Month')" :class="periode === 'This Month' ? 'btn-primary' : 'btn-outline-primary'" class="btn">This Month</button>
+                            <button type="button" @click="filterPeriod('Range')" :class="periode === 'Range' ? 'btn-primary' : 'btn-outline-primary'" class="btn">Range</button>
                         </div>
                         <div class="col-3">
                             <label>Date</label><br>
@@ -24,34 +30,43 @@
                     </div>
                     <div class="col-md-12">
                     <client-only>
-                       <apexchart height="400" type="line" :options="options" :series="series"></apexchart>
+                    <apexchart height="400" type="line" :options="options" :series="series"></apexchart>
                     </client-only>
                     </div>
                     <!-- <div>
-                      <button class="btn btn-success float-right">Download</button>
+                    <button class="btn btn-success float-right">Download</button>
                     </div> -->
                     <div style="margin-top: 50px; overflow-x: auto;">
-                      <table class="table table-bordered" style="white-space: nowrap; font-size: small;">
-                          <thead class="bg-light">
+                    <table class="table table-bordered" style="white-space: nowrap; font-size: small;">
+                        <thead class="bg-light">
                             <tr class="text-center">
-                              <th rowspan="2">Name</th>
-                              <th :colspan="Object.keys(arrDate).length">Date</th>
+                            <th rowspan="2">Name</th>
+                            <th :colspan="Object.keys(arrDate).length">Date</th>
                             </tr>
                             <tr>
-                              <th v-for="date, index in Object.keys(arrDate)" :key="index">{{ date }}</th>
+                            <th v-for="date, index in Object.keys(arrDate)" :key="index">{{ date }}</th>
                             </tr>
-                          </thead>
-                          <tbody>
-                              <tr v-for="member, index in memberActivity" :key="index">
+                        </thead>
+                        <tbody>
+                            <tr v-for="member, index in memberActivity" :key="index">
                                 <td>{{ member.name }}</td>
-                                <td v-for="date, index in Object.keys(member.project)" :key="index">{{ member.project[date].count }}</td>
-                              </tr>
-                          </tbody>
-                      </table>
+                                <td v-for="date, index in Object.keys(member.project)" :key="index" @click="openModal(member.member_id, date)">{{ member.project[date].count }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                     </div>
                 </div>
             </div>
         </div>
+        <b-modal id="modal_detail_activity" hide-footer size="lg" title="Detail Activity">
+            <ul class="list-group">
+                <li class="list-group-item" v-for="activity, index in detailActivity" :key="index">
+                    <b>{{ (index + 1) + '. ' }} {{ activity.name}} - {{ activity.board.name }}</b>
+                    <p class="mb-1">{{ activity.checklists.childs.name }}</p>
+                    <p class="text-muted mb-1">{{ activity.checklists.childs.updatedAt }}</p>
+                </li>
+            </ul>
+        </b-modal>
     </div>
 </template>
 
@@ -67,6 +82,7 @@ export default {
       return {
         periode: null,
         date: [],
+        detailActivity: [],
         arrDate: {},
         memberActivity: {},
         workspace: null,
@@ -159,6 +175,15 @@ export default {
             arrDate[date.format('YYYY-MM-DD')] = { count: 0, type: ( date.day() == 6 || date.day() == 0 ) ? 'weekend' : 'weekday'}
         }
         return arrDate
+    },
+    openModal(member_id, date){
+        this.$axios.post(`/api/report/member/detail`, {
+            member_id,
+            date
+        }).then(response => {
+            this.detailActivity = response.data.data
+            this.$bvModal.show("modal_detail_activity")
+        })
     }
    }
 }
