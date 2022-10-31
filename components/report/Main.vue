@@ -63,7 +63,7 @@
                 <li class="list-group-item" v-for="activity, index in detailActivity" :key="index">
                     <b>{{ (index + 1) + '. ' }} {{ activity.name}} - {{ activity.board.name }}</b>
                     <p class="mb-1">{{ activity.checklists.childs.name }}</p>
-                    <p class="text-muted mb-1">{{ activity.checklists.childs.updatedAt }}</p>
+                    <p class="text-muted mb-1">{{ formatDate(activity.checklists.childs.updatedAt) }}</p>
                 </li>
             </ul>
         </b-modal>
@@ -88,7 +88,14 @@ export default {
         workspace: null,
         options: {
             chart: {
-                id: 'vuechart-example'
+                id: 'vuechart-example',
+                toolbar: {
+                    export: {
+                        csv: {
+                            filename: 'ActivityReport'
+                        }
+                    }
+                }
             },
             stroke: {
                 curve: 'smooth',
@@ -184,6 +191,9 @@ export default {
             this.detailActivity = response.data.data
             this.$bvModal.show("modal_detail_activity")
         })
+    },
+    formatDate(date){
+        return moment(date).format('YYYY-MM-DD HH:mm:ss')
     }
    }
 }
