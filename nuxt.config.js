@@ -13,7 +13,7 @@ export default {
     WEBSOCKET_URL: process.env.WEBSOCKET_URL
   },
   head: {
-    title: 'Project Management',
+    title: 'Nagita',
     htmlAttrs: {
       lang: 'en'
     },
