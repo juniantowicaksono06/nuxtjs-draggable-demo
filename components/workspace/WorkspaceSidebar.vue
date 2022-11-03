@@ -271,7 +271,7 @@
 <template>
     <div id="sidebar" class="h-100 px-2 sidebar-close" ref="sidebar_ref">
         <div id="sidebar_logo" ref="sidebar_logo_ref" class="pt-2">
-            <img src="/img/IT-OAR.png" width="58" alt="">
+            <img src="/img/Nagita.png" width="58" style="scale: 125%; margin-right: 10px; padding-block: 20px;">
         </div>
         <div id="sidebar_header" ref="sidebar_header_ref" class="pt-3 pb-2">
             <div id="btn_sidebar_close" :class="(!sidebar_open ? 'd-none' : '')" v-on:click="closeSidebar">
