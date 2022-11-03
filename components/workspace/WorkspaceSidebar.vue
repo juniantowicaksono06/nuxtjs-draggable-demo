@@ -533,6 +533,8 @@
                 this.calculateSidebarContainerHeight()
             }).observe(this.$refs.sidebar_logo_ref)
             this.webSocketEvent()
+            
+            this.openSidebar()
         },
         computed: {
             wsInstance() {
