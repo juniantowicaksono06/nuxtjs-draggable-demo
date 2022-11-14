@@ -52,7 +52,7 @@ pipeline {
 
 def sendTelegram(message, token) {
     sh(script: """curl --location \
-        --proxy 'http://10.59.82.1:8080' \
+        --proxy 'http://10.59.105.206:8080' \
         --request POST 'https://api.telegram.org/bot${token}/sendMessage' \
         --header 'Content-Type: application/json' \
         --data-raw '{ \
