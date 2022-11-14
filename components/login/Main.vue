@@ -33,7 +33,7 @@
                                     <div class="form-group">
                                         <label class="login-text">User Domain</label>
                                         <div class="input-group">
-                                            <input v-model="username_input" type="text" class="form-control" placeholder="User Domain..." autofocus>
+                                            <input v-model="username_input" type="text" class="form-control" placeholder="User Domain..." autofocus v-on:keyup.enter="actionLogin">
                                             <div class="input-group-append">
                                                 <div class="btn btn-primary login-normal-cursor">
                                                     <i class="fa fa-user"></i>
@@ -47,7 +47,7 @@
                                     <div class="form-group">
                                         <label class="login-text">Password</label>
                                         <div class="input-group">
-                                            <input v-model="password_input" type="password" class="form-control" placeholder="Password..." autofocus>
+                                            <input v-model="password_input" type="password" class="form-control" placeholder="Password..." autofocus v-on:keyup.enter="actionLogin">
                                             <div class="input-group-append">
                                                 <div class="btn btn-primary login-normal-cursor">
                                                     <i class="fa fa-lock"></i>
