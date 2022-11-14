@@ -6,3 +6,6 @@ services:
     restart: always
     ports:
       - "8058:443"
+    volumes:
+      - /etc/ssl/certs/nginx-selfsigned.crt:/etc/nginx/ssl.crt
+      - /etc/ssl/private/nginx-selfsigned.key:/etc/nginx/ssl.key
